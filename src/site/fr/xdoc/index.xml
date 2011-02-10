@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE document PUBLIC "//UNKNOWN/" "http://maven.apache.org/dtd/xdoc_1_0.dtd">
+<document>
+	<properties>
+		<title>Introduction</title>
+	</properties>
+	<body>
+		<section name="Descriptif du plugin">
+			<subsection name="Introduction">
+				<p>
+					Le plugin Files2Docs permet d'importer en masse certains types de documents Lutèce,
+					à partir de ressources (images, fichiers) présentes sur le système de fichier de
+					l'utilisateur.
+				</p>
+				<p>
+					Ceci permet aux utilisateurs de s'affranchir de la création individuelle de chaque
+					document et notamment d'automatiser la création en attribuant, de façon automatique,
+					des valeurs aux champs obligatoires du type de document choisi.
+				</p>
+			</subsection>
+		</section>
+	</body>
+</document>

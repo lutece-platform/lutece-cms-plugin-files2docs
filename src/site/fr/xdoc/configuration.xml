@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE document PUBLIC "//UNKNOWN/" "http://maven.apache.org/dtd/xdoc_1_0.dtd">
+<document>
+	<properties>
+		<title>Configuration</title>
+	</properties>
+	<body>
+		<section name="Installation">
+			<p>Le plugin Files2Docs est à installer dans une application contenant au minimum :</p>
+			<ul>
+				<li>Le coeur de Lutèce</li>
+				<li>Le plugin Document</li>
+			</ul>
+			<p>
+				Il existe plusieurs possibilités d'installation en fonction de la distribution
+				employée :
+			</p>
+			<ul>
+				<li>
+					Distribution binaire : Le contenu du fichier zip de la distribution binaire doit
+					être décompressé dans une webapp contenant déjà le coeur de Lutèce ainsi que le
+					plugin Document.
+				</li>
+				<li>
+					Sources : Dans ce cas, il est nécessaire d'ajouter la dépendance sur le coeur et
+					le plugin Document afin de pouvoir compiler les sources et de se retrouver avec
+					une distribution binaire.
+				</li>
+			</ul>
+			<p>
+				Pour générer la distribution binaire, il suffit de télécharger les sources du projet
+				et d'exécuter la commande :
+				<br />
+				<code>mvn lutece:assembly</code>.
+			</p>
+			<p>
+				Pour les détails de l'installation, reportez-vous à la rubrique :
+				<a href="http://dev.lutece.paris.fr/lutece-core/fr/howto-create-plugins.html">
+					Installation de plugin
+				</a>
+			</p>
+			<p>
+				<strong>Remarque :</strong>
+				<br />
+				Il est possible d'obtenir un fichier
+				<code>war</code>
+				déployable en utilisant un packaging de type
+				<code>lutece-site.</code>
+				Ce fichier doit être placé dans le répertoire
+				<code>webapps</code>
+				de votre installation de Tomcat. Il sera automatiquement déployé lors du lancement
+				du serveur.
+			</p>
+		</section>
+		<section name="Configuration">
+			<subsection name="Mode Portail">
+				<p>La configuration correspond à la configuration classique d'un portail Lutèce.</p>
+			</subsection>
+			<subsection name="Fichiers paramétrables">
+				<p>db.properties :</p>
+				<p>
+					Pour utiliser un pool spécifique au plugin Files2docs, ajouter le code suivant
+					dans ce fichier :
+				</p>
+				<source>
+					files2docs.poolservice=fr.paris.lutece.util.pool.service.LuteceConnectionService
+					files2docs.driver=org.gjt.mm.mysql.Driver
+					files2docs.url=jdbc:mysql://&lt;mysqlhost&gt;:&lt;mysqlport&gt;/&lt;basename&gt;?
+								autoReconnect=true&amp;useUnicode=yes&amp;characterEncoding=utf8
+					files2docs.user=
+					files2docs.password=
+					files2docs.initconns=2
+					files2docs.maxconns=5
+					files2docs.logintimeout=2000
+					files2docs.checkvalidconnectionsql=SELECT 1
+				</source>
+				<br />
+				<p>files2docs.properties :</p>
+				<p>Certains réglages sont disponibles au niveau du plugin :</p>
+				<table>
+					<tr>
+						<th>Propriété</th>
+						<th>Description</th>
+					</tr>
+					<tr>
+						<td>files2docs.itemsPerPage</td>
+						<td>
+							Nombre de lignes par défaut affichées par le paginator
+							dans les interfaces d'administration du plugin.
+						</td>
+					</tr>
+					<tr>
+						<td>files2docs.listAttributeTypeFile</td>
+						<td>
+							Liste des attributs de document comportant un champ de type
+							input="file"
+						</td>
+					</tr>
+					<tr>
+						<td>files2docs.parentPath</td>
+						<td>Chemin parent utilisé pour importer les fichiers</td>
+					</tr>
+					<tr>
+						<td>files2docs.swfupload.file_upload_limit</td>
+						<td>
+							Nombre maximum de fichiers à importer. Renseignez la valeur
+							0 pour que le nombre de fichiers soit illimité.
+						</td>
+					</tr>
+					<tr>
+						<td>files2docs.swfupload.file_queue_limit</td>
+						<td>
+							Nombre maximum de fichiers placés dans la file d'attente. Renseignez
+							la valeur 0 pour que le nombre de fichiers soit illimité.
+						</td>
+					</tr>
+					<tr>
+						<td>files2docs.swfupload.requeue_on_error</td>
+						<td>
+							Pour replacer les fichiers en erreur dans la file d'attente,
+							renseignez la valeur true, sinon false.
+						</td>
+					</tr>
+					<tr>
+						<td>files2docs.swfupload.debug</td>
+						<td>
+							Pour activer le mode debug du composant SWFUpload, renseignez
+							la valeur true, sinon false.
+						</td>
+					</tr>
+					<tr>
+						<td>files2docs.requestMaxSize</td>
+						<td>
+							Taille maximale (en octets) par requête (ou fichier importé).
+							Cette valeur doit être identique à la valeur renseignée dans
+							le filtre du coeur de Lutèce (requestMaxSize).
+						</td>
+					</tr>
+					<tr>
+						<td>files2docs.minInterval</td>
+						<td>
+							Intervalle de temps minimum (en millisecondes) autorisé entre deux
+							requêtes du même client. Cette valeur doit correspondre à la valeur
+							renseignée dans le filtre du coeur de Lutèce (minInterval).
+						</td>
+					</tr>
+					<tr>
+						<td>files2docs.mapping.listTags</td>
+						<td>
+							Liste des tags définis ci-dessous :
+						</td>
+					</tr>
+					<tr>
+						<td>files2docs.mapping.tag.filename</td>
+						<td>
+							Nom du tag permettant de récupérer le nom du fichier importé
+							(sans extension).
+						</td>
+					</tr>
+					<tr>
+						<td>files2docs.mapping.tag.mimetype</td>
+						<td>Nom du tag permettant de récupérer le type MIME du fichier importé.</td>
+					</tr>
+					<tr>
+						<td>files2docs.mapping.tag.extension</td>
+						<td>
+							Nom du tag permettant de récupérer l'extension du fichier importé
+							(sans le "." devant l'extension).
+						</td>
+					</tr>
+					<tr>
+						<td>files2docs.mapping.tag.date</td>
+						<td>Nom du tag permettant de récupérer la date de l'import.</td>
+					</tr>
+					<tr>
+						<td>daemon.autoCleaning.interval</td>
+						<td>
+							Intervalle de temps (en millisecondes) entre chaque passage du daemon de
+							nettoyage des fichiers importés. Ce dernier est chargé de supprimer les
+							fichiers importés dont la date de dernière modification est supérieure à
+							un jour.
+						</td>
+					</tr>
+					<tr>
+						<td>daemon.autoCleaning.onstartup</td>
+						<td>
+							Pour démarrer le daemon de nettoyage des fichiers importés au démarrage
+							de la webapp, renseignez la valeur 1, sinon 0.
+						</td>
+					</tr>
+				</table>
+			</subsection>
+		</section>
+	</body>
+</document>

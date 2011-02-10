@@ -1,0 +1,6 @@
+<p>
+    <label for="${attribute.code}_${identifier}">${attribute.name}<#if attribute.required>*</#if>&nbsp;:&nbsp;</label> 
+    <input type="text" id="${attribute.code}_${identifier}" name="${attribute.code}_${identifier}"
+    	size="<#list parameters.size as size>${size}</#list>" maxlength="<#list parameters.maxlength as maxlength>${maxlength}</#list>"
+    	value="<#if (parameters.mapping)?has_content><#list parameters.mapping as mapping>${mapping?if_exists}</#list></#if>" />
+</p>

@@ -1,0 +1,24 @@
+<div class="content-box">
+	
+	<h2>#i18n{files2docs.createMapping.pageTitle}</h2>
+	
+	<form method="post" action="jsp/admin/plugins/files2docs/DoCreateMapping.jsp">
+        <p>
+			<label for="document_type_code">#i18n{files2docs.createMapping.labelDocumentType}&nbsp;*&nbsp;:</label>
+			<select name="document_type_code">
+				<#list document_type_list?sort_by("name") as type>
+					<option value="${type.code}">${type.name}</option>
+				</#list>
+			</select>
+		</p>
+        <p>
+            <label for="description">#i18n{files2docs.createMapping.labelDescription}&nbsp;*&nbsp;:</label>
+            <input type="text" name="description" value="" size="50" maxlength="255" />
+        </p>
+        <p>
+        	<input type="submit" class="button" value="#i18n{files2docs.createMapping.buttonSubmit}" />
+            <input type="submit" class="button" name="cancel" value="#i18n{files2docs.createMapping.buttonCancel}" />
+        </p>
+    </form>
+    
+</div>

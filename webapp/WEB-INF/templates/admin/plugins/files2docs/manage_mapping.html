@@ -1,0 +1,41 @@
+<div class="content-box">
+
+	<h2>#i18n{files2docs.manageMapping.pageTitle}</h2>
+	
+	<table>
+		<tbody>
+			<tr>
+				<th>#i18n{files2docs.manageMapping.columnDocumentType}</th>
+				<th>#i18n{files2docs.manageMapping.columnDescription}</th>
+				<th>#i18n{files2docs.manageMapping.columnActions}</th>
+			</tr>
+			<#if mapping_list?exists>
+				<#assign i = 0>
+				<#list mapping_list?sort_by("documentTypeName") as mapping>
+					<tr>
+						<td>${mapping.documentTypeName}</td>
+					    <td>${mapping.description}</td>
+					    <td>
+							<a href="jsp/admin/plugins/files2docs/ModifyMapping.jsp?mapping_id=${mapping.id}">
+								<img src="images/admin/skin/actions/modify.png"
+									alt="#i18n{files2docs.manageMapping.actionModify}"
+									title="#i18n{files2docs.manageMapping.actionModify}" />
+							</a>
+							<a href="jsp/admin/plugins/files2docs/RemoveMapping.jsp?mapping_id=${mapping.id}">
+								<img src="images/admin/skin/actions/delete.png"
+									alt="#i18n{files2docs.manageMapping.actionDelete}"
+									title="#i18n{files2docs.manageMapping.actionDelete}" />
+							</a>
+						</td>
+					</tr>
+					<#assign i = i + 1>
+				</#list>
+			</#if>
+		</tbody>
+	</table>
+	
+    <form method="post" action="jsp/admin/plugins/files2docs/CreateMapping.jsp">
+		<input type="submit" class="button" value="#i18n{files2docs.manageMapping.buttonCreate}" />
+	</form>
+	
+</div>

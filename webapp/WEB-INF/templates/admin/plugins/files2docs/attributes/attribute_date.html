@@ -1,0 +1,6 @@
+<p>
+    <label for="${attribute.code}_${identifier}">${attribute.name}<#if attribute.required>*</#if>&nbsp;:&nbsp;</label> 
+    <input type="text" id="${attribute.code}_${identifier}" name="${attribute.code}_${identifier}" size="10"
+	    value="<#if (parameters.mapping)?has_content><#list parameters.mapping as mapping>${mapping?if_exists}</#list><#else><#if (parameters.currentdate)?has_content><#list parameters.currentdate as currentdate>${currentdate?if_exists}</#list><#else><#if (parameters.defaultvalue)?has_content><#list parameters.defaultvalue as defaultvalue>${defaultvalue?if_exists}</#list></#if></#if></#if>" />
+</p>
+<@getDatePicker idField=(attribute.code + "_" + identifier) language=locale.language />

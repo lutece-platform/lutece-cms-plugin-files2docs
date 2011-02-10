@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE document PUBLIC "//UNKNOWN/" "http://maven.apache.org/dtd/xdoc_1_0.dtd">
+<document>
+	<properties>
+		<title>Mapping upload en masse</title>
+	</properties>
+	<body>
+		<section name="Mapping upload en masse">
+			<p>
+				L'interface de gestion des mappings permet aux utilisateurs d'attribuer,
+				de façon automatique, des valeurs aux champs obligatoires des types de
+				documents qui contiennent un attribut de type "fichier" ou "image".
+			</p>
+			<center>
+				<img src="images/mapping/manage_mapping.png" alt="Liste des mappings" />
+			</center>
+			<p>Les actions possibles sont :</p>
+			<ul>
+				<li>Création d'un mapping</li>
+				<li>Modification d'un mapping</li>
+				<li>Modification d'un attribut</li>
+				<li>Suppression d'un mapping</li>
+			</ul>
+			<p>La liste des mappings est triée par ordre alphabétique sur les types de documents.</p>
+			<subsection name="Création d'un mapping">
+				<p>
+					L'interface de saisie suivante récapitule les informations nécessaires à la
+					création d'un mapping.
+				</p>
+				<center>
+					<img src="images/mapping/create_mapping.png" alt="Création d'un mapping" />
+				</center>
+				<p>
+					La liste de sélection contient les types de documents qui contiennent
+					un attribut (et un seul) de type "fichier" ou "image", et pour lesquels
+					aucun mapping n'a été créé. Cette liste est vide si tous les mappings
+					ont déjà été créés.
+				</p>
+			</subsection>
+			<subsection name="Modification d'un mapping">
+				<p>
+					L'interface de modification d'un mapping permet de visualiser les informations
+					renseignées lors de la création du mapping, et de modifier la description.
+					Néanmoins, il n'est pas possible de modifier le type de document.
+				</p>
+				<center>
+					<img src="images/mapping/modify_mapping.png" alt="Modification d'un mapping" />
+				</center>
+				<p>
+					Cette interface permet également de visualiser la liste des attributs du mapping.
+					Les attributs "titre" et "résumé", disponibles pour tous les types de documents,
+					sont suivis de tous les attributs obligatoires du type de document en question. 
+				</p>
+			</subsection>
+			<subsection name="Modification d'un attribut">
+				<p>
+					L'interface de modification d'un attribut permet de modifier le format par défaut
+					de l'attribut.
+				</p>
+				<center>
+					<img src="images/mapping/modify_attribute.png" alt="Modification d'un attribut" />
+				</center>
+				<p>
+					Le format par défaut peut être défini soit par un texte en dur, qui sera
+					identique pour tous les documents, ou bien alors en insérant un ou plusieurs
+					tags dynamiques :
+				</p>
+				<ul>
+					<li>&lt;filename&gt; : nom du fichier importé (sans extension)</li>
+					<li>&lt;mimetype&gt; : type MIME du fichier importé</li>
+					<li>
+						&lt;extension&gt; : extension du fichier importé
+						(sans le "." devant l'extension)
+					</li>
+					<li>&lt;date&gt; : date de l'import</li>
+				</ul>
+				<p>
+					Il est également possible de combiner du texte en dur et des tags dynamiques.
+					Par exemple :
+					<code>Document "&lt;filename&gt;.&lt;extension&gt;" importé le &lt;date&gt;</code>.
+				</p>
+			</subsection>
+			<subsection name="Suppression d'un mapping">
+				<p>
+					La suppression d'un mapping entraîne la suppression de tous les attributs associés
+					au mapping. Un message de confirmation permet d'avertir l'utilisateur et d'éviter
+					toute suppression accidentelle.
+				</p>
+				<center>
+					<img src="images/mapping/delete_mapping.png" alt="Suppression d'un mapping" />
+				</center>
+		    </subsection>
+		</section>
+	</body>
+</document>

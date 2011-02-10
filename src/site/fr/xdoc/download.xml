@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE document PUBLIC "//UNKNOWN/" "http://maven.apache.org/dtd/xdoc_1_0.dtd">
+<document>
+	<properties>
+		<title>Téléchargement</title>
+	</properties>
+	<body>
+		<section name="Téléchargement">
+			<p>
+				Vous pouvez télécharger les sources du plugin Files2Docs à partir du référentiel Subversion
+				(cf. page "Info Projet/Dépôt des sources").
+			</p>
+		</section>
+	</body>
+</document>

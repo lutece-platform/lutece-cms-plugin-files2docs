@@ -1,0 +1,96 @@
+<div class="content-box">
+	<h2>
+		#i18n{files2docs.modifyMapping.contentBoxTitle1}
+		<#if mapping.documentTypeName?has_content>
+			&#34;${mapping.documentTypeName}&#34;
+		</#if>
+	</h2>
+	
+	<form method="post" action="jsp/admin/plugins/files2docs/DoModifyMapping.jsp">
+        <input type="hidden" name="mapping_id" value="${mapping.id}" />
+        <p>
+			<label>#i18n{files2docs.modifyMapping.labelDocumentType}&nbsp;*&nbsp;:</label>
+			<#if mapping.documentTypeName?has_content>
+				${mapping.documentTypeName}
+			<#else>
+				&nbsp;
+			</#if>
+		</p>
+        <p>
+            <label for="description">#i18n{files2docs.modifyMapping.labelDescription}&nbsp;*&nbsp;:</label>
+            <input type="text" name="description" value="${mapping.description}" size="50" maxlength="255" />
+        </p>
+        <p>
+        	<input type="submit" class="button" value="#i18n{files2docs.modifyMapping.buttonModify}" />
+        	<input type="submit" class="button" name="cancel" value="#i18n{files2docs.modifyMapping.buttonCancel}" />
+        </p>
+    </form>
+</div>
+
+<div class="content-box">
+	<h2>#i18n{files2docs.modifyMapping.contentBoxTitle2}</h2>
+	
+	<table>
+		<tbody>
+			<tr>
+				<th>#i18n{files2docs.modifyMapping.columnAttribute}</th>
+				<th>#i18n{files2docs.modifyMapping.columnValue}</th>
+				<th>#i18n{files2docs.modifyMapping.columnActions}</th>
+			</tr>
+			<tr>
+				<td>#i18n{files2docs.modifyMapping.labelTitle}</td>
+			    <td><#if mapping.title?exists>${mapping.title}</#if></td>
+			    <td>
+					<a href="jsp/admin/plugins/files2docs/ModifyAttribute.jsp?mapping_id=${mapping.id}&attribute_name=title">
+						<img src="images/admin/skin/actions/modify.png"
+							alt="#i18n{files2docs.modifyMapping.actionModify}"
+							title="#i18n{files2docs.modifyMapping.actionModify}" />
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td>#i18n{files2docs.modifyMapping.labelSummary}</td>
+			    <td><#if mapping.summary?exists>${mapping.summary}</#if></td>
+			    <td>
+					<a href="jsp/admin/plugins/files2docs/ModifyAttribute.jsp?mapping_id=${mapping.id}&attribute_name=summary">
+						<img src="images/admin/skin/actions/modify.png"
+							alt="#i18n{files2docs.modifyMapping.actionModify}"
+							title="#i18n{files2docs.modifyMapping.actionModify}" />
+					</a>
+				</td>
+			</tr>
+			<#if attribute_list?exists>
+				<#assign i = 0>
+				<#list attribute_list as attribute>
+					<#if document_attribute_name_list[i]?exists && document_attribute_code_list[i]?exists>
+						<tr>
+							<td>${document_attribute_name_list[i]}</td>
+						    <td>
+						    	<#switch document_attribute_code_list[i]>
+									<#case "file">
+										#i18n{files2docs.modifyMapping.labelFile}
+										<#break>
+									<#case "image">
+										#i18n{files2docs.modifyMapping.labelImage}
+										<#break>
+									<#default>
+										<#if attribute.format?exists>${attribute.format}</#if>
+								</#switch>
+						    </td>
+						    <td>
+								<#if document_attribute_code_list[i] != "file" && document_attribute_code_list[i] != "image">
+									<a href="jsp/admin/plugins/files2docs/ModifyAttribute.jsp?attribute_id=${attribute.id}">
+										<img src="images/admin/skin/actions/modify.png"
+											alt="#i18n{files2docs.modifyMapping.actionModify}"
+											title="#i18n{files2docs.modifyMapping.actionModify}" />
+									</a>
+								</#if>
+							</td>
+						</tr>
+						<#assign i = i + 1>
+					</#if>
+				</#list>
+			</#if>
+		</tbody>
+	</table>
+</div>

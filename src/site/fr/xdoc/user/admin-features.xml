@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE document PUBLIC "//UNKNOWN/" "http://maven.apache.org/dtd/xdoc_1_0.dtd">
+<document>
+	<properties>
+		<title>Fonctionnalités d'administration du plugin Files2Docs</title>
+	</properties>
+	<body>
+		<section name="Plugin Files2Docs">
+			<p>Le plugin Files2Docs comporte deux fonctionnalités d'administration :</p>
+			<ul>
+				<li>Mapping upload en masse</li>
+				<li>Upload en masse de documents</li>
+			</ul>
+		</section>
+	</body>
+</document>       

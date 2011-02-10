@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE document PUBLIC "//UNKNOWN/" "http://maven.apache.org/dtd/xdoc_1_0.dtd">
+<document>
+	<properties>
+		<title>Upload en masse de documents</title>
+	</properties>
+	<body>
+		<section name="Importer des fichiers vers un type de document">
+			<p>
+				L'interface d'upload en masse de documents permet d'importer certains types
+				de documents Lutèce, à partir de ressources (images, fichiers) présentes sur
+				le système de fichier de l'utilisateur.
+			</p>
+			<center>
+				<img src="images/upload/manage_upload.png"
+					alt="Importer des fichiers vers un type de document" />
+			</center>
+			<p>Les actions possibles sont :</p>
+			<ul>
+				<li>Sélection d'un type de document</li>
+				<li>Sélection des types de fichiers</li>
+				<li>Sélection des fichiers à importer</li>
+				<li>Import des fichiers</li>
+				<li>Sélection d'un espace de destination</li>
+			</ul>
+			<subsection name="Sélection d'un type de document">
+				<p>
+					La sélection d'un type de document est réalisée par l'intermédiaire
+					d'une liste de sélection contenant tous les types de documents qui
+					contiennent un attribut (et un seul) de type "fichier" ou "image".
+				</p>
+				<center>
+					<img src="images/upload/select_document_type.png"
+						alt="Sélection d'un type de document" />
+				</center>
+				<p>
+					Par défaut, le premier élément de la liste est sélectionné.
+					Dès que l'utilisateur sélectionne un nouveau type de document,
+					la page est rechargée.
+				</p>
+			</subsection>
+			<subsection name="Sélection des types de fichiers">
+				<p>
+					Lorsque le plugin RegularExpression (gestion des expressions régulières)
+					est installé, et qu'une expression régulière portant sur les extensions
+					des fichiers (par exemple : <code>.*\.(ext1|ext2)</code>) a été ajoutée
+					à l'attribut de type "fichier" ou "image" du type de document sélectionné,
+					alors une liste de cases à cocher apparaît et permet de sélectionner les
+					types de fichiers à importer.
+				</p>
+				<center>
+					<img src="images/upload/select_file_type.png"
+						alt="Sélection des types de fichiers" />
+				</center>
+				<p>
+					La liste des cases à cocher est générée à partir du découpage de
+					l'expression régulière associée à l'attribut de type "fichier" ou
+					"image" du type de document sélectionné.
+				</p>
+				<p>
+					Si l'expression régulière ajoutée ne comporte qu'une seule extension
+					(par exemple : <code>.*\.ext</code>) alors la sélection des types de
+					fichiers n'est pas disponible.
+				</p>
+				<p>
+					<strong>Remarque :</strong>
+					<br />
+					Il est impossible de décocher toutes les cases.
+				</p>
+			</subsection>
+			<subsection name="Sélection des fichiers à importer">
+				<p>
+					Lorsque l'utilisateur clique sur le bouton parcourir, une fenêtre
+					de sélection des fichiers apparaît et permet de sélectionner un ou
+					plusieurs fichiers présents sur le système de fichier de l'utilisateur.
+				</p>
+				<center>
+					<img src="images/upload/select_files.png"
+						alt="Sélection des fichiers à importer" />
+				</center>
+				<p>
+					La sélection de plusieurs fichiers dans un répertoire est possible en
+					maintenant la touche <code>Ctrl</code> du clavier enfoncée, ou bien en
+					utilisant la combinaison <code>Ctrl + A</code> pour sélectionner tous
+					les fichiers du répertoire courant.
+				</p>
+				<p>
+					Lorsque la sélection des types de fichiers est disponible, alors un filtre sur
+					les types de fichiers est appliqué sur la fenêtre de sélection des fichiers.
+					La sélection ou la désélection d'une case à cocher entraîne instantanément la
+					mise à jour du filtre.
+				</p>
+				<p>
+					Par défaut, si la sélection des types de fichiers n'est pas disponible, tous
+					les types de fichiers sont autorisés (*.*).
+				</p>
+			</subsection>
+			<subsection name="Import des fichiers">
+				<p>
+					Une fois les fichiers sélectionnés, ceux-ci sont placés dans la file
+					d'attente et l'import du premier fichier de la file démarre.
+				</p>
+				<center>
+					<img src="images/upload/upload_progress.png"
+						alt="Import des fichiers en progression" />
+				</center>
+				<p>
+					Les fichiers sont importés un par un. Dès qu'un fichier est importé ou est en
+					erreur, le composant passe au fichier suivant. Une barre de progression indique
+					l'état d'avancement du fichier en cours.
+				</p>
+				<p>
+					Dès que la file d'attente est entièrement traitée, le compteur affichant le
+					nombre de fichiers importés est mis à jour.
+				</p>
+				<center>
+					<img src="images/upload/upload_finished.png"
+						alt="Import des fichiers terminé" />
+				</center>
+				<p>
+					<strong>Remarque :</strong>
+					<br />
+					Si au moins un fichier est importé, la sélection du type de document ainsi
+					que la sélection des types de fichiers sont désactivées.
+				</p>
+				<p>
+					Il est également possible de supprimer l'ensemble des fichiers importés en
+					cliquant sur le bouton prévu à cet effet (à droite du bouton parcourir).
+				</p>
+				<p>
+					Lorsqu'un fichier dépasse la taille maximale autorisée, un message d'erreur
+					est affiché et le fichier n'est pas importé.
+				</p>
+				<center>
+					<img src="images/upload/upload_size.png"
+						alt="Fichier trop volumineux" />
+				</center>
+				<p>
+					De même, si l'utilisateur sélectionne un fichier déjà importé, un message
+					d'erreur le signale et le fichier n'est bien sûr pas réimporté.
+				</p>
+				<center>
+					<img src="images/upload/upload_duplicated.png"
+						alt="Fichier déjà importé" />
+				</center>
+			</subsection>
+			<subsection name="Sélection d'un espace de destination">
+				<p>
+					La sélection d'un espace de destination permet à l'utilisateur de choisir
+					vers quel espace existant seront envoyés les nouveaux documents.
+				</p>
+				<center>
+					<img src="images/upload/select_space.png"
+						alt="Sélection d'un espace de destination" />
+				</center>
+				<p>
+					Les espaces sont proposés sous forme d'arborescence. Le lien remonter permet
+					de remonter d'un niveau dans l'arborescence.
+				</p>
+			</subsection>
+		</section>
+		<section name="Liste des fichiers à importer">
+			<p>
+				Lorsque l'utilisateur a sélectionné un type de document, importé un ou plusieurs
+				fichiers et sélectionné un espace de destination, il peut cliquer sur le bouton
+				valider permettant d'afficher l'interface de saisie des champs obligatoires pour
+				le type de document choisi.
+			</p>
+			<center>
+				<img src="images/upload/create_documents.png"
+					alt="Liste des fichiers à importer" />
+			</center>
+			<p>
+				Pour chaque fichier, l'utilisateur doit renseigner un titre et un résumé, et
+				éventuellement la liste des attributs supplémentaires obligatoires du type
+				de document sélectionné.
+			</p>
+			<p>
+				Lorsque qu'un mapping a été créé pour le type de document sélectionné et que
+				des valeurs ont été attribuées aux attributs du mapping, alors les champs du
+				formulaire sont automatiquement pré-remplis.
+			</p>
+			<p>
+				Le bouton retour permet de revenir à l'interface d'upload en masse de
+				documents et d'importer de nouveaux fichiers ou bien de supprimer les
+				fichiers importés.
+			</p>
+		</section>
+		<section name="Résultat de l'import">
+			<p>
+				Lorsque tous les champs du formulaire sont remplis et ce, pour tous les
+				fichiers importés, l'utilisateur peut cliquer sur le bouton ajouter aux
+				documents, ce qui a pour action de créer les documents puis d'afficher
+				l'interface de présentation du résultat de l'import.
+			</p>
+			<center>
+				<img src="images/upload/import_result.png"
+					alt="Résultat de l'import" />
+			</center>
+			<p>
+				Les fichiers correctement importés ainsi qu'éventuellement les fichiers en
+				échec sont répertoriés et comptabilisés.
+			</p>
+			<p>
+				Le bouton retour permet de revenir à l'interface d'upload en masse de
+				documents.
+			</p>
+		</section>
+	</body>
+</document>

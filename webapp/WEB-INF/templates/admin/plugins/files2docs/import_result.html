@@ -1,0 +1,87 @@
+<div class="content-box">
+
+	<h2>#i18n{files2docs.importResult.pageTitle}</h2>
+	
+	<p>#i18n{files2docs.importResult.labelImportedFiles} : ${nb_imported_files}</p>
+	<p>#i18n{files2docs.importResult.labelFailureFiles} : ${nb_failure_files}</p>
+    
+    <form method="post" action="jsp/admin/plugins/files2docs/ImportResult.jsp">
+		<input type="hidden" name="imported_list" value="${imported_list}" />
+		<input type="hidden" name="failure_list" value="${failure_list}" />
+		<input type="hidden" name="mode" value="${mode}" />
+		
+		<@pagination paginator=paginator />
+        #i18n{files2docs.importResult.labelItemsPerPage} :
+        <select name="items_per_page">
+            <#list [ "5" , "10" , "20" , "50" ] as nb>
+            	<#if nb_items_per_page = nb>
+             		<option selected="selected" value="${nb}">${nb}</option>
+            	<#else>
+             		<option value="${nb}">${nb}</option>
+            	</#if>
+            </#list>
+        </select>
+        <input type="submit" class="button" value="#i18n{files2docs.importResult.buttonItemsPerPage}" />
+    </form>
+    
+    <form method="post" action="jsp/admin/plugins/files2docs/DoSelectFiles.jsp">
+    	<table>
+			<tbody>
+				<tr>
+					<th style="width:24px;"></th>
+					<th>#i18n{files2docs.importResult.columnFilename}</th>
+					<th>#i18n{files2docs.importResult.columnDocumentName}</th>
+					<th>#i18n{files2docs.importResult.columnSummary}</th>
+					<th>#i18n{files2docs.importResult.columnAttributes}</th>
+				</tr>
+				
+				<#list document_list as document>
+			    	<#if document.attributes?exists>
+				    	<#list document.attributes as attribute>
+							<#if attribute.codeAttributeType = "file" || attribute.codeAttributeType = "image">
+								<#assign filename = attribute.textValue>
+							</#if>
+						</#list>
+					</#if>
+			    	<tr>
+			    		<td>
+			    			<#if document.id != -1>
+			    				<img src="images/admin/skin/enable.png"
+					 				alt="#i18n{files2docs.importResult.fileImported}"
+					 				title="#i18n{files2docs.importResult.fileImported}" />
+			    			<#else>
+			    				<img src="images/admin/skin/disable.png"
+					 				alt="#i18n{files2docs.importResult.fileFailure}"
+					 				title="#i18n{files2docs.importResult.fileFailure}" />
+			    			</#if>
+			    		</td>
+			    		<td><#if document.id != -1>${filename}<#else>${document.title}</#if></td>
+			    		<td><#if document.id != -1>${document.title}</#if></td>
+			    		<td><#if document.id != -1>${document.summary}</#if></td>
+			    		<td style="width:35%;">
+				    		<#if document.attributes?exists>
+					    		<#list document.attributes as attribute>
+									<#if attribute.codeAttributeType != "file" && attribute.codeAttributeType != "image">
+										<p>
+											<label>${attribute.name}<#if attribute.required>*</#if>&nbsp;:&nbsp;</label>
+											<#if attribute.textValue?has_content>
+												${attribute.textValue}
+											<#else>
+												&nbsp;
+											</#if>
+										</p>
+									</#if>
+								</#list>
+							</#if>
+			    		</td>
+			    	</tr>
+			    </#list>
+			</tbody>
+		</table>
+    	<p>
+			<input type="hidden" name="mode" value="${mode}" />
+			<input type="submit" class="button" name="delete" value="#i18n{files2docs.importResult.buttonSubmit}" />
+		</p>
+    </form>
+    
+</div>

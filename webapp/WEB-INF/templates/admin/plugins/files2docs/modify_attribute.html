@@ -1,0 +1,52 @@
+<div class="content-box">
+	
+	<h2>#i18n{files2docs.modifyAttribute.contentBoxTitle}</h2>
+	
+	<p>
+		#i18n{files2docs.modifyAttribute.labelDocumentType} :
+		<#if mapping.documentTypeName?has_content>
+			${mapping.documentTypeName}
+		<#else>
+			&nbsp;
+		</#if>
+	</p>
+	
+	<form method="post" action="jsp/admin/plugins/files2docs/DoModifyAttribute.jsp">
+	
+		<input type="hidden" name="attribute_id" value="<#if attribute?exists>${attribute.id}</#if>" />
+		<input type="hidden" name="attribute_name" value="<#if attribute_name?exists>${attribute_name}</#if>" />
+		<input type="hidden" name="mapping_id" value="${mapping.id}" />
+		
+		<p>
+			<label for="attribute_format">#i18n{files2docs.modifyAttribute.labelFormat}&nbsp;:</label>
+			<input type="text" name="attribute_format" size="50" maxlength="255"
+				value="<#if attribute?exists && attribute.format?exists>
+					${attribute.format}
+				<#else>
+					<#if mapping?exists && attribute_name?exists>
+						<#if attribute_name = "title" && mapping.title?exists>
+							${mapping.title}
+						<#else>
+							<#if attribute_name = "summary" && mapping.summary?exists>
+								${mapping.summary}
+							</#if>
+						</#if>
+					</#if>
+				</#if>" />
+			<br />
+			<label>&nbsp;</label>
+			#i18n{files2docs.modifyAttribute.labelDescription}
+			<br />
+			<label>&nbsp;</label>
+			#i18n{files2docs.modifyAttribute.labelExample} :
+			<i><#list mapping_tag_list as mapping_tag>${mapping_tag}&nbsp;</#list></i>
+		</p>
+		
+		<p>
+        	<input type="submit" class="button" value="#i18n{files2docs.modifyAttribute.buttonSubmit}" />
+        	<input type="submit" class="button" name="cancel" value="#i18n{files2docs.modifyAttribute.buttonCancel}" />
+        </p>
+        
+	</form>
+
+</div>

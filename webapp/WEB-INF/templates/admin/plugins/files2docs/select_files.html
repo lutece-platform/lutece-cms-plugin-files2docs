@@ -1,0 +1,371 @@
+<!-- SWFUpload Component -->
+<script type="text/javascript" src="js/plugins/files2docs/swfupload/swfupload.js"></script>
+
+<!-- SWFUpload SWFObject plug-in -->
+<script type="text/javascript" src="js/plugins/files2docs/swfupload/plugins/swfupload.swfobject.js"></script>
+
+<!-- SWFUpload Queue handling plug-in -->
+<script type="text/javascript" src="js/plugins/files2docs/swfupload/plugins/swfupload.queue.js"></script>
+
+<!-- SWFUpload Event handlers -->
+<script type="text/javascript" src="js/plugins/files2docs/swfupload/plugins/fileprogress.js"></script>
+<script type="text/javascript" src="js/plugins/files2docs/swfupload/plugins/handlers.js"></script>
+
+<#if !document_type_code?exists>
+	<#list document_type_list?sort_by("name") as type>
+		<#assign document_type_code = type.code>
+		<#break>
+	</#list>
+</#if>
+
+<!-- Initialization and settings -->
+<script type="text/javascript">
+	// Declares variables
+	var swfu;
+	var fileTypes;
+	
+	// Internationalization messages (i18n)
+	var message_complete_singular = "#i18n{files2docs.message.swfupload.complete.singular}";
+	var message_complete_plural = "#i18n{files2docs.message.swfupload.complete.plural}";
+	
+	var message_alert_intro = "#i18n{files2docs.message.swfupload.alert.intro}";
+	var message_alert_limit_reached = "#i18n{files2docs.message.swfupload.alert.limit_reached}";
+	var message_alert_select_begin = "#i18n{files2docs.message.swfupload.alert.select_begin}";
+	var message_alert_select_singular = "#i18n{files2docs.message.swfupload.alert.select_singular}";
+	var message_alert_select_plural_first_part = "#i18n{files2docs.message.swfupload.alert.select_plural_first_part}";
+	var message_alert_select_plural_second_part = "#i18n{files2docs.message.swfupload.alert.select_plural_second_part}";
+	
+	var message_status_pending = "#i18n{files2docs.message.swfupload.status.pending}";
+	var message_status_uploading = "#i18n{files2docs.message.swfupload.status.uploading}";
+	var message_status_complete = "#i18n{files2docs.message.swfupload.status.complete}";
+	var message_status_cancelled = "#i18n{files2docs.message.swfupload.status.cancelled}";
+	var message_status_stopped = "#i18n{files2docs.message.swfupload.status.stopped}";
+	
+	var message_error_file_exceeds_size_limit = "#i18n{files2docs.message.swfupload.error.file_exceeds_size_limit}";
+	var message_error_zero_byte_file = "#i18n{files2docs.message.swfupload.error.zero_byte_file}";
+	var message_error_invalid_filetype = "#i18n{files2docs.message.swfupload.error.invalid_filetype}";
+	var message_error_unhandled_error = "#i18n{files2docs.message.swfupload.error.unhandled_error}";
+	var message_error_http_error = "#i18n{files2docs.message.swfupload.error.http_error}";
+	var message_error_upload_failed = "#i18n{files2docs.message.swfupload.error.upload_failed}";
+	var message_error_io_error = "#i18n{files2docs.message.swfupload.error.io_error}";
+	var message_error_security_error = "#i18n{files2docs.message.swfupload.error.security_error}";
+	var message_error_upload_limit_exceeded = "#i18n{files2docs.message.swfupload.error.upload_limit_exceeded}";
+	var message_error_file_validation_failed = "#i18n{files2docs.message.swfupload.error.file_validation_failed}";
+	var message_error_file_is_duplicated = "#i18n{files2docs.message.swfupload.error.file_is_duplicated}";
+	var message_error_invalid_filename = "#i18n{files2docs.message.swfupload.error.invalid_filename}";
+	
+	// Loads SWFUpload
+	SWFUpload.onload = function (  )
+	{
+		// Inits the file type list
+		<#if regexp_map[document_type_code]?exists>
+			fileTypes = "";
+			<#list regexp_map[document_type_code]?trim?split(",") as extension>
+				<#if extension_checked_list?has_content>
+					<#assign bIsChecked = false>
+					<#list extension_checked_list?trim?split(",") as extension_checked>
+						<#if extension = extension_checked>
+							<#assign bIsChecked = true>
+							<#break>
+						</#if>
+					</#list>
+				</#if>
+				<#if !bIsChecked?exists || bIsChecked>
+					if ( fileTypes == null || fileTypes == "" )
+					{
+						fileTypes = "*.${extension}";
+					}
+					else
+					{
+						fileTypes += "; *.${extension}";
+					}
+				</#if>
+			</#list>
+		<#else>
+			fileTypes = "*.*";
+		</#if>
+		
+		// Loads SWFUpload
+		swfu = new SWFUpload( getSettings ( fileTypes ) );
+	}
+	
+	// Reloads SWFUpload
+	function reloadSWFUpload ( fileTypes )
+	{
+		var movie = swfu.getMovieElement(  );
+		var placeHolder = document.createElement( "span" );
+		placeHolder.id = "spanButtonPlaceholder";
+		movie.parentNode.replaceChild( placeHolder, movie );
+		
+		swfu.destroy(  );
+		swfu = new SWFUpload( getSettings ( fileTypes ) );
+	}
+	
+	// Gets the SWFUpload settings
+	function getSettings ( fileTypes )
+	{
+		var settings =
+		{
+			flash_url : "plugins/files2docs/swf/swfupload/swfupload.swf",
+			upload_url : "${webapp_url}jsp/admin/plugins/files2docs/Upload.jsp;jsessionid=${jsessionid}",
+			post_params :
+			{
+				// Minimum interval (in ms) allowed between two uploads
+				"min_interval" : "${min_interval}",
+				// Document type code
+				"document_type_code" : "${document_type_code}"
+			},
+			file_size_limit : "${file_size_limit} B",
+			file_types : fileTypes,
+			file_types_description : "${document_type_code?cap_first}",
+			file_upload_limit : ${file_upload_limit},
+			file_queue_limit : ${file_queue_limit},
+			custom_settings :
+			{
+				progressTarget : "fsUploadProgress"
+			},
+			requeue_on_error : ${requeue_on_error},
+			debug : ${debug},
+			
+			// Button settings
+			button_placeholder_id : "spanButtonPlaceholder",
+			button_width : 71,
+			button_height : 18,
+			button_window_mode : SWFUpload.WINDOW_MODE.TRANSPARENT,
+			button_cursor : SWFUpload.CURSOR.HAND,
+			
+			// The event handler functions are defined in handlers.js
+			swfupload_loaded_handler : swfUploadLoaded,
+			file_queued_handler : fileQueued,
+			file_queue_error_handler : fileQueueError,
+			file_dialog_complete_handler : fileDialogComplete,
+			upload_start_handler : uploadStart,
+			upload_progress_handler : uploadProgress,
+			upload_error_handler : uploadError,
+			upload_success_handler : uploadSuccess,
+			queue_complete_handler : queueComplete,	// Queue handling plug-in event
+			
+			// SWFObject settings
+			minimum_flash_version : "9.0.28",
+			swfupload_pre_load_handler : swfUploadPreLoad,
+			swfupload_load_failed_handler : swfUploadLoadFailed
+		};
+		
+		return settings;
+	}
+	
+	// Updates the selected document type
+	function updateDocumentType(  )
+	{
+		document.getElementById("update_document_type").value = "update_document_type";
+		
+		// Reloads the page
+		document.forms[0].action="${webapp_url}jsp/admin/plugins/files2docs/SelectFiles.jsp";
+		document.forms[0].submit(  );
+	}
+	
+	// Updates the file type list
+	function updateFileTypeList( identifier )
+	{	
+		// Defines the file types list
+		fileTypes = "";
+		if ( document.forms[0].extension.length != null )
+		{
+			for ( var i = 0; i < document.forms[0].extension.length; i++ )
+			{
+				if ( document.forms[0].extension[i].checked )
+				{
+					if ( fileTypes == null || fileTypes == "" )
+					{
+						fileTypes = "*." + document.forms[0].extension[i].value;
+					}
+					else
+					{
+						fileTypes += "; *." + document.forms[0].extension[i].value;
+					}
+				}
+			}
+			
+			if ( fileTypes != null && fileTypes != "" )
+			{
+				// Reloads SWFUpload
+				reloadSWFUpload( fileTypes );
+			}
+			else
+			{
+				// Checks the last modified
+				document.forms[0].extension[identifier].checked = true;
+			}
+		}
+	}
+</script>
+
+<div class="content-box">
+
+	<h2>#i18n{files2docs.selectFiles.pageTitle}</h2>
+	
+	<form method="post" action="jsp/admin/plugins/files2docs/DoSelectFiles.jsp" enctype="multipart/form-data">
+		
+		<div class="highlight-box">
+			<p>
+				#i18n{files2docs.selectFiles.labelType}* :
+				<select id="document_type_code" name="document_type_code"
+					<#if document_type_code_disabled>
+						disabled="disabled"
+					</#if>
+				onchange="updateDocumentType();">
+					<#list document_type_list?sort_by("name") as type>
+						<#if document_type_code?exists && document_type_code=type.code>
+							<option selected="selected" value="${type.code}">${type.name}</option>
+						<#else>
+							<option value="${type.code}">${type.name}</option>
+						</#if>
+					</#list>
+				</select>
+				<input type="hidden" id="document_type_code_hidden" name="document_type_code_hidden"
+					value="${document_type_code}" />
+				<input type="hidden" id="update_document_type" name="update_document_type" value="" />
+			</p>
+			<#if regexp_map[document_type_code]?exists && regexp_map[document_type_code]?split(",")?size &gt; 1>
+				<p id="divExtension" style="display:none;">
+					<script type="text/javascript">
+						// Displays the file type list with checkbox (JS enabled)
+						document.getElementById("divExtension").style.display = "";
+					</script>
+					#i18n{files2docs.selectFiles.labelExtension}* :
+					<#assign i = 0>
+					<#list regexp_map[document_type_code]?trim?split(",") as extension>
+						<input type="checkbox" class="checkbox" name="extension" value="${extension}"
+						<#if extension_checked_list?has_content>
+							<#assign bIsChecked = false>
+							<#list extension_checked_list?trim?split(",") as extension_checked>
+								<#if extension = extension_checked>
+									<#assign bIsChecked = true>
+									<#break>
+								</#if>
+							</#list>
+						</#if>
+						<#if !bIsChecked?exists || bIsChecked>
+							checked="checked"
+						</#if>
+						<#if document_type_code_disabled>
+							disabled="disabled"
+						</#if>
+						onclick="updateFileTypeList(${i});" />${extension}
+						<#assign i = i + 1>
+					</#list>
+				</p>
+				<input type="hidden" id="extension_hidden" name="extension_hidden"
+					value="<#if extension_checked_list?has_content>${extension_checked_list}</#if>" />
+			</#if>
+		</div>
+
+		<div class="highlight-box">
+			<p>#i18n{files2docs.selectFiles.labelUpload}* :</p>
+			<div id="divSWFUploadUI" style="display:none;">
+				<script type="text/javascript">
+					// Displays the SWFUpload UI div (JS enabled)
+					document.getElementById("divSWFUploadUI").style.display = "";
+				</script>
+				
+				<div id="fsUploadProgress" class="fieldset flash">
+					<span class="legend">#i18n{files2docs.selectFiles.UploadQueue}</span>
+				</div>
+				
+				<p id="divStatus">
+					<#if nb_imported_files?exists>
+						${nb_imported_files}
+						<#if nb_imported_files &lt; 2>
+							#i18n{files2docs.message.swfupload.complete.singular}
+						<#else>
+							#i18n{files2docs.message.swfupload.complete.plural}
+						</#if>
+					</#if>
+				</p>
+				
+				<input type="hidden" id="nb_imported_files" name="nb_imported_files"
+					value="<#if nb_imported_files?exists>${nb_imported_files}<#else>0</#if>" />
+				
+				<p>
+					<span id="spanButtonPlaceholder"></span>
+					<input type="button" class="button" value="#i18n{files2docs.selectFiles.buttonUpload}" style="width:71px;" />
+					<input type="submit" class="button" name="delete" value="#i18n{files2docs.selectFiles.buttonDelete}" />
+				</p>
+			</div>
+			
+			<noscript>
+				<p class="alert" style="text-align:left;">
+					#i18n{files2docs.message.swfupload.label.javascript}
+				</p>
+				<p class="alert" style="text-align:left;">
+					#i18n{files2docs.message.swfupload.label.degraded}
+				</p>
+				<p>
+					<a href="jsp/admin/plugins/files2docs/SelectFiles.jsp?mode=degraded">
+						#i18n{files2docs.selectFiles.linkDegraded}
+					</a>
+				</p>
+			</noscript>
+			
+			<div id="divLoadingContent" style="display:none;">
+				<p class="alert" style="text-align:left;">#i18n{files2docs.message.swfupload.label.loading}</p>
+			</div>
+			
+			<div id="divLongLoading" style="display:none;">
+				<p class="alert" style="text-align:left;">
+					#i18n{files2docs.message.swfupload.label.longFirst}
+				</p>
+				<p class="alert" style="text-align:left;">
+					#i18n{files2docs.message.swfupload.label.longSecond}
+				</p>
+				<p class="alert" style="text-align:left;">
+					#i18n{files2docs.message.swfupload.label.degraded}
+				</p>
+				<p>
+					<a href="jsp/admin/plugins/files2docs/SelectFiles.jsp?mode=degraded">
+						#i18n{files2docs.selectFiles.linkDegraded}
+					</a>
+				</p>
+			</div>
+			
+			<div id="divAlternateContent" style="display:none;">
+				<p class="alert" style="text-align:left;">
+					#i18n{files2docs.message.swfupload.label.flash}
+				</p>
+				<p class="alert" style="text-align:left;">
+					#i18n{files2docs.message.swfupload.label.flashLink.begin}
+					<a target="_blank" href="http://get.adobe.com/fr/flashplayer">
+						#i18n{files2docs.message.swfupload.label.flashLink.name}
+					</a>
+					#i18n{files2docs.message.swfupload.label.flashLink.end}
+				</p>
+				<p class="alert" style="text-align:left;">
+					#i18n{files2docs.message.swfupload.label.degraded}
+				</p>
+				<p>
+					<a href="jsp/admin/plugins/files2docs/SelectFiles.jsp?mode=degraded">
+						#i18n{files2docs.selectFiles.linkDegraded}
+					</a>
+				</p>
+			</div>
+		</div>
+		
+		<div class="highlight-box">
+			<p>
+				#i18n{files2docs.selectFiles.labelSpace}* :
+				${spaces_browser}
+			</p>
+		</div>
+		
+		<p>
+			<input type="submit" class="button" value="#i18n{files2docs.selectFiles.buttonSubmit}"
+				<#if submit_button_disabled>
+					disabled="disabled"
+				</#if>
+			/>
+			<input type="submit" class="button" name="cancel" value="#i18n{files2docs.selectFiles.buttonCancel}" />
+		</p>
+		
+    </form>
+    
+</div>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Lutece - Files2Docs">
+	<body>
+		<links>
+			<item name="FR" href="/fr/index.html" />
+		</links>
+
+    	<menu name="Downloads" inherit="bottom">
+			<item name="Released versions" href="../../stable_builds/plugins/plugin-files2docs/"/>
+			<item name="Nightly builds" href="../../nightly_builds/plugins/plugin-files2docs/" />
+		</menu>
+
+		<menu ref="reports" />
+	</body>
+</project>

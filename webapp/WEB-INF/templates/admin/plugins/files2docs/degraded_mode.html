@@ -1,0 +1,76 @@
+<#if !document_type_code?exists>
+	<#list document_type_list?sort_by("name") as type>
+		<#assign document_type_code = type.code>
+		<#break>
+	</#list>
+</#if>
+
+<div class="content-box">
+
+	<h2>#i18n{files2docs.degradedMode.pageTitle}</h2>
+	
+	<form method="post" action="jsp/admin/plugins/files2docs/DoSelectFiles.jsp" enctype="multipart/form-data">
+		
+		<div class="highlight-box">
+			<p>
+				#i18n{files2docs.degradedMode.labelType}* :
+				<select name="document_type_code"
+					<#if document_type_code_disabled>
+						disabled="disabled"
+					</#if>
+				>
+					<#list document_type_list?sort_by("name") as type>
+						<#if document_type_code?exists && document_type_code=type.code>
+							<option selected="selected" value="${type.code}">${type.name}</option>
+						<#else>
+							<option value="${type.code}">${type.name}</option>
+						</#if>
+					</#list>
+				</select>
+				<input type="hidden" name="document_type_code_hidden" value="${document_type_code}" />
+			</p>
+		</div>
+
+		<div class="highlight-box">
+			<p>#i18n{files2docs.degradedMode.labelUpload}* :</p>
+			<p><input type="file" name="Filedata" size="50" /></p>
+			<#if degraded_error?has_content>
+				<p class="alert" style="text-align:left;">
+					${degraded_error}
+				</p>
+			</#if>
+			<p>
+				<#if nb_imported_files?exists>
+					${nb_imported_files}
+					<#if nb_imported_files &lt; 2>
+						#i18n{files2docs.message.swfupload.complete.singular}
+					<#else>
+						#i18n{files2docs.message.swfupload.complete.plural}
+					</#if>
+				</#if>
+			</p>
+			<p>
+				<input type="hidden" name="nb_imported_files"
+					value="<#if nb_imported_files?exists>${nb_imported_files}<#else>0</#if>" />
+				<input type="hidden" name="mode" value="degraded" />
+				
+				<input type="submit" class="button" name="degraded_upload" value="#i18n{files2docs.degradedMode.buttonDegraded}" />
+				<input type="submit" class="button" name="delete" value="#i18n{files2docs.degradedMode.buttonDelete}" />
+			</p>
+		</div>
+		
+		<div class="highlight-box">
+			<p>
+				#i18n{files2docs.degradedMode.labelSpace}* :
+				${spaces_browser}
+			</p>
+		</div>
+		
+		<p>
+			<input type="submit" class="button" value="#i18n{files2docs.degradedMode.buttonSubmit}" />
+			<input type="submit" class="button" name="cancel" value="#i18n{files2docs.degradedMode.buttonCancel}" />
+		</p>
+		
+    </form>
+    
+</div>
