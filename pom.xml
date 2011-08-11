@@ -39,7 +39,7 @@
 	
 	<properties>
 		<componentName>filestodocs</componentName>
-		<jiraProjectName>FILETODOCS</jiraProjectName>
+		<jiraProjectName>FILESTODOCS</jiraProjectName>
 		<jiraComponentId>10201</jiraComponentId>
 	</properties>
     <scm>
