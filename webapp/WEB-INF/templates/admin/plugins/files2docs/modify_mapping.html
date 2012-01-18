@@ -84,6 +84,15 @@
 											alt="#i18n{files2docs.modifyMapping.actionModify}"
 											title="#i18n{files2docs.modifyMapping.actionModify}" />
 									</a>
+								<#elseif attribute.id != -1>
+									<img src="images/admin/skin/enable.png" title="#i18n{files2docs.modifyMapping.labelAssigned}" alt="#i18n{files2docs.modifyMapping.labelAssigned}" />
+								<#elseif !id_mandatory_doc_attr_file_img??>
+									<#-- No mandatory document attribute type file/image, then display the button to change the assignment for attribute file/image -->
+									<form method="post" action="jsp/admin/plugins/files2docs/DoChangeAttributeFileImage.jsp">
+										<input type="hidden" name="mapping_id" value="${mapping.id}" />
+										<input type="hidden" name="id_document_attr" value="${attribute.documentAttributeId}" />
+										<input class="button" type="submit" value="#i18n{files2docs.modifyMapping.buttonModifyAttributeFileImage}" />
+									</form>
 								</#if>
 							</td>
 						</tr>

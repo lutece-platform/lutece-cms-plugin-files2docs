@@ -45,10 +45,17 @@ import fr.paris.lutece.plugins.document.service.DocumentException;
 import fr.paris.lutece.plugins.document.service.DocumentService;
 import fr.paris.lutece.plugins.document.service.DocumentTypeResourceIdService;
 import fr.paris.lutece.plugins.document.service.spaces.DocumentSpacesService;
+import fr.paris.lutece.plugins.files2docs.business.Attribute;
+import fr.paris.lutece.plugins.files2docs.business.AttributeHome;
+import fr.paris.lutece.plugins.files2docs.util.Files2DocsUtil;
 import fr.paris.lutece.portal.business.user.AdminUser;
+import fr.paris.lutece.portal.service.plugin.Plugin;
+
+import org.apache.commons.lang.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
 
 import javax.servlet.http.HttpServletRequest;
@@ -98,7 +105,8 @@ public final class Files2DocsLinkDocument
 
         for ( DocumentType type : DocumentTypeHome.findAll(  ) )
         {
-            int nCount = 0;
+            int nNbAttributeFiles = 0;
+            int nNbMandatoryAttributeFiles = 0;
 
             // Filters document types by fields of type file
             for ( DocumentAttribute attribute : DocumentTypeHome.findByPrimaryKey( type.getCode(  ) ).getAttributes(  ) )
@@ -107,13 +115,25 @@ public final class Files2DocsLinkDocument
                 {
                     if ( attribute.getCodeAttributeType(  ).equals( strCode ) )
                     {
-                        nCount++;
+                        nNbAttributeFiles++;
+
+                        if ( attribute.isRequired(  ) )
+                        {
+                            nNbMandatoryAttributeFiles++;
+                        }
+
+                        break;
                     }
                 }
             }
 
-            // Adds the document type if its attributes contain only one field of type file
-            if ( nCount == 1 )
+            /**
+             * FILESTODOCS-5 : Manage the mapping of document attributes even when there is more than a binary field
+             * Adds the document type if it :
+             * 1) contains one or several attributes type file/image and none are mandatory
+             * 2) contains one and only one mandatory attribute file/image and the others are not mandatory
+             */
+            if ( ( nNbAttributeFiles > 0 ) && ( nNbMandatoryAttributeFiles < 2 ) )
             {
                 colDocumentTypes.add( type );
             }
@@ -163,17 +183,47 @@ public final class Files2DocsLinkDocument
                                                                       .getAttributes(  );
         Collection<DocumentAttribute> colFiltered = new ArrayList<DocumentAttribute>(  );
 
+        /**
+         * Add the document attribute if it :
+         * 1) is an attribute file/image
+         * 2) is mandatory
+         */
         for ( DocumentAttribute attribute : colAttributes )
         {
-            String strCode = attribute.getCodeAttributeType(  );
-
-            if ( attribute.isRequired(  ) || strCode.equals( ATTRIBUTE_FILE ) || strCode.equals( ATTRIBUTE_IMAGE ) )
+            if ( attribute.isRequired(  ) || isDocumentAttributeFile( attribute ) ||
+                    isDocumentAttributeImage( attribute ) )
             {
                 colFiltered.add( attribute );
             }
         }
 
         return colFiltered;
+    }
+
+    /**
+     * Get the mandatory attribute file/image from a given
+     * document type
+     * @param strDocumentTypeCode the document type code
+     * @return the mandatory attribute file/image
+     */
+    public DocumentAttribute getMandatoryAttributeFileImage( String strDocumentTypeCode )
+    {
+        Collection<DocumentAttribute> colAttributes = DocumentTypeHome.findByPrimaryKey( strDocumentTypeCode )
+                                                                      .getAttributes(  );
+
+        if ( ( colAttributes != null ) && !colAttributes.isEmpty(  ) )
+        {
+            for ( DocumentAttribute attribute : colAttributes )
+            {
+                if ( ( isDocumentAttributeFile( attribute ) || isDocumentAttributeImage( attribute ) ) &&
+                        attribute.isRequired(  ) )
+                {
+                    return attribute;
+                }
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -263,5 +313,82 @@ public final class Files2DocsLinkDocument
     public Collection<Integer> getListRegularExpressionKeyByIdAttribute( int nIdAttribute )
     {
         return DocumentAttributeHome.getListRegularExpressionKeyByIdAttribute( nIdAttribute );
+    }
+
+    /**
+     * Get the collection of all document attributes that are mandatory or type file/image.
+     * <br />
+     * This method will also get the attributes even if they are not stored in the db.
+     * <br />
+     * The format of the attribute will be formatted in HTML.
+     * @param strDocumentTypeCode the document type code
+     * @param nIdMapping the id mapping
+     * @param plugin the plugin
+     * @return the collection of attributes
+     */
+    public List<Attribute> getAllAttributes( String strDocumentTypeCode, int nIdMapping, Plugin plugin )
+    {
+        List<Attribute> listAttributes = new ArrayList<Attribute>(  );
+
+        for ( DocumentAttribute docAttribute : getMandatoryAttributes( strDocumentTypeCode ) )
+        {
+            Attribute attribute = AttributeHome.findByDocumentAttribute( docAttribute.getId(  ), plugin );
+
+            if ( attribute != null )
+            {
+                // Replaces '<' and '>' caracters in the format value
+                String strFormat = attribute.getFormat(  );
+
+                if ( StringUtils.isNotBlank( strFormat ) )
+                {
+                    attribute.setFormat( Files2DocsUtil.formatToHtml( strFormat ) );
+                }
+            }
+            else
+            {
+                attribute = new Attribute(  );
+                attribute.setId( Files2DocsUtil.CONSTANT_ID_NULL );
+                attribute.setDocumentAttributeId( docAttribute.getId(  ) );
+                attribute.setMappingId( nIdMapping );
+            }
+
+            listAttributes.add( attribute );
+        }
+
+        return listAttributes;
+    }
+
+    /**
+     * Check if the given document attribute is an attribute type file
+     * @param attribute then attribute
+     * @return true if it is an attribute type file, false otherwise
+     */
+    public boolean isDocumentAttributeFile( DocumentAttribute attribute )
+    {
+        boolean bIsFile = false;
+
+        if ( ( attribute != null ) && StringUtils.isNotBlank( attribute.getCodeAttributeType(  ) ) )
+        {
+            return ATTRIBUTE_FILE.equals( attribute.getCodeAttributeType(  ) );
+        }
+
+        return bIsFile;
+    }
+
+    /**
+     * Check if the given document attribute is an attribute type image
+     * @param attribute then attribute
+     * @return true if it is an attribute type image, false otherwise
+     */
+    public boolean isDocumentAttributeImage( DocumentAttribute attribute )
+    {
+        boolean bIsImage = false;
+
+        if ( ( attribute != null ) && StringUtils.isNotBlank( attribute.getCodeAttributeType(  ) ) )
+        {
+            return ATTRIBUTE_IMAGE.equals( attribute.getCodeAttributeType(  ) );
+        }
+
+        return bIsImage;
     }
 }

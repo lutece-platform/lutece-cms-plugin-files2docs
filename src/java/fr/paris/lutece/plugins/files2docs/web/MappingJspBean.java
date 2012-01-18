@@ -44,15 +44,19 @@ import fr.paris.lutece.plugins.files2docs.util.Files2DocsUtil;
 import fr.paris.lutece.portal.service.message.AdminMessage;
 import fr.paris.lutece.portal.service.message.AdminMessageService;
 import fr.paris.lutece.portal.service.template.AppTemplateService;
+import fr.paris.lutece.portal.service.util.AppLogService;
 import fr.paris.lutece.portal.service.util.AppPropertiesService;
 import fr.paris.lutece.portal.web.admin.PluginAdminPageJspBean;
 import fr.paris.lutece.portal.web.constants.Messages;
 import fr.paris.lutece.util.html.HtmlTemplate;
 import fr.paris.lutece.util.url.UrlItem;
 
+import org.apache.commons.lang.StringUtils;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -81,6 +85,7 @@ public class MappingJspBean extends PluginAdminPageJspBean
     private static final String MARK_ATTRIBUTE = "attribute";
     private static final String MARK_ATTRIBUTE_NAME = "attribute_name";
     private static final String MARK_MAPPING_TAG_LIST = "mapping_tag_list";
+    private static final String MARK_ID_MANDATORY_DOC_ATTR_FILE_IMG = "id_mandatory_doc_attr_file_img";
 
     // Parameters
     private static final String PARAMETER_DOCUMENT_TYPE_CODE = "document_type_code";
@@ -90,6 +95,7 @@ public class MappingJspBean extends PluginAdminPageJspBean
     private static final String PARAMETER_ATTRIBUTE_ID = "attribute_id";
     private static final String PARAMETER_ATTRIBUTE_FORMAT = "attribute_format";
     private static final String PARAMETER_ATTRIBUTE_NAME = "attribute_name";
+    private static final String PARAMETER_ID_DOCUMENT_ATTR = "id_document_attr";
 
     // Properties
     private static final String PROPERTY_MANAGE_MAPPING_PAGE_TITLE = "files2docs.manageMapping.pageTitle";
@@ -98,6 +104,10 @@ public class MappingJspBean extends PluginAdminPageJspBean
     private static final String PROPERTY_MODIFY_ATTRIBUTE_PAGE_TITLE = "files2docs.modifyAttribute.pageTitle";
     private static final String PROPERTY_MAPPING_LIST_TAGS = "files2docs.mapping.listTags";
     private static final String PROPERTY_MAPPING_TAG_FRAGMENT = "files2docs.mapping.tag.";
+
+    // Messages
+    private static final String MESSAGE_ERROR_FILES2DOCS = "files2docs.message.error.files2docs";
+    private static final String MESSAGE_ERROR_DOC_TYPE_HAS_MANDATORY_DOC_ATTR_FILE_IMG = "files2docs.message.error.docType.hasMandatoryDocAttrFileImg";
 
     // JSP
     private static final String JSP_DO_REMOVE_MAPPING = "jsp/admin/plugins/files2docs/DoRemoveMapping.jsp";
@@ -109,10 +119,6 @@ public class MappingJspBean extends PluginAdminPageJspBean
     // Strings
     private static final String STRING_EMPTY = "";
     private static final String STRING_COMMA = ",";
-    private static final String STRING_LT = "<";
-    private static final String STRING_GT = ">";
-    private static final String STRING_LT_HTML = "&lt;";
-    private static final String STRING_GT_HTML = "&gt;";
     private static final String STRING_TITLE = "title";
     private static final String STRING_SUMMARY = "summary";
 
@@ -222,17 +228,74 @@ public class MappingJspBean extends PluginAdminPageJspBean
             return AdminMessageService.getMessageUrl( request, Messages.MANDATORY_FIELDS, AdminMessage.TYPE_STOP );
         }
 
+        // Check if the mapping does not already exists in DB
+        Mapping mapping = MappingHome.findByDocumentTypeCode( strDocumentTypeCode, getPlugin(  ) );
+
+        if ( mapping != null )
+        {
+            return AdminMessageService.getMessageUrl( request, MESSAGE_ERROR_FILES2DOCS, AdminMessage.TYPE_STOP );
+        }
+
         // Creates the mapping
-        Mapping mapping = new Mapping(  );
+        mapping = new Mapping(  );
         mapping.setDocumentTypeCode( strDocumentTypeCode );
         mapping.setDescription( strDescription );
 
         MappingHome.create( mapping, getPlugin(  ) );
 
+        /**
+         * FILESTODOCS-5 : Manage the mapping of document attributes even when there is more than a binary field
+         * When creating a new mapping, only create one mapping for the first attribute file/image.
+         * The other attributes file/image will not have a mapping
+         * @since 1.0.4
+         */
+
+        // This flag is used to check if the attribute file/image is already created or not
+        boolean bIsAttributeFileImgCreated = false;
+        DocumentAttribute docMandatoryAttrFileImg = Files2DocsLinkDocument.getInstance(  )
+                                                                          .getMandatoryAttributeFileImage( strDocumentTypeCode );
+
         // Creates the other associations (attributes)
         for ( DocumentAttribute docAttribute : Files2DocsLinkDocument.getInstance(  )
                                                                      .getMandatoryAttributes( strDocumentTypeCode ) )
         {
+            /**
+             * For document attribute file/image, only create ONE and only ONE attribute.
+             * The one which will be created will be either :
+             * 1) The document type has a mandatory attribute file/image, thus the one to be created is the mandatory attribute
+             * 2) The document type does not have a mandatory attribute file/image. The one to be created will be the first
+             * in the list.
+             */
+            if ( Files2DocsLinkDocument.getInstance(  ).isDocumentAttributeFile( docAttribute ) ||
+                    Files2DocsLinkDocument.getInstance(  ).isDocumentAttributeImage( docAttribute ) )
+            {
+                if ( bIsAttributeFileImgCreated )
+                {
+                    // If the attribute File/Image is already created, then do not create the other attributes File/Image
+                    continue;
+                }
+
+                /** 1) The document type has a mandatory attribute file/image, thus the one to be created is the mandatory attribute */
+                else if ( docMandatoryAttrFileImg != null )
+                {
+                    if ( docMandatoryAttrFileImg.getId(  ) == docAttribute.getId(  ) )
+                    {
+                        bIsAttributeFileImgCreated = true;
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                }
+
+                /** 2) The document type does not have a mandatory attribute file/image. The one to be created will be the first */
+                else
+                {
+                    // The attribute File/Image is the first one. Set true the flag so the other attributes will not be created
+                    bIsAttributeFileImgCreated = true;
+                }
+            }
+
             Attribute mAttribute = new Attribute(  );
             mAttribute.setMappingId( mapping.getId(  ) );
             mAttribute.setDocumentAttributeId( docAttribute.getId(  ) );
@@ -260,24 +323,25 @@ public class MappingJspBean extends PluginAdminPageJspBean
         // Gets the mapping
         Mapping mapping = MappingHome.findByPrimaryKey( nMappingId, getPlugin(  ) );
 
+        if ( mapping == null )
+        {
+            return AdminMessageService.getMessageUrl( request, MESSAGE_ERROR_FILES2DOCS, AdminMessage.TYPE_STOP );
+        }
+
         // Replaces '<' and '>' caracters in the title
         String strTitle = mapping.getTitle(  );
 
-        if ( ( strTitle != null ) && !strTitle.equals( STRING_EMPTY ) )
+        if ( StringUtils.isNotBlank( strTitle ) )
         {
-            strTitle = strTitle.replace( STRING_LT, STRING_LT_HTML );
-            strTitle = strTitle.replace( STRING_GT, STRING_GT_HTML );
-            mapping.setTitle( strTitle );
+            mapping.setTitle( Files2DocsUtil.formatToHtml( strTitle ) );
         }
 
         // Replaces '<' and '>' caracters in the summary
         String strSummary = mapping.getSummary(  );
 
-        if ( ( strSummary != null ) && !strSummary.equals( STRING_EMPTY ) )
+        if ( StringUtils.isNotBlank( strSummary ) )
         {
-            strSummary = strSummary.replace( STRING_LT, STRING_LT_HTML );
-            strSummary = strSummary.replace( STRING_GT, STRING_GT_HTML );
-            mapping.setSummary( strSummary );
+            mapping.setSummary( Files2DocsUtil.formatToHtml( strSummary ) );
         }
 
         // Gets the document type name corresponding to the document type code
@@ -290,11 +354,13 @@ public class MappingJspBean extends PluginAdminPageJspBean
         }
         else
         {
-            mapping.setDocumentTypeName( STRING_EMPTY );
+            mapping.setDocumentTypeName( StringUtils.EMPTY );
         }
 
         // Gets all associations constituting the mapping
-        Collection<Attribute> colAttribute = AttributeHome.findByMapping( nMappingId, getPlugin(  ) );
+        List<Attribute> colAttribute = Files2DocsLinkDocument.getInstance(  )
+                                                             .getAllAttributes( mapping.getDocumentTypeCode(  ),
+                nMappingId, getPlugin(  ) );
 
         // Gets the document attribute names and codes corresponding to the document attribute identifiers
         Collection<String> colDocumentAttributeName = new ArrayList<String>(  );
@@ -312,18 +378,11 @@ public class MappingJspBean extends PluginAdminPageJspBean
                 colDocumentAttributeName.add( docAttribute.getName(  ) );
                 colDocumentAttributeCode.add( docAttribute.getCodeAttributeType(  ) );
             }
-
-            // Replaces '<' and '>' caracters in the format value
-            String strFormat = mAttribute.getFormat(  );
-
-            if ( ( strFormat != null ) && !strFormat.equals( STRING_EMPTY ) )
-            {
-                strFormat = strFormat.replace( STRING_LT, STRING_LT_HTML );
-                strFormat = strFormat.replace( STRING_GT, STRING_GT_HTML );
-
-                mAttribute.setFormat( strFormat );
-            }
         }
+
+        // Get the mandatory document attribute file/image
+        DocumentAttribute docMandatoryAttrFileImg = Files2DocsLinkDocument.getInstance(  )
+                                                                          .getMandatoryAttributeFileImage( mapping.getDocumentTypeCode(  ) );
 
         Map<String, Object> model = new HashMap<String, Object>(  );
         model.put( MARK_MAPPING, mapping );
@@ -334,6 +393,12 @@ public class MappingJspBean extends PluginAdminPageJspBean
         // Document attribute names and codes corresponding to the document attribute identifiers
         model.put( MARK_DOCUMENT_ATTRIBUTE_NAME_LIST, colDocumentAttributeName );
         model.put( MARK_DOCUMENT_ATTRIBUTE_CODE_LIST, colDocumentAttributeCode );
+
+        // Id of the mandatory attribute file/image
+        if ( docMandatoryAttrFileImg != null )
+        {
+            model.put( MARK_ID_MANDATORY_DOC_ATTR_FILE_IMG, docMandatoryAttrFileImg.getId(  ) );
+        }
 
         HtmlTemplate template = AppTemplateService.getTemplate( TEMPLATE_MODIFY_MAPPING, getLocale(  ), model );
 
@@ -485,10 +550,7 @@ public class MappingJspBean extends PluginAdminPageJspBean
                 String strTag = AppPropertiesService.getProperty( PROPERTY_MAPPING_TAG_FRAGMENT + strPropertyFragment );
 
                 // Replaces '<' and '>' caracters
-                strTag = strTag.replace( STRING_LT, STRING_LT_HTML );
-                strTag = strTag.replace( STRING_GT, STRING_GT_HTML );
-
-                colTag.add( strTag );
+                colTag.add( Files2DocsUtil.formatToHtml( strTag ) );
             }
         }
 
@@ -564,6 +626,76 @@ public class MappingJspBean extends PluginAdminPageJspBean
             }
 
             MappingHome.update( mapping, getPlugin(  ) );
+        }
+
+        return url.getUrl(  );
+    }
+
+    /**
+     * Change the assignment for attribute file/image of the document type
+     *
+     * @param request The HTTP request
+     * @return The URL to go after performing the action
+     */
+    public String doChangeAttributeFileImage( HttpServletRequest request )
+    {
+        String strMappingId = request.getParameter( PARAMETER_MAPPING_ID );
+        String strIdDocumentAttr = request.getParameter( PARAMETER_ID_DOCUMENT_ATTR );
+
+        // Validates the mandatory field
+        if ( StringUtils.isBlank( strMappingId ) || StringUtils.isBlank( strIdDocumentAttr ) )
+        {
+            return AdminMessageService.getMessageUrl( request, Messages.MANDATORY_FIELDS, AdminMessage.TYPE_STOP );
+        }
+
+        int nMappingId = Files2DocsUtil.convertStringToInt( strMappingId );
+        int nIdDocumentAttr = Files2DocsUtil.convertStringToInt( strIdDocumentAttr );
+
+        Mapping mapping = MappingHome.findByPrimaryKey( nMappingId, getPlugin(  ) );
+
+        if ( mapping == null )
+        {
+            AppLogService.error( "The mapping does not exist in the database for id : " + nMappingId );
+
+            return AdminMessageService.getMessageUrl( request, MESSAGE_ERROR_FILES2DOCS, AdminMessage.TYPE_STOP );
+        }
+
+        // If the document type has a mandatory attribute file/image, the user
+        // should not be able to chaneg the attribute file/image 
+        DocumentAttribute docMandatoryAttrFileImg = Files2DocsLinkDocument.getInstance(  )
+                                                                          .getMandatoryAttributeFileImage( mapping.getDocumentTypeCode(  ) );
+
+        if ( docMandatoryAttrFileImg != null )
+        {
+            return AdminMessageService.getMessageUrl( request, MESSAGE_ERROR_DOC_TYPE_HAS_MANDATORY_DOC_ATTR_FILE_IMG,
+                AdminMessage.TYPE_STOP );
+        }
+
+        UrlItem url = new UrlItem( JSP_MODIFY_MAPPING );
+        url.addParameter( PARAMETER_MAPPING_ID, nMappingId );
+
+        // Remove all attributes
+        AttributeHome.removeByMapping( nMappingId, getPlugin(  ) );
+
+        // Creates the other associations (attributes)
+        for ( DocumentAttribute docAttribute : Files2DocsLinkDocument.getInstance(  )
+                                                                     .getMandatoryAttributes( mapping.getDocumentTypeCode(  ) ) )
+        {
+            if ( !Files2DocsLinkDocument.getInstance(  ).isDocumentAttributeFile( docAttribute ) ||
+                    !Files2DocsLinkDocument.getInstance(  ).isDocumentAttributeImage( docAttribute ) )
+            {
+                if ( docAttribute.getId(  ) != nIdDocumentAttr )
+                {
+                    // Create only the attribute file/image selected
+                    continue;
+                }
+            }
+
+            Attribute mAttribute = new Attribute(  );
+            mAttribute.setMappingId( mapping.getId(  ) );
+            mAttribute.setDocumentAttributeId( docAttribute.getId(  ) );
+
+            AttributeHome.create( mAttribute, getPlugin(  ) );
         }
 
         return url.getUrl(  );

@@ -38,7 +38,7 @@
 				<#list document_list as document>
 			    	<#if document.attributes?exists>
 				    	<#list document.attributes as attribute>
-							<#if attribute.codeAttributeType = "file" || attribute.codeAttributeType = "image">
+							<#if ( attribute.codeAttributeType = "file" || attribute.codeAttributeType = "image" ) && attribute.textValue??>
 								<#assign filename = attribute.textValue>
 							</#if>
 						</#list>
@@ -55,7 +55,7 @@
 					 				title="#i18n{files2docs.importResult.fileFailure}" />
 			    			</#if>
 			    		</td>
-			    		<td><#if document.id != -1>${filename}<#else>${document.title}</#if></td>
+			    		<td><#if document.id != -1>${filename!}<#else>${document.title}</#if></td>
 			    		<td><#if document.id != -1>${document.title}</#if></td>
 			    		<td><#if document.id != -1>${document.summary}</#if></td>
 			    		<td style="width:35%;">

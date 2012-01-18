@@ -1232,36 +1232,41 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
                 // Attribute of type file or image
                 if ( strCode.equals( ATTRIBUTE_FILE ) || strCode.equals( ATTRIBUTE_IMAGE ) )
                 {
-                    // Gets the uploades file
-                    File file = new File( getUploadDirectory( request ), listFilenames.get( identifier ) );
+                    Attribute mAttribute = AttributeHome.findByDocumentAttribute( attribute.getId(  ), getPlugin(  ) );
 
-                    // Gets values
-                    String strContentType = getMimeType( file );
-                    String strFileName = file.getName(  );
-                    byte[] bytes = null;
-
-                    try
+                    if ( mAttribute != null )
                     {
-                        InputStream in = new FileInputStream( file );
-                        ByteArrayOutputStream result = new ByteArrayOutputStream(  );
+                        // Gets the uploades file
+                        File file = new File( getUploadDirectory( request ), listFilenames.get( identifier ) );
 
-                        for ( int nBytes = in.read(  ); nBytes != -1; nBytes = in.read(  ) )
+                        // Gets values
+                        String strContentType = getMimeType( file );
+                        String strFileName = file.getName(  );
+                        byte[] bytes = null;
+
+                        try
                         {
-                            result.write( nBytes );
+                            InputStream in = new FileInputStream( file );
+                            ByteArrayOutputStream result = new ByteArrayOutputStream(  );
+
+                            for ( int nBytes = in.read(  ); nBytes != -1; nBytes = in.read(  ) )
+                            {
+                                result.write( nBytes );
+                            }
+
+                            in.close(  );
+                            bytes = result.toByteArray(  );
+                        }
+                        catch ( IOException e )
+                        {
+                            AppLogService.error( e.getMessage(  ), e );
                         }
 
-                        in.close(  );
-                        bytes = result.toByteArray(  );
+                        attribute.setBinary( true );
+                        attribute.setBinaryValue( bytes );
+                        attribute.setValueContentType( strContentType );
+                        attribute.setTextValue( strFileName );
                     }
-                    catch ( IOException e )
-                    {
-                        AppLogService.error( e.getMessage(  ), e );
-                    }
-
-                    attribute.setBinary( true );
-                    attribute.setBinaryValue( bytes );
-                    attribute.setValueContentType( strContentType );
-                    attribute.setTextValue( strFileName );
                 }
 
                 // Other attributes
