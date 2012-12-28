@@ -39,7 +39,7 @@
         </admin-feature>
     </admin-features>
     
-    <!-- Daemons -->
+	<!-- Daemons -->
 	<daemons>
 		<daemon>
 			<daemon-id>autoCleaning</daemon-id>

@@ -1,63 +1,56 @@
-<#include "/admin/util/editor/editor.html" />
-
-<div class="content-box">
-
-	<h2>#i18n{files2docs.createDocuments.pageTitle}</h2>
+<div class="row-fluid">
+	<div class="span12">
+	<fieldset>
+	<legend>#i18n{files2docs.createDocuments.pageTitle} <small>#i18n{files2docs.createDocuments.labelImportedFiles} : ${nb_imported_files}</small></legend>
+	<form class="form-inline" method="post" action="jsp/admin/plugins/files2docs/DoCreateDocuments.jsp">
+	<input type="hidden" name="document_type_code" value="${document_type_code}" />
+	<input type="hidden" name="browser_selected_space_id" value="${browser_selected_space_id}" />
+	<input type="hidden" name="nb_imported_files" value="${nb_imported_files}" />
+	<input type="hidden" name="extension" value="${extension_checked_list}" />
+	<input type="hidden" name="mode" value="${mode}" />
+	<button class="btn btn-primary btn-small" type="submit" >
+		<i class="icon-plus icon-white"></i>&nbsp;#i18n{files2docs.createDocuments.buttonSubmit}
+	</button>
+	<a href="jsp/admin/plugins/files2docs/SelectFiles.jsp" class="btn btn-small" >
+			<i class="icon-remove-circle"></i>&nbsp;#i18n{files2docs.createDocuments.buttonCancel}
+		</a>
+	<table class="table table-striped table-condensed">
+	<thead>
+		<tr>
+			<th>#i18n{files2docs.createDocuments.columnFilename}</th>
+			<th>#i18n{files2docs.createDocuments.columnDocumentName}</th>
+			<th>#i18n{files2docs.createDocuments.columnSummary}</th>
+			<th>#i18n{files2docs.createDocuments.columnAttributes}</th>
+		</tr>
+	</thead>
+	<tbody>
+		<#assign i = 0>
+		<#list filename_list as filename>
+	   	<tr>
+    		<td>${filename}</td>
+    		<td>
+				<input type="text" name="document_title_${i+1}" id="document_title_${i+1}" class="input-small" maxlength="255" value="<#if mapping_list[i]?exists && mapping_list[i].title?exists>${mapping_list[i].title}</#if>" />
+			</td>
+			<td>
+				<textarea name="document_summary_${i+1}" cols="40" rows="2"><#if mapping_list[i]?exists && mapping_list[i].summary?exists>${mapping_list[i].summary}</#if></textarea>
+			</td>
+			<td>
+				<#if attributes_forms[i]?exists>${attributes_forms[i]}</#if>
+			</td>
+		</tr>
+		<#assign i = i + 1>
+		</#list>
+		</tbody>
+	</table>
 	
-	<p>#i18n{files2docs.createDocuments.labelImportedFiles} : ${nb_imported_files}</p>
-	
-	<form method="post" action="jsp/admin/plugins/files2docs/DoCreateDocuments.jsp">
-		
-		<input type="hidden" name="document_type_code" value="${document_type_code}" />
-		<input type="hidden" name="browser_selected_space_id" value="${browser_selected_space_id}" />
-		<input type="hidden" name="nb_imported_files" value="${nb_imported_files}" />
-		<input type="hidden" name="extension" value="${extension_checked_list}" />
-		<input type="hidden" name="mode" value="${mode}" />
-		
-		<p>
-			<input type="submit" class="button" value="#i18n{files2docs.createDocuments.buttonSubmit}" />
-			<input type="submit" class="button" name="cancel" value="#i18n{files2docs.createDocuments.buttonCancel}" />
-		</p>
-		
-		<table>
-			<tbody>
-				<tr>
-					<th>#i18n{files2docs.createDocuments.columnFilename}</th>
-					<th>#i18n{files2docs.createDocuments.columnDocumentName}</th>
-					<th>#i18n{files2docs.createDocuments.columnSummary}</th>
-					<th>#i18n{files2docs.createDocuments.columnAttributes}</th>
-				</tr>
-				
-				<#assign i = 0>
-				<#list filename_list as filename>
-			    	<tr>
-			    		<td>${filename}</td>
-			    		<td>
-			    			<input type="text" name="document_title_${i+1}" size="30" maxlength="255"
-			    			value="<#if mapping_list[i]?exists && mapping_list[i].title?exists>${mapping_list[i].title}</#if>" />
-			    		</td>
-			    		<td>
-			    			<textarea name="document_summary_${i+1}" cols="40"
-			    				rows="2"><#if mapping_list[i]?exists && mapping_list[i].summary?exists>${mapping_list[i].summary}</#if></textarea>
-			    		</td>
-			    		<td style="width:35%;">
-							<#if attributes_forms[i]?exists>
-								${attributes_forms[i]}
-							</#if>
-			    		</td>
-			    	</tr>
-			    	<#assign i = i + 1>
-			    </#list>
-			</tbody>
-		</table>
-		
-		<p>
-			<input type="submit" class="button" value="#i18n{files2docs.createDocuments.buttonSubmit}" />
-			<input type="submit" class="button" name="cancel" value="#i18n{files2docs.createDocuments.buttonCancel}" />
-		</p>
-		
+	<button class="btn btn-primary btn-small" type="submit">
+			<i class="icon-plus icon-white"></i>&nbsp;#i18n{files2docs.createDocuments.buttonSubmit}</button>
+		<a href="jsp/admin/plugins/files2docs/SelectFiles.jsp" class="btn btn-small" >
+			<i class="icon-remove-circle"></i>&nbsp;#i18n{files2docs.createDocuments.buttonCancel}
+		</a>
 	</form>
-	
+	</fieldset>
+	</div>
 </div>
-
+<#include "/admin/util/editor/editor.html" />
 <@initEditor />

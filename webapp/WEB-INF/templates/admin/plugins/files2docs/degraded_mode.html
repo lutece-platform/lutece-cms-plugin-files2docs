@@ -4,21 +4,19 @@
 		<#break>
 	</#list>
 </#if>
-
-<div class="content-box">
-
-	<h2>#i18n{files2docs.degradedMode.pageTitle}</h2>
-	
-	<form method="post" action="jsp/admin/plugins/files2docs/DoSelectFiles.jsp" enctype="multipart/form-data">
-		
-		<div class="highlight-box">
-			<p>
-				#i18n{files2docs.degradedMode.labelType}* :
-				<select name="document_type_code"
-					<#if document_type_code_disabled>
-						disabled="disabled"
-					</#if>
-				>
+<div class="row-fluid">
+	<div class="span12">
+		<fieldset>
+		<legend>#i18n{files2docs.degradedMode.pageTitle}</legend>
+		<form class="form-horizontal" method="post" action="jsp/admin/plugins/files2docs/DoSelectFiles.jsp" enctype="multipart/form-data">
+		<input type="hidden" name="document_type_code_hidden" value="${document_type_code}" />
+		<input type="hidden" name="nb_imported_files" value="<#if nb_imported_files?exists>${nb_imported_files}<#else>0</#if>" />
+		<input type="hidden" name="mode" value="degraded" />
+		<div class="well">
+		<div class="control-group">
+		<label class="control-label" for="document_type_code">#i18n{files2docs.degradedMode.labelType}* </label>
+			<div class="controls">
+				<select name="document_type_code" <#if document_type_code_disabled>	disabled="disabled"</#if>>
 					<#list document_type_list?sort_by("name") as type>
 						<#if document_type_code?exists && document_type_code=type.code>
 							<option selected="selected" value="${type.code}">${type.name}</option>
@@ -27,50 +25,45 @@
 						</#if>
 					</#list>
 				</select>
-				<input type="hidden" name="document_type_code_hidden" value="${document_type_code}" />
-			</p>
+			</div>
 		</div>
-
-		<div class="highlight-box">
-			<p>#i18n{files2docs.degradedMode.labelUpload}* :</p>
-			<p><input type="file" name="Filedata" size="50" /></p>
-			<#if degraded_error?has_content>
-				<p class="alert" style="text-align:left;">
-					${degraded_error}
-				</p>
-			</#if>
-			<p>
-				<#if nb_imported_files?exists>
-					${nb_imported_files}
-					<#if nb_imported_files &lt; 2>
-						#i18n{files2docs.message.swfupload.complete.singular}
-					<#else>
-						#i18n{files2docs.message.swfupload.complete.plural}
-					</#if>
-				</#if>
-			</p>
-			<p>
-				<input type="hidden" name="nb_imported_files"
-					value="<#if nb_imported_files?exists>${nb_imported_files}<#else>0</#if>" />
-				<input type="hidden" name="mode" value="degraded" />
-				
-				<input type="submit" class="button" name="degraded_upload" value="#i18n{files2docs.degradedMode.buttonDegraded}" />
-				<input type="submit" class="button" name="delete" value="#i18n{files2docs.degradedMode.buttonDelete}" />
-			</p>
-		</div>
-		
-		<div class="highlight-box">
-			<p>
-				#i18n{files2docs.degradedMode.labelSpace}* :
-				${spaces_browser}
-			</p>
-		</div>
-		
+		<div class="control-group">
+			<label class="control-label" for="description">#i18n{files2docs.degradedMode.labelUpload}*</label>
+				<div class="controls">
+					<input type="file" name="Filedata" size="50" />
+				</div>	
+		</div>	
+		<#if degraded_error?has_content>
+			<div class="alert alert-error">${degraded_error}</div>
+		</#if>
+		<#if nb_imported_files?exists>
 		<p>
-			<input type="submit" class="button" value="#i18n{files2docs.degradedMode.buttonSubmit}" />
-			<input type="submit" class="button" name="cancel" value="#i18n{files2docs.degradedMode.buttonCancel}" />
+			${nb_imported_files}
+			<#if nb_imported_files &lt; 2>
+				#i18n{files2docs.message.swfupload.complete.singular}
+			<#else>
+				#i18n{files2docs.message.swfupload.complete.plural}
+			</#if>
 		</p>
-		
-    </form>
-    
+		</#if>
+		<button class="btn btn-primary" type="submit" >
+			<i class="icon-upload icon-white"></i>
+			&nbsp;#i18n{files2docs.degradedMode.buttonDegraded}
+		</button>
+		<button class="btn btn-danger" type="submit">
+			<i class="icon-trash icon-white"></i>
+			&nbsp;#i18n{files2docs.degradedMode.buttonDelete}
+		</button>
+		</div>
+		<div class="well">
+			#i18n{files2docs.degradedMode.labelSpace}*
+			${spaces_browser}
+		</div>
+		<div class="form-actions">
+			<button class="btn btn-primary" type="submit" >#i18n{files2docs.degradedMode.buttonSubmit}</button>
+			<button class="btn btn-primary" type="submit" >#i18n{files2docs.degradedMode.buttonCancel}</button>
+		</div>
+		</form>
+	</fieldset>
+    </div>
 </div>

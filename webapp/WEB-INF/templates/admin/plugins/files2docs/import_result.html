@@ -1,87 +1,76 @@
-<div class="content-box">
-
-	<h2>#i18n{files2docs.importResult.pageTitle}</h2>
-	
-	<p>#i18n{files2docs.importResult.labelImportedFiles} : ${nb_imported_files}</p>
-	<p>#i18n{files2docs.importResult.labelFailureFiles} : ${nb_failure_files}</p>
-    
-    <form method="post" action="jsp/admin/plugins/files2docs/ImportResult.jsp">
-		<input type="hidden" name="imported_list" value="${imported_list}" />
-		<input type="hidden" name="failure_list" value="${failure_list}" />
+<div class="row-fluid">
+	<div class="span12">
+	<fieldset>
+		<legend>
+			#i18n{files2docs.importResult.pageTitle}&nbsp;&gt;
+			<small>
+				#i18n{files2docs.importResult.labelImportedFiles} <span class="badge badge-success">${nb_imported_files}</span>
+				#i18n{files2docs.importResult.labelFailureFiles} <span class="badge badge-important">${nb_failure_files}</span>
+			</small>
+			<a class="btn btn-primary btn-small pull-right" href="jsp/admin/plugins/document/ManageDocuments.jsp?id_space_filter=${browser_selected_space_id}">
+				<i class="icon-folder-open icon-white"></i>&nbsp;#i18n{files2docs.importResult.goToDocumentSpace}
+			</a>
+		</legend>
+		<form class="form-horizontal" method="post" action="jsp/admin/plugins/files2docs/DoSelectFiles.jsp">
 		<input type="hidden" name="mode" value="${mode}" />
-		
-		<@pagination paginator=paginator />
-        #i18n{files2docs.importResult.labelItemsPerPage} :
-        <select name="items_per_page">
-            <#list [ "5" , "10" , "20" , "50" ] as nb>
-            	<#if nb_items_per_page = nb>
-             		<option selected="selected" value="${nb}">${nb}</option>
-            	<#else>
-             		<option value="${nb}">${nb}</option>
-            	</#if>
-            </#list>
-        </select>
-        <input type="submit" class="button" value="#i18n{files2docs.importResult.buttonItemsPerPage}" />
-    </form>
-    
-    <form method="post" action="jsp/admin/plugins/files2docs/DoSelectFiles.jsp">
-    	<table>
-			<tbody>
+			<table class="table table-striped table-condensed">
+				<thead>
 				<tr>
-					<th style="width:24px;"></th>
+					<th></th>
 					<th>#i18n{files2docs.importResult.columnFilename}</th>
 					<th>#i18n{files2docs.importResult.columnDocumentName}</th>
 					<th>#i18n{files2docs.importResult.columnSummary}</th>
 					<th>#i18n{files2docs.importResult.columnAttributes}</th>
+					<th>#i18n{files2docs.manageMapping.columnActions}</th>
 				</tr>
-				
+				</thead>
+				<tbody>
 				<#list document_list as document>
-			    	<#if document.attributes?exists>
-				    	<#list document.attributes as attribute>
+					<#if document.attributes?exists>
+						<#list document.attributes as attribute>
 							<#if ( attribute.codeAttributeType = "file" || attribute.codeAttributeType = "image" ) && attribute.textValue??>
 								<#assign filename = attribute.textValue>
 							</#if>
 						</#list>
 					</#if>
-			    	<tr>
-			    		<td>
-			    			<#if document.id != -1>
-			    				<img src="images/admin/skin/enable.png"
-					 				alt="#i18n{files2docs.importResult.fileImported}"
-					 				title="#i18n{files2docs.importResult.fileImported}" />
-			    			<#else>
-			    				<img src="images/admin/skin/disable.png"
-					 				alt="#i18n{files2docs.importResult.fileFailure}"
-					 				title="#i18n{files2docs.importResult.fileFailure}" />
-			    			</#if>
-			    		</td>
-			    		<td><#if document.id != -1>${filename!}<#else>${document.title}</#if></td>
-			    		<td><#if document.id != -1>${document.title}</#if></td>
-			    		<td><#if document.id != -1>${document.summary}</#if></td>
-			    		<td style="width:35%;">
-				    		<#if document.attributes?exists>
-					    		<#list document.attributes as attribute>
-									<#if attribute.codeAttributeType != "file" && attribute.codeAttributeType != "image">
-										<p>
-											<label>${attribute.name}<#if attribute.required>*</#if>&nbsp;:&nbsp;</label>
-											<#if attribute.textValue?has_content>
-												${attribute.textValue}
-											<#else>
-												&nbsp;
-											</#if>
-										</p>
+					<tr>
+						<td>
+						<#if document.id != -1>
+							<span class="label label-success"><i class="icon-ok-sign icon-white"></i> #i18n{portal.util.labelEnabled}</span>
+						<#else>
+							<span class="label label-important"><i class="icon-remove-sign icon-white"></i> #i18n{portal.util.labelDisabled}</span>
+						</#if>
+						</td>
+						<td><#if document.id != -1>${filename!}<#else>${document.title}</#if></td>
+						<td><#if document.id != -1>${document.title}</#if>
+						</td>
+						<td><#if document.id != -1>${document.summary}</#if></td>
+						<td>
+							<#compress>
+							<#if document.attributes?exists>
+								<#list document.attributes as attribute>
+								<#if attribute.codeAttributeType != "file" && attribute.codeAttributeType != "image">
+									${attribute.name}<#if attribute.required>*</#if>&nbsp;
+									<#if attribute.textValue?has_content>
+									${attribute.textValue}
 									</#if>
+								</#if>
 								</#list>
 							</#if>
-			    		</td>
-			    	</tr>
-			    </#list>
-			</tbody>
-		</table>
-    	<p>
-			<input type="hidden" name="mode" value="${mode}" />
-			<input type="submit" class="button" name="delete" value="#i18n{files2docs.importResult.buttonSubmit}" />
-		</p>
-    </form>
-    
+							</#compress>
+						</td>
+						<td>
+						<#if document.id != -1>
+							<a class="btn btn-small btn-primary"  href="jsp/admin/plugins/document/ModifyDocument.jsp?id_document=${document.id}&id_action=2&id_space_filter=${browser_selected_space_id}" title="#i18n{files2docs.manageMapping.actionModify} ${document.title}">
+								<i class="icon-edit icon-white"></i>
+							</a>
+						</#if>
+						</td>
+					</tr>
+					</#list>
+				</tbody>
+			</table>
+		</form>
+	</fieldset>
+	</div>
 </div>

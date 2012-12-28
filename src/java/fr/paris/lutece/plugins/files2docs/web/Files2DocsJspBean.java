@@ -1396,6 +1396,7 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
         url.addParameter( PARAMETER_IMPORTED_LIST, strListImported );
         url.addParameter( PARAMETER_FAILURE_LIST, strListFailure );
         url.addParameter( PARAMETER_UPLOAD_MODE, strUploadMode );
+        url.addParameter( PARAMETER_BROWSER_SELECTED_SPACE_ID, strSpaceId );
 
         return url.getUrl(  );
     }
@@ -1415,6 +1416,9 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
 
         // Gets the upload mode
         String strUploadMode = request.getParameter( PARAMETER_UPLOAD_MODE );
+        
+        // Gets the spce id
+        String strSpaceId = request.getParameter( PARAMETER_BROWSER_SELECTED_SPACE_ID );
 
         // Adds the failure files
         String strListFailure = request.getParameter( PARAMETER_FAILURE_LIST );
@@ -1477,6 +1481,7 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
         url.addParameter( PARAMETER_IMPORTED_LIST, strListImported );
         url.addParameter( PARAMETER_FAILURE_LIST, strListFailure );
         url.addParameter( PARAMETER_UPLOAD_MODE, strUploadMode );
+        url.addParameter( PARAMETER_BROWSER_SELECTED_SPACE_ID, strSpaceId );
 
         // Paginator
         _strCurrentPageIndex = Paginator.getPageIndex( request, Paginator.PARAMETER_PAGE_INDEX, _strCurrentPageIndex );
@@ -1504,6 +1509,9 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
 
         // Upload mode
         model.put( MARK_UPLOAD_MODE, strUploadMode );
+        
+         // Space id
+        model.put( MARK_BROWSER_SELECTED_SPACE_ID, strSpaceId );
 
         HtmlTemplate template = AppTemplateService.getTemplate( TEMPLATE_IMPORT_RESULT, getLocale(  ), model );
 
