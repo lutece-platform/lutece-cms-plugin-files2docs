@@ -4,9 +4,10 @@
 		<#break>
 	</#list>
 </#if>
+<#if document_type_code?has_content>
 <form class="form" method="post" action="jsp/admin/plugins/files2docs/DoSelectFiles.jsp" enctype="multipart/form-data">
 <input type="hidden" id="update_document_type" name="update_document_type" value="" />
-<input type="hidden" id="document_type_code_hidden" name="document_type_code_hidden" value="${document_type_code}" />
+<input type="hidden" id="document_type_code_hidden" name="document_type_code_hidden" value="${document_type_code!}" />
 <fieldset>
 	<legend><span class="badge badge-info">#i18n{files2docs.selectFiles.step} 1</span>&nbsp;#i18n{files2docs.selectFiles.pageTitle}*</legend>
 	<div class="row-fluid">
@@ -359,3 +360,8 @@
 	});
 	
 </script>
+<#else>
+	<div class="alert alert-error">
+	#i18n{files2docs.selectFiles.noMapping}
+	</div>
+</#if>

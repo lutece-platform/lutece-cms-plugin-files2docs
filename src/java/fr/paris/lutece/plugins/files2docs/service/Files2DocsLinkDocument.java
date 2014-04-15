@@ -33,6 +33,15 @@
  */
 package fr.paris.lutece.plugins.files2docs.service;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Locale;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.lang.StringUtils;
+
 import fr.paris.lutece.plugins.document.business.Document;
 import fr.paris.lutece.plugins.document.business.DocumentHome;
 import fr.paris.lutece.plugins.document.business.DocumentType;
@@ -47,18 +56,12 @@ import fr.paris.lutece.plugins.document.service.DocumentTypeResourceIdService;
 import fr.paris.lutece.plugins.document.service.spaces.DocumentSpacesService;
 import fr.paris.lutece.plugins.files2docs.business.Attribute;
 import fr.paris.lutece.plugins.files2docs.business.AttributeHome;
+import fr.paris.lutece.plugins.files2docs.business.Mapping;
+import fr.paris.lutece.plugins.files2docs.business.MappingHome;
 import fr.paris.lutece.plugins.files2docs.util.Files2DocsUtil;
 import fr.paris.lutece.portal.business.user.AdminUser;
 import fr.paris.lutece.portal.service.plugin.Plugin;
-
-import org.apache.commons.lang.StringUtils;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Locale;
-
-import javax.servlet.http.HttpServletRequest;
+import fr.paris.lutece.portal.service.plugin.PluginService;
 
 
 /**
@@ -74,20 +77,20 @@ public final class Files2DocsLinkDocument
     /**
      * Creates a new instance of Files2DocsLinkDocument
      */
-    private Files2DocsLinkDocument(  )
+    private Files2DocsLinkDocument( )
     {
     }
 
     /**
      * Gets the unique instance of Files2DocsLinkDocument
-     *
+     * 
      * @return The unique instance of Files2DocsLinkDocument
      */
-    public static Files2DocsLinkDocument getInstance(  )
+    public static Files2DocsLinkDocument getInstance( )
     {
         if ( _singleton == null )
         {
-            _singleton = new Files2DocsLinkDocument(  );
+            _singleton = new Files2DocsLinkDocument( );
         }
 
         return _singleton;
@@ -95,47 +98,64 @@ public final class Files2DocsLinkDocument
 
     /**
      * Gets the document types filtered by fields of type file
-     *
-     * @param listAttributeTypeFile The list of document attributes types (codes) with a field of type file
+     * 
+     * @param listAttributeTypeFile The list of document attributes types
+     *            (codes) with a field of type file
      * @return A collection of document types filtered by fields of type file
      */
     public Collection<DocumentType> getListDocumentTypeFile( Collection<String> listAttributeTypeFile )
     {
-        Collection<DocumentType> colDocumentTypes = new ArrayList<DocumentType>(  );
+        Collection<DocumentType> colDocumentTypes = new ArrayList<DocumentType>( );
 
-        for ( DocumentType type : DocumentTypeHome.findAll(  ) )
+        // Gets the list of mapping
+        Collection<Mapping> colMapping = MappingHome.findAllMapping( PluginService.getPlugin( "files2docs" ) );
+
+        for ( DocumentType type : DocumentTypeHome.findAll( ) )
         {
-            int nNbAttributeFiles = 0;
-            int nNbMandatoryAttributeFiles = 0;
-
-            // Filters document types by fields of type file
-            for ( DocumentAttribute attribute : DocumentTypeHome.findByPrimaryKey( type.getCode(  ) ).getAttributes(  ) )
+            for ( Mapping mapping : colMapping )
             {
-                for ( String strCode : listAttributeTypeFile )
+                if ( mapping.getDocumentTypeCode( ).equals( type.getCode( ) ) )
                 {
-                    if ( attribute.getCodeAttributeType(  ).equals( strCode ) )
+                    int nNbAttributeFiles = 0;
+                    int nNbMandatoryAttributeFiles = 0;
+
+                    // Filters document types by fields of type file
+                    for ( DocumentAttribute attribute : DocumentTypeHome.findByPrimaryKey( type.getCode( ) )
+                            .getAttributes( ) )
                     {
-                        nNbAttributeFiles++;
-
-                        if ( attribute.isRequired(  ) )
+                        for ( String strCode : listAttributeTypeFile )
                         {
-                            nNbMandatoryAttributeFiles++;
-                        }
+                            if ( attribute.getCodeAttributeType( ).equals( strCode ) )
+                            {
+                                nNbAttributeFiles++;
 
-                        break;
+                                if ( attribute.isRequired( ) )
+                                {
+                                    nNbMandatoryAttributeFiles++;
+                                }
+
+                                break;
+                            }
+                        }
+                    }
+
+                    /**
+                     * FILESTODOCS-5 : Manage the mapping of document attributes
+                     * even
+                     * when there is more than a binary field
+                     * Adds the document type if it :
+                     * 1) contains one or several attributes type file/image and
+                     * none
+                     * are mandatory
+                     * 2) contains one and only one mandatory attribute
+                     * file/image and
+                     * the others are not mandatory
+                     */
+                    if ( ( nNbAttributeFiles > 0 ) && ( nNbMandatoryAttributeFiles < 2 ) )
+                    {
+                        colDocumentTypes.add( type );
                     }
                 }
-            }
-
-            /**
-             * FILESTODOCS-5 : Manage the mapping of document attributes even when there is more than a binary field
-             * Adds the document type if it :
-             * 1) contains one or several attributes type file/image and none are mandatory
-             * 2) contains one and only one mandatory attribute file/image and the others are not mandatory
-             */
-            if ( ( nNbAttributeFiles > 0 ) && ( nNbMandatoryAttributeFiles < 2 ) )
-            {
-                colDocumentTypes.add( type );
             }
         }
 
@@ -144,7 +164,7 @@ public final class Files2DocsLinkDocument
 
     /**
      * Gets the HTML code to display the spaces browser
-     *
+     * 
      * @param request The HTTP request
      * @param user The current user
      * @param locale The current locale
@@ -152,36 +172,39 @@ public final class Files2DocsLinkDocument
      */
     public String getSpacesBrowser( HttpServletRequest request, AdminUser user, Locale locale )
     {
-        return DocumentSpacesService.getInstance(  ).getSpacesBrowser( request, user, locale, true, true );
+        return DocumentSpacesService.getInstance( ).getSpacesBrowser( request, user, locale, true, true );
     }
 
     /**
-    * Checks that a given user is allowed to access a document type for a given permission in a document space specified
-    * in parameter. If permission is document creation, check if document creation is allowed for the specified space
-    *
-    * @param nIdSpace The document space identifier
-    * @param strDocumentTypeId The identifier of the type document being considered
-    * @param user The user trying to access the resource
-    * @return True if the user can access the given resource with the given permission, otherwise false
-    */
+     * Checks that a given user is allowed to access a document type for a given
+     * permission in a document space specified
+     * in parameter. If permission is document creation, check if document
+     * creation is allowed for the specified space
+     * 
+     * @param nIdSpace The document space identifier
+     * @param strDocumentTypeId The identifier of the type document being
+     *            considered
+     * @param user The user trying to access the resource
+     * @return True if the user can access the given resource with the given
+     *         permission, otherwise false
+     */
     public boolean isAuthorizedAdminDocument( int nIdSpace, String strDocumentTypeId, AdminUser user )
     {
-        return DocumentService.getInstance(  )
-                              .isAuthorizedAdminDocument( nIdSpace, strDocumentTypeId,
-            DocumentTypeResourceIdService.PERMISSION_CREATE, user );
+        return DocumentService.getInstance( ).isAuthorizedAdminDocument( nIdSpace, strDocumentTypeId,
+                DocumentTypeResourceIdService.PERMISSION_CREATE, user );
     }
 
     /**
      * Gets mandatory attributes for the document type
-     *
+     * 
      * @param strDocumentTypeCode The document type code
      * @return A collection of mandatory attributes
      */
     public Collection<DocumentAttribute> getMandatoryAttributes( String strDocumentTypeCode )
     {
         Collection<DocumentAttribute> colAttributes = DocumentTypeHome.findByPrimaryKey( strDocumentTypeCode )
-                                                                      .getAttributes(  );
-        Collection<DocumentAttribute> colFiltered = new ArrayList<DocumentAttribute>(  );
+                .getAttributes( );
+        Collection<DocumentAttribute> colFiltered = new ArrayList<DocumentAttribute>( );
 
         /**
          * Add the document attribute if it :
@@ -190,8 +213,8 @@ public final class Files2DocsLinkDocument
          */
         for ( DocumentAttribute attribute : colAttributes )
         {
-            if ( attribute.isRequired(  ) || isDocumentAttributeFile( attribute ) ||
-                    isDocumentAttributeImage( attribute ) )
+            if ( attribute.isRequired( ) || isDocumentAttributeFile( attribute )
+                    || isDocumentAttributeImage( attribute ) )
             {
                 colFiltered.add( attribute );
             }
@@ -209,14 +232,14 @@ public final class Files2DocsLinkDocument
     public DocumentAttribute getMandatoryAttributeFileImage( String strDocumentTypeCode )
     {
         Collection<DocumentAttribute> colAttributes = DocumentTypeHome.findByPrimaryKey( strDocumentTypeCode )
-                                                                      .getAttributes(  );
+                .getAttributes( );
 
-        if ( ( colAttributes != null ) && !colAttributes.isEmpty(  ) )
+        if ( ( colAttributes != null ) && !colAttributes.isEmpty( ) )
         {
             for ( DocumentAttribute attribute : colAttributes )
             {
-                if ( ( isDocumentAttributeFile( attribute ) || isDocumentAttributeImage( attribute ) ) &&
-                        attribute.isRequired(  ) )
+                if ( ( isDocumentAttributeFile( attribute ) || isDocumentAttributeImage( attribute ) )
+                        && attribute.isRequired( ) )
                 {
                     return attribute;
                 }
@@ -228,7 +251,7 @@ public final class Files2DocsLinkDocument
 
     /**
      * Gets attribute type parameters list
-     *
+     * 
      * @param strAttributeTypeCode The attribute type code
      * @param locale The current locale
      * @return A collection of attribute type parameters
@@ -240,7 +263,7 @@ public final class Files2DocsLinkDocument
 
     /**
      * Gets parameters values
-     *
+     * 
      * @param nAttributeId The attribute identifier
      * @param locale The current locale
      * @return A collection of attribute type parameters
@@ -252,7 +275,7 @@ public final class Files2DocsLinkDocument
 
     /**
      * Creates a new document
-     *
+     * 
      * @param document The document
      * @param user The user doing the action
      * @return null if document is created, otherwise the error message
@@ -261,19 +284,20 @@ public final class Files2DocsLinkDocument
     {
         try
         {
-            DocumentService.getInstance(  ).createDocument( document, user );
+            DocumentService.getInstance( ).createDocument( document, user );
         }
         catch ( DocumentException e )
         {
-            return e.getI18nMessage(  );
+            return e.getI18nMessage( );
         }
 
         return null;
     }
 
     /**
-     * Returns an instance of a document whose identifier is specified in parameter
-     *
+     * Returns an instance of a document whose identifier is specified in
+     * parameter
+     * 
      * @param nKey The primary key of the document
      * @return An instance of document
      */
@@ -283,8 +307,9 @@ public final class Files2DocsLinkDocument
     }
 
     /**
-     * Returns an instance of a documentType whose identifier is specified in parameter
-     *
+     * Returns an instance of a documentType whose identifier is specified in
+     * parameter
+     * 
      * @param strCode The document type code (primary key)
      * @return An instance of documentType
      */
@@ -294,8 +319,9 @@ public final class Files2DocsLinkDocument
     }
 
     /**
-     * Returns an instance of a documentAttribute whose identifier is specified in parameter
-     *
+     * Returns an instance of a documentAttribute whose identifier is specified
+     * in parameter
+     * 
      * @param nKey The primary key of the documentAttribute
      * @return An instance of documentAttribute
      */
@@ -306,7 +332,7 @@ public final class Files2DocsLinkDocument
 
     /**
      * Gets all regular expression key associated to the attribute
-     *
+     * 
      * @param nIdAttribute The identifier of the document attribute
      * @return A collection of regular expression key
      */
@@ -316,10 +342,10 @@ public final class Files2DocsLinkDocument
     }
 
     /**
-     * Get the collection of all document attributes that are mandatory or type file/image.
-     * <br />
-     * This method will also get the attributes even if they are not stored in the db.
-     * <br />
+     * Get the collection of all document attributes that are mandatory or type
+     * file/image. <br />
+     * This method will also get the attributes even if they are not stored in
+     * the db. <br />
      * The format of the attribute will be formatted in HTML.
      * @param strDocumentTypeCode the document type code
      * @param nIdMapping the id mapping
@@ -328,16 +354,16 @@ public final class Files2DocsLinkDocument
      */
     public List<Attribute> getAllAttributes( String strDocumentTypeCode, int nIdMapping, Plugin plugin )
     {
-        List<Attribute> listAttributes = new ArrayList<Attribute>(  );
+        List<Attribute> listAttributes = new ArrayList<Attribute>( );
 
         for ( DocumentAttribute docAttribute : getMandatoryAttributes( strDocumentTypeCode ) )
         {
-            Attribute attribute = AttributeHome.findByDocumentAttribute( docAttribute.getId(  ), plugin );
+            Attribute attribute = AttributeHome.findByDocumentAttribute( docAttribute.getId( ), plugin );
 
             if ( attribute != null )
             {
                 // Replaces '<' and '>' caracters in the format value
-                String strFormat = attribute.getFormat(  );
+                String strFormat = attribute.getFormat( );
 
                 if ( StringUtils.isNotBlank( strFormat ) )
                 {
@@ -346,9 +372,9 @@ public final class Files2DocsLinkDocument
             }
             else
             {
-                attribute = new Attribute(  );
+                attribute = new Attribute( );
                 attribute.setId( Files2DocsUtil.CONSTANT_ID_NULL );
-                attribute.setDocumentAttributeId( docAttribute.getId(  ) );
+                attribute.setDocumentAttributeId( docAttribute.getId( ) );
                 attribute.setMappingId( nIdMapping );
             }
 
@@ -367,9 +393,9 @@ public final class Files2DocsLinkDocument
     {
         boolean bIsFile = false;
 
-        if ( ( attribute != null ) && StringUtils.isNotBlank( attribute.getCodeAttributeType(  ) ) )
+        if ( ( attribute != null ) && StringUtils.isNotBlank( attribute.getCodeAttributeType( ) ) )
         {
-            return ATTRIBUTE_FILE.equals( attribute.getCodeAttributeType(  ) );
+            return ATTRIBUTE_FILE.equals( attribute.getCodeAttributeType( ) );
         }
 
         return bIsFile;
@@ -384,9 +410,9 @@ public final class Files2DocsLinkDocument
     {
         boolean bIsImage = false;
 
-        if ( ( attribute != null ) && StringUtils.isNotBlank( attribute.getCodeAttributeType(  ) ) )
+        if ( ( attribute != null ) && StringUtils.isNotBlank( attribute.getCodeAttributeType( ) ) )
         {
-            return ATTRIBUTE_IMAGE.equals( attribute.getCodeAttributeType(  ) );
+            return ATTRIBUTE_IMAGE.equals( attribute.getCodeAttributeType( ) );
         }
 
         return bIsImage;
