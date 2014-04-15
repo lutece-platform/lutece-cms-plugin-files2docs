@@ -33,6 +33,16 @@
  */
 package fr.paris.lutece.plugins.files2docs.web;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.lang.StringUtils;
+
 import fr.paris.lutece.plugins.document.business.DocumentType;
 import fr.paris.lutece.plugins.document.business.attributes.DocumentAttribute;
 import fr.paris.lutece.plugins.files2docs.business.Attribute;
@@ -50,16 +60,6 @@ import fr.paris.lutece.portal.web.admin.PluginAdminPageJspBean;
 import fr.paris.lutece.portal.web.constants.Messages;
 import fr.paris.lutece.util.html.HtmlTemplate;
 import fr.paris.lutece.util.url.UrlItem;
-
-import org.apache.commons.lang.StringUtils;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
 
 
 /**
@@ -123,15 +123,15 @@ public class MappingJspBean extends PluginAdminPageJspBean
     private static final String STRING_SUMMARY = "summary";
 
     /**
-    * Constructor
-    */
-    public MappingJspBean(  )
+     * Constructor
+     */
+    public MappingJspBean( )
     {
     }
 
     /**
      * Gets the mapping management page
-     *
+     * 
      * @param request The HTTP request
      * @return The mapping management page
      */
@@ -140,17 +140,17 @@ public class MappingJspBean extends PluginAdminPageJspBean
         setPageTitleProperty( PROPERTY_MANAGE_MAPPING_PAGE_TITLE );
 
         // Gets the list of mapping
-        Collection<Mapping> colMapping = MappingHome.findAllMapping( getPlugin(  ) );
+        Collection<Mapping> colMapping = MappingHome.findAllMapping( getPlugin( ) );
 
         // Gets the document type names corresponding to the document type codes
         for ( Mapping mapping : colMapping )
         {
-            DocumentType documentType = Files2DocsLinkDocument.getInstance(  )
-                                                              .getDocumentTypeByCode( mapping.getDocumentTypeCode(  ) );
+            DocumentType documentType = Files2DocsLinkDocument.getInstance( ).getDocumentTypeByCode(
+                    mapping.getDocumentTypeCode( ) );
 
             if ( documentType != null )
             {
-                mapping.setDocumentTypeName( documentType.getName(  ) );
+                mapping.setDocumentTypeName( documentType.getName( ) );
             }
             else
             {
@@ -158,17 +158,17 @@ public class MappingJspBean extends PluginAdminPageJspBean
             }
         }
 
-        Map<String, Object> model = new HashMap<String, Object>(  );
+        Map<String, Object> model = new HashMap<String, Object>( );
         model.put( MARK_MAPPING_LIST, colMapping );
 
-        HtmlTemplate template = AppTemplateService.getTemplate( TEMPLATE_MANAGE_MAPPING, getLocale(  ), model );
+        HtmlTemplate template = AppTemplateService.getTemplate( TEMPLATE_MANAGE_MAPPING, getLocale( ), model );
 
-        return getAdminPage( template.getHtml(  ) );
+        return getAdminPage( template.getHtml( ) );
     }
 
     /**
      * Gets the mapping creation page
-     *
+     * 
      * @param request The HTTP request
      * @return The mapping creation page
      */
@@ -177,31 +177,31 @@ public class MappingJspBean extends PluginAdminPageJspBean
         setPageTitleProperty( PROPERTY_CREATE_MAPPING_PAGE_TITLE );
 
         // Gets the document types filtered by fields of type file
-        Collection<DocumentType> colDocumentTypes = Files2DocsLinkDocument.getInstance(  )
-                                                                          .getListDocumentTypeFile( Files2DocsUtil.getListAttributeTypeFile(  ) );
+        Collection<DocumentType> colDocumentTypes = Files2DocsLinkDocument.getInstance( ).getListDocumentTypeFile(
+                Files2DocsUtil.getListAttributeTypeFile( ), true );
 
         // Filters the document types with removing those which have already a mapping
-        Collection<DocumentType> colFilteredDocumentTypes = new ArrayList<DocumentType>(  );
+        Collection<DocumentType> colFilteredDocumentTypes = new ArrayList<DocumentType>( );
 
         for ( DocumentType type : colDocumentTypes )
         {
-            if ( MappingHome.findByDocumentTypeCode( type.getCode(  ), getPlugin(  ) ) == null )
+            if ( MappingHome.findByDocumentTypeCode( type.getCode( ), getPlugin( ) ) == null )
             {
                 colFilteredDocumentTypes.add( type );
             }
         }
 
-        Map<String, Object> model = new HashMap<String, Object>(  );
+        Map<String, Object> model = new HashMap<String, Object>( );
         model.put( MARK_DOCUMENT_TYPE_LIST, colFilteredDocumentTypes );
 
-        HtmlTemplate template = AppTemplateService.getTemplate( TEMPLATE_CREATE_MAPPING, getLocale(  ), model );
+        HtmlTemplate template = AppTemplateService.getTemplate( TEMPLATE_CREATE_MAPPING, getLocale( ), model );
 
-        return getAdminPage( template.getHtml(  ) );
+        return getAdminPage( template.getHtml( ) );
     }
 
     /**
      * Performs the creation of the mapping
-     *
+     * 
      * @param request The HTTP request
      * @return The URL to go after performing the action
      */
@@ -222,14 +222,14 @@ public class MappingJspBean extends PluginAdminPageJspBean
         String strDescription = request.getParameter( PARAMETER_DESCRIPTION );
 
         // Validates the mandatory fields
-        if ( ( strDocumentTypeCode == null ) || strDocumentTypeCode.trim(  ).equals( STRING_EMPTY ) ||
-                ( strDescription == null ) || strDescription.trim(  ).equals( STRING_EMPTY ) )
+        if ( ( strDocumentTypeCode == null ) || strDocumentTypeCode.trim( ).equals( STRING_EMPTY )
+                || ( strDescription == null ) || strDescription.trim( ).equals( STRING_EMPTY ) )
         {
             return AdminMessageService.getMessageUrl( request, Messages.MANDATORY_FIELDS, AdminMessage.TYPE_STOP );
         }
 
         // Check if the mapping does not already exists in DB
-        Mapping mapping = MappingHome.findByDocumentTypeCode( strDocumentTypeCode, getPlugin(  ) );
+        Mapping mapping = MappingHome.findByDocumentTypeCode( strDocumentTypeCode, getPlugin( ) );
 
         if ( mapping != null )
         {
@@ -237,37 +237,42 @@ public class MappingJspBean extends PluginAdminPageJspBean
         }
 
         // Creates the mapping
-        mapping = new Mapping(  );
+        mapping = new Mapping( );
         mapping.setDocumentTypeCode( strDocumentTypeCode );
         mapping.setDescription( strDescription );
 
-        MappingHome.create( mapping, getPlugin(  ) );
+        MappingHome.create( mapping, getPlugin( ) );
 
         /**
-         * FILESTODOCS-5 : Manage the mapping of document attributes even when there is more than a binary field
-         * When creating a new mapping, only create one mapping for the first attribute file/image.
+         * FILESTODOCS-5 : Manage the mapping of document attributes even when
+         * there is more than a binary field
+         * When creating a new mapping, only create one mapping for the first
+         * attribute file/image.
          * The other attributes file/image will not have a mapping
          * @since 1.0.4
          */
 
         // This flag is used to check if the attribute file/image is already created or not
         boolean bIsAttributeFileImgCreated = false;
-        DocumentAttribute docMandatoryAttrFileImg = Files2DocsLinkDocument.getInstance(  )
-                                                                          .getMandatoryAttributeFileImage( strDocumentTypeCode );
+        DocumentAttribute docMandatoryAttrFileImg = Files2DocsLinkDocument.getInstance( )
+                .getMandatoryAttributeFileImage( strDocumentTypeCode );
 
         // Creates the other associations (attributes)
-        for ( DocumentAttribute docAttribute : Files2DocsLinkDocument.getInstance(  )
-                                                                     .getMandatoryAttributes( strDocumentTypeCode ) )
+        for ( DocumentAttribute docAttribute : Files2DocsLinkDocument.getInstance( ).getMandatoryAttributes(
+                strDocumentTypeCode ) )
         {
             /**
-             * For document attribute file/image, only create ONE and only ONE attribute.
+             * For document attribute file/image, only create ONE and only ONE
+             * attribute.
              * The one which will be created will be either :
-             * 1) The document type has a mandatory attribute file/image, thus the one to be created is the mandatory attribute
-             * 2) The document type does not have a mandatory attribute file/image. The one to be created will be the first
+             * 1) The document type has a mandatory attribute file/image, thus
+             * the one to be created is the mandatory attribute
+             * 2) The document type does not have a mandatory attribute
+             * file/image. The one to be created will be the first
              * in the list.
              */
-            if ( Files2DocsLinkDocument.getInstance(  ).isDocumentAttributeFile( docAttribute ) ||
-                    Files2DocsLinkDocument.getInstance(  ).isDocumentAttributeImage( docAttribute ) )
+            if ( Files2DocsLinkDocument.getInstance( ).isDocumentAttributeFile( docAttribute )
+                    || Files2DocsLinkDocument.getInstance( ).isDocumentAttributeImage( docAttribute ) )
             {
                 if ( bIsAttributeFileImgCreated )
                 {
@@ -275,10 +280,13 @@ public class MappingJspBean extends PluginAdminPageJspBean
                     continue;
                 }
 
-                /** 1) The document type has a mandatory attribute file/image, thus the one to be created is the mandatory attribute */
+                /**
+                 * 1) The document type has a mandatory attribute file/image,
+                 * thus the one to be created is the mandatory attribute
+                 */
                 else if ( docMandatoryAttrFileImg != null )
                 {
-                    if ( docMandatoryAttrFileImg.getId(  ) == docAttribute.getId(  ) )
+                    if ( docMandatoryAttrFileImg.getId( ) == docAttribute.getId( ) )
                     {
                         bIsAttributeFileImgCreated = true;
                     }
@@ -288,7 +296,10 @@ public class MappingJspBean extends PluginAdminPageJspBean
                     }
                 }
 
-                /** 2) The document type does not have a mandatory attribute file/image. The one to be created will be the first */
+                /**
+                 * 2) The document type does not have a mandatory attribute
+                 * file/image. The one to be created will be the first
+                 */
                 else
                 {
                     // The attribute File/Image is the first one. Set true the flag so the other attributes will not be created
@@ -296,11 +307,11 @@ public class MappingJspBean extends PluginAdminPageJspBean
                 }
             }
 
-            Attribute mAttribute = new Attribute(  );
-            mAttribute.setMappingId( mapping.getId(  ) );
-            mAttribute.setDocumentAttributeId( docAttribute.getId(  ) );
+            Attribute mAttribute = new Attribute( );
+            mAttribute.setMappingId( mapping.getId( ) );
+            mAttribute.setDocumentAttributeId( docAttribute.getId( ) );
 
-            AttributeHome.create( mAttribute, getPlugin(  ) );
+            AttributeHome.create( mAttribute, getPlugin( ) );
         }
 
         return getHomeUrl( request );
@@ -308,7 +319,7 @@ public class MappingJspBean extends PluginAdminPageJspBean
 
     /**
      * Gets the mapping modification page
-     *
+     * 
      * @param request The HTTP request
      * @return The mapping modification page
      */
@@ -321,7 +332,7 @@ public class MappingJspBean extends PluginAdminPageJspBean
         int nMappingId = Files2DocsUtil.convertStringToInt( strMappingId );
 
         // Gets the mapping
-        Mapping mapping = MappingHome.findByPrimaryKey( nMappingId, getPlugin(  ) );
+        Mapping mapping = MappingHome.findByPrimaryKey( nMappingId, getPlugin( ) );
 
         if ( mapping == null )
         {
@@ -329,7 +340,7 @@ public class MappingJspBean extends PluginAdminPageJspBean
         }
 
         // Replaces '<' and '>' caracters in the title
-        String strTitle = mapping.getTitle(  );
+        String strTitle = mapping.getTitle( );
 
         if ( StringUtils.isNotBlank( strTitle ) )
         {
@@ -337,7 +348,7 @@ public class MappingJspBean extends PluginAdminPageJspBean
         }
 
         // Replaces '<' and '>' caracters in the summary
-        String strSummary = mapping.getSummary(  );
+        String strSummary = mapping.getSummary( );
 
         if ( StringUtils.isNotBlank( strSummary ) )
         {
@@ -345,12 +356,12 @@ public class MappingJspBean extends PluginAdminPageJspBean
         }
 
         // Gets the document type name corresponding to the document type code
-        DocumentType documentType = Files2DocsLinkDocument.getInstance(  )
-                                                          .getDocumentTypeByCode( mapping.getDocumentTypeCode(  ) );
+        DocumentType documentType = Files2DocsLinkDocument.getInstance( ).getDocumentTypeByCode(
+                mapping.getDocumentTypeCode( ) );
 
         if ( documentType != null )
         {
-            mapping.setDocumentTypeName( documentType.getName(  ) );
+            mapping.setDocumentTypeName( documentType.getName( ) );
         }
         else
         {
@@ -358,33 +369,32 @@ public class MappingJspBean extends PluginAdminPageJspBean
         }
 
         // Gets all associations constituting the mapping
-        List<Attribute> colAttribute = Files2DocsLinkDocument.getInstance(  )
-                                                             .getAllAttributes( mapping.getDocumentTypeCode(  ),
-                nMappingId, getPlugin(  ) );
+        List<Attribute> colAttribute = Files2DocsLinkDocument.getInstance( ).getAllAttributes(
+                mapping.getDocumentTypeCode( ), nMappingId, getPlugin( ) );
 
         // Gets the document attribute names and codes corresponding to the document attribute identifiers
-        Collection<String> colDocumentAttributeName = new ArrayList<String>(  );
-        Collection<String> colDocumentAttributeCode = new ArrayList<String>(  );
+        Collection<String> colDocumentAttributeName = new ArrayList<String>( );
+        Collection<String> colDocumentAttributeCode = new ArrayList<String>( );
 
         for ( Attribute mAttribute : colAttribute )
         {
             // Gets the document attribute
-            DocumentAttribute docAttribute = Files2DocsLinkDocument.getInstance(  )
-                                                                   .getDocumentAttributeById( mAttribute.getDocumentAttributeId(  ) );
+            DocumentAttribute docAttribute = Files2DocsLinkDocument.getInstance( ).getDocumentAttributeById(
+                    mAttribute.getDocumentAttributeId( ) );
 
             if ( docAttribute != null )
             {
                 // Gets the document attribute name and code
-                colDocumentAttributeName.add( docAttribute.getName(  ) );
-                colDocumentAttributeCode.add( docAttribute.getCodeAttributeType(  ) );
+                colDocumentAttributeName.add( docAttribute.getName( ) );
+                colDocumentAttributeCode.add( docAttribute.getCodeAttributeType( ) );
             }
         }
 
         // Get the mandatory document attribute file/image
-        DocumentAttribute docMandatoryAttrFileImg = Files2DocsLinkDocument.getInstance(  )
-                                                                          .getMandatoryAttributeFileImage( mapping.getDocumentTypeCode(  ) );
+        DocumentAttribute docMandatoryAttrFileImg = Files2DocsLinkDocument.getInstance( )
+                .getMandatoryAttributeFileImage( mapping.getDocumentTypeCode( ) );
 
-        Map<String, Object> model = new HashMap<String, Object>(  );
+        Map<String, Object> model = new HashMap<String, Object>( );
         model.put( MARK_MAPPING, mapping );
 
         // All associations constituting the mapping
@@ -397,17 +407,17 @@ public class MappingJspBean extends PluginAdminPageJspBean
         // Id of the mandatory attribute file/image
         if ( docMandatoryAttrFileImg != null )
         {
-            model.put( MARK_ID_MANDATORY_DOC_ATTR_FILE_IMG, docMandatoryAttrFileImg.getId(  ) );
+            model.put( MARK_ID_MANDATORY_DOC_ATTR_FILE_IMG, docMandatoryAttrFileImg.getId( ) );
         }
 
-        HtmlTemplate template = AppTemplateService.getTemplate( TEMPLATE_MODIFY_MAPPING, getLocale(  ), model );
+        HtmlTemplate template = AppTemplateService.getTemplate( TEMPLATE_MODIFY_MAPPING, getLocale( ), model );
 
-        return getAdminPage( template.getHtml(  ) );
+        return getAdminPage( template.getHtml( ) );
     }
 
     /**
      * Performs the modification of the mapping
-     *
+     * 
      * @param request The HTTP request
      * @return The URL to go after performing the action
      */
@@ -429,23 +439,23 @@ public class MappingJspBean extends PluginAdminPageJspBean
         String strDescription = request.getParameter( PARAMETER_DESCRIPTION );
 
         // Validates the mandatory field
-        if ( ( strDescription == null ) || strDescription.trim(  ).equals( STRING_EMPTY ) )
+        if ( ( strDescription == null ) || strDescription.trim( ).equals( STRING_EMPTY ) )
         {
             return AdminMessageService.getMessageUrl( request, Messages.MANDATORY_FIELDS, AdminMessage.TYPE_STOP );
         }
 
         // Updates the mapping
-        Mapping mapping = MappingHome.findByPrimaryKey( nMappingId, getPlugin(  ) );
+        Mapping mapping = MappingHome.findByPrimaryKey( nMappingId, getPlugin( ) );
         mapping.setDescription( strDescription );
 
-        MappingHome.update( mapping, getPlugin(  ) );
+        MappingHome.update( mapping, getPlugin( ) );
 
         return getHomeUrl( request );
     }
 
     /**
      * Returns the confirmation to remove the mapping
-     *
+     * 
      * @param request The HTTP request
      * @return The confirmation page
      */
@@ -458,13 +468,13 @@ public class MappingJspBean extends PluginAdminPageJspBean
         UrlItem url = new UrlItem( JSP_DO_REMOVE_MAPPING );
         url.addParameter( PARAMETER_MAPPING_ID, nMappingId );
 
-        return AdminMessageService.getMessageUrl( request, MESSAGE_CONFIRM_REMOVE_MAPPING, url.getUrl(  ),
-            AdminMessage.TYPE_CONFIRMATION );
+        return AdminMessageService.getMessageUrl( request, MESSAGE_CONFIRM_REMOVE_MAPPING, url.getUrl( ),
+                AdminMessage.TYPE_CONFIRMATION );
     }
 
     /**
      * Performs the removal of the mapping
-     *
+     * 
      * @param request The HTTP request
      * @return The URL to go after performing the action
      */
@@ -475,17 +485,17 @@ public class MappingJspBean extends PluginAdminPageJspBean
         int nMappingId = Files2DocsUtil.convertStringToInt( strMappingId );
 
         // Removes the mapping
-        MappingHome.remove( nMappingId, getPlugin(  ) );
+        MappingHome.remove( nMappingId, getPlugin( ) );
 
         // Removes all associations constituting the mapping
-        AttributeHome.removeByMapping( nMappingId, getPlugin(  ) );
+        AttributeHome.removeByMapping( nMappingId, getPlugin( ) );
 
         return getHomeUrl( request );
     }
 
     /**
      * Gets the attribute modification page
-     *
+     * 
      * @param request The HTTP request
      * @return The attribute modification page
      */
@@ -507,10 +517,10 @@ public class MappingJspBean extends PluginAdminPageJspBean
             int nAttributeId = Files2DocsUtil.convertStringToInt( strAttributeId );
 
             // Gets the attribute
-            attribute = AttributeHome.findByPrimaryKey( nAttributeId, getPlugin(  ) );
+            attribute = AttributeHome.findByPrimaryKey( nAttributeId, getPlugin( ) );
 
             // Gets the mapping identifier
-            nMappingId = attribute.getMappingId(  );
+            nMappingId = attribute.getMappingId( );
         }
 
         // Gets the mapping identifier (title or summary)
@@ -520,18 +530,18 @@ public class MappingJspBean extends PluginAdminPageJspBean
         }
 
         // Gets the mapping
-        Mapping mapping = MappingHome.findByPrimaryKey( nMappingId, getPlugin(  ) );
+        Mapping mapping = MappingHome.findByPrimaryKey( nMappingId, getPlugin( ) );
 
         // Gets the attribute name (title or summary)
         String strAttributeName = request.getParameter( PARAMETER_ATTRIBUTE_NAME );
 
         // Gets the document type name corresponding to the document type code
-        DocumentType documentType = Files2DocsLinkDocument.getInstance(  )
-                                                          .getDocumentTypeByCode( mapping.getDocumentTypeCode(  ) );
+        DocumentType documentType = Files2DocsLinkDocument.getInstance( ).getDocumentTypeByCode(
+                mapping.getDocumentTypeCode( ) );
 
         if ( documentType != null )
         {
-            mapping.setDocumentTypeName( documentType.getName(  ) );
+            mapping.setDocumentTypeName( documentType.getName( ) );
         }
         else
         {
@@ -540,8 +550,8 @@ public class MappingJspBean extends PluginAdminPageJspBean
 
         // Gets the mapping tags
         String strListTags = AppPropertiesService.getProperty( PROPERTY_MAPPING_LIST_TAGS );
-        String[] strSplitList = strListTags.trim(  ).split( STRING_COMMA );
-        Collection<String> colTag = new ArrayList<String>(  );
+        String[] strSplitList = strListTags.trim( ).split( STRING_COMMA );
+        Collection<String> colTag = new ArrayList<String>( );
 
         if ( strSplitList != null )
         {
@@ -554,7 +564,7 @@ public class MappingJspBean extends PluginAdminPageJspBean
             }
         }
 
-        Map<String, Object> model = new HashMap<String, Object>(  );
+        Map<String, Object> model = new HashMap<String, Object>( );
         model.put( MARK_ATTRIBUTE, attribute );
         model.put( MARK_MAPPING, mapping );
 
@@ -564,14 +574,14 @@ public class MappingJspBean extends PluginAdminPageJspBean
         // Mapping tags
         model.put( MARK_MAPPING_TAG_LIST, colTag );
 
-        HtmlTemplate template = AppTemplateService.getTemplate( TEMPLATE_MODIFY_ATTRIBUTE, getLocale(  ), model );
+        HtmlTemplate template = AppTemplateService.getTemplate( TEMPLATE_MODIFY_ATTRIBUTE, getLocale( ), model );
 
-        return getAdminPage( template.getHtml(  ) );
+        return getAdminPage( template.getHtml( ) );
     }
 
     /**
      * Performs the modification of the attribute
-     *
+     * 
      * @param request The HTTP request
      * @return The URL to go after performing the action
      */
@@ -589,7 +599,7 @@ public class MappingJspBean extends PluginAdminPageJspBean
 
         if ( ( strCancel != null ) && !strCancel.equals( STRING_EMPTY ) )
         {
-            return url.getUrl(  );
+            return url.getUrl( );
         }
 
         // Gets parameters
@@ -602,16 +612,16 @@ public class MappingJspBean extends PluginAdminPageJspBean
         {
             int nAttributeId = Files2DocsUtil.convertStringToInt( strAttributeId );
 
-            Attribute attribute = AttributeHome.findByPrimaryKey( nAttributeId, getPlugin(  ) );
+            Attribute attribute = AttributeHome.findByPrimaryKey( nAttributeId, getPlugin( ) );
             attribute.setFormat( strAttributeFormat );
 
-            AttributeHome.update( attribute, getPlugin(  ) );
+            AttributeHome.update( attribute, getPlugin( ) );
         }
 
         // Updates the mapping (title or summary)
         else if ( ( strAttributeName != null ) && !strAttributeName.equals( STRING_EMPTY ) )
         {
-            Mapping mapping = MappingHome.findByPrimaryKey( nMappingId, getPlugin(  ) );
+            Mapping mapping = MappingHome.findByPrimaryKey( nMappingId, getPlugin( ) );
 
             // Title
             if ( strAttributeName.equals( STRING_TITLE ) )
@@ -625,15 +635,15 @@ public class MappingJspBean extends PluginAdminPageJspBean
                 mapping.setSummary( strAttributeFormat );
             }
 
-            MappingHome.update( mapping, getPlugin(  ) );
+            MappingHome.update( mapping, getPlugin( ) );
         }
 
-        return url.getUrl(  );
+        return url.getUrl( );
     }
 
     /**
      * Change the assignment for attribute file/image of the document type
-     *
+     * 
      * @param request The HTTP request
      * @return The URL to go after performing the action
      */
@@ -651,7 +661,7 @@ public class MappingJspBean extends PluginAdminPageJspBean
         int nMappingId = Files2DocsUtil.convertStringToInt( strMappingId );
         int nIdDocumentAttr = Files2DocsUtil.convertStringToInt( strIdDocumentAttr );
 
-        Mapping mapping = MappingHome.findByPrimaryKey( nMappingId, getPlugin(  ) );
+        Mapping mapping = MappingHome.findByPrimaryKey( nMappingId, getPlugin( ) );
 
         if ( mapping == null )
         {
@@ -662,42 +672,42 @@ public class MappingJspBean extends PluginAdminPageJspBean
 
         // If the document type has a mandatory attribute file/image, the user
         // should not be able to chaneg the attribute file/image 
-        DocumentAttribute docMandatoryAttrFileImg = Files2DocsLinkDocument.getInstance(  )
-                                                                          .getMandatoryAttributeFileImage( mapping.getDocumentTypeCode(  ) );
+        DocumentAttribute docMandatoryAttrFileImg = Files2DocsLinkDocument.getInstance( )
+                .getMandatoryAttributeFileImage( mapping.getDocumentTypeCode( ) );
 
         if ( docMandatoryAttrFileImg != null )
         {
             return AdminMessageService.getMessageUrl( request, MESSAGE_ERROR_DOC_TYPE_HAS_MANDATORY_DOC_ATTR_FILE_IMG,
-                AdminMessage.TYPE_STOP );
+                    AdminMessage.TYPE_STOP );
         }
 
         UrlItem url = new UrlItem( JSP_MODIFY_MAPPING );
         url.addParameter( PARAMETER_MAPPING_ID, nMappingId );
 
         // Remove all attributes
-        AttributeHome.removeByMapping( nMappingId, getPlugin(  ) );
+        AttributeHome.removeByMapping( nMappingId, getPlugin( ) );
 
         // Creates the other associations (attributes)
-        for ( DocumentAttribute docAttribute : Files2DocsLinkDocument.getInstance(  )
-                                                                     .getMandatoryAttributes( mapping.getDocumentTypeCode(  ) ) )
+        for ( DocumentAttribute docAttribute : Files2DocsLinkDocument.getInstance( ).getMandatoryAttributes(
+                mapping.getDocumentTypeCode( ) ) )
         {
-            if ( !Files2DocsLinkDocument.getInstance(  ).isDocumentAttributeFile( docAttribute ) ||
-                    !Files2DocsLinkDocument.getInstance(  ).isDocumentAttributeImage( docAttribute ) )
+            if ( !Files2DocsLinkDocument.getInstance( ).isDocumentAttributeFile( docAttribute )
+                    || !Files2DocsLinkDocument.getInstance( ).isDocumentAttributeImage( docAttribute ) )
             {
-                if ( docAttribute.getId(  ) != nIdDocumentAttr )
+                if ( docAttribute.getId( ) != nIdDocumentAttr )
                 {
                     // Create only the attribute file/image selected
                     continue;
                 }
             }
 
-            Attribute mAttribute = new Attribute(  );
-            mAttribute.setMappingId( mapping.getId(  ) );
-            mAttribute.setDocumentAttributeId( docAttribute.getId(  ) );
+            Attribute mAttribute = new Attribute( );
+            mAttribute.setMappingId( mapping.getId( ) );
+            mAttribute.setDocumentAttributeId( docAttribute.getId( ) );
 
-            AttributeHome.create( mAttribute, getPlugin(  ) );
+            AttributeHome.create( mAttribute, getPlugin( ) );
         }
 
-        return url.getUrl(  );
+        return url.getUrl( );
     }
 }

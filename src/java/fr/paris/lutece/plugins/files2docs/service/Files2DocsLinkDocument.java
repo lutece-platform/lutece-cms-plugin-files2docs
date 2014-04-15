@@ -103,7 +103,8 @@ public final class Files2DocsLinkDocument
      *            (codes) with a field of type file
      * @return A collection of document types filtered by fields of type file
      */
-    public Collection<DocumentType> getListDocumentTypeFile( Collection<String> listAttributeTypeFile )
+    public Collection<DocumentType> getListDocumentTypeFile( Collection<String> listAttributeTypeFile,
+            boolean bIsForCreate )
     {
         Collection<DocumentType> colDocumentTypes = new ArrayList<DocumentType>( );
 
@@ -112,49 +113,55 @@ public final class Files2DocsLinkDocument
 
         for ( DocumentType type : DocumentTypeHome.findAll( ) )
         {
+            boolean bAddType = bIsForCreate;
             for ( Mapping mapping : colMapping )
             {
                 if ( mapping.getDocumentTypeCode( ).equals( type.getCode( ) ) )
                 {
-                    int nNbAttributeFiles = 0;
-                    int nNbMandatoryAttributeFiles = 0;
+                    bAddType = !bIsForCreate;
+                    break;
+                }
+            }
+            if ( bAddType )
+            {
+                int nNbAttributeFiles = 0;
+                int nNbMandatoryAttributeFiles = 0;
 
-                    // Filters document types by fields of type file
-                    for ( DocumentAttribute attribute : DocumentTypeHome.findByPrimaryKey( type.getCode( ) )
-                            .getAttributes( ) )
+                // Filters document types by fields of type file
+                for ( DocumentAttribute attribute : DocumentTypeHome.findByPrimaryKey( type.getCode( ) )
+                        .getAttributes( ) )
+                {
+                    for ( String strCode : listAttributeTypeFile )
                     {
-                        for ( String strCode : listAttributeTypeFile )
+                        if ( attribute.getCodeAttributeType( ).equals( strCode ) )
                         {
-                            if ( attribute.getCodeAttributeType( ).equals( strCode ) )
+                            nNbAttributeFiles++;
+
+                            if ( attribute.isRequired( ) )
                             {
-                                nNbAttributeFiles++;
-
-                                if ( attribute.isRequired( ) )
-                                {
-                                    nNbMandatoryAttributeFiles++;
-                                }
-
-                                break;
+                                nNbMandatoryAttributeFiles++;
                             }
+
+                            break;
                         }
                     }
+                }
 
-                    /**
-                     * FILESTODOCS-5 : Manage the mapping of document attributes
-                     * even
-                     * when there is more than a binary field
-                     * Adds the document type if it :
-                     * 1) contains one or several attributes type file/image and
-                     * none
-                     * are mandatory
-                     * 2) contains one and only one mandatory attribute
-                     * file/image and
-                     * the others are not mandatory
-                     */
-                    if ( ( nNbAttributeFiles > 0 ) && ( nNbMandatoryAttributeFiles < 2 ) )
-                    {
-                        colDocumentTypes.add( type );
-                    }
+                /**
+                 * FILESTODOCS-5 : Manage the mapping of document attributes
+                 * even
+                 * when there is more than a binary field
+                 * Adds the document type if it :
+                 * 1) contains one or several attributes type file/image and
+                 * none
+                 * are mandatory
+                 * 2) contains one and only one mandatory attribute
+                 * file/image and
+                 * the others are not mandatory
+                 */
+                if ( ( nNbAttributeFiles > 0 ) && ( nNbMandatoryAttributeFiles < 2 ) )
+                {
+                    colDocumentTypes.add( type );
                 }
             }
         }

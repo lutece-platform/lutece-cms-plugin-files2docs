@@ -33,6 +33,32 @@
  */
 package fr.paris.lutece.plugins.files2docs.web;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URL;
+import java.net.URLConnection;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.fileupload.FileItem;
+
 import fr.paris.lutece.plugins.document.business.Document;
 import fr.paris.lutece.plugins.document.business.DocumentType;
 import fr.paris.lutece.plugins.document.business.attributes.AttributeTypeParameter;
@@ -61,35 +87,6 @@ import fr.paris.lutece.util.filesystem.UploadUtil;
 import fr.paris.lutece.util.html.HtmlTemplate;
 import fr.paris.lutece.util.html.Paginator;
 import fr.paris.lutece.util.url.UrlItem;
-
-import org.apache.commons.fileupload.FileItem;
-
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-
-import java.net.URI;
-import java.net.URL;
-import java.net.URLConnection;
-
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.servlet.http.HttpServletRequest;
 
 
 /**
@@ -231,13 +228,13 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
     /**
      * Constructor
      */
-    public Files2DocsJspBean(  )
+    public Files2DocsJspBean( )
     {
     }
 
     /**
      * Checks if the file already exists
-     *
+     * 
      * @param strFileName The name of the file to upload
      * @param strUploadDirectory The upload directory
      * @return True if the file already exists, otherwise false
@@ -247,13 +244,13 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
         boolean bDuplicate = false;
 
         // Lists all files in the upload directory
-        File[] uploadFiles = ( new File( strUploadDirectory ) ).listFiles(  );
+        File[] uploadFiles = ( new File( strUploadDirectory ) ).listFiles( );
 
         if ( uploadFiles != null )
         {
             for ( File current : uploadFiles )
             {
-                if ( current.getName(  ).equals( strFileName ) )
+                if ( current.getName( ).equals( strFileName ) )
                 {
                     bDuplicate = true;
 
@@ -267,7 +264,7 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
 
     /**
      * Gets the path of the upload directory
-     *
+     * 
      * @param request The HTTP request
      * @return The path of the upload directory
      */
@@ -276,12 +273,12 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
         // Gets the relative parent path
         String strParentPath = AppPropertiesService.getProperty( PROPERTY_PARENT_PATH );
 
-        return AppPathService.getWebAppPath(  ) + strParentPath + request.getSession(  ).getId(  );
+        return AppPathService.getWebAppPath( ) + strParentPath + request.getSession( ).getId( );
     }
 
     /**
      * Deletes the upload directory
-     *
+     * 
      * @param request The HTTP request
      * @return true if the directory is deleted, otherwise false
      */
@@ -291,38 +288,38 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
         File uploadDirectory = new File( getUploadDirectory( request ) );
 
         // Deletes all files in the upload directory
-        File[] uploadFiles = uploadDirectory.listFiles(  );
+        File[] uploadFiles = uploadDirectory.listFiles( );
 
         if ( uploadFiles != null )
         {
             for ( File current : uploadFiles )
             {
-                current.delete(  );
+                current.delete( );
             }
         }
 
         // Deletes the empty upload directory
-        return uploadDirectory.delete(  );
+        return uploadDirectory.delete( );
     }
 
     /**
      * Gets the collection of uploaded filenames
-     *
+     * 
      * @param request The HTTP request
      * @return The collection of uploaded filenames
      */
     private Collection<String> getListFilename( HttpServletRequest request )
     {
-        Collection<String> colFilenames = new ArrayList<String>(  );
+        Collection<String> colFilenames = new ArrayList<String>( );
 
         // Lists all files in the upload directory
-        File[] uploadFiles = ( new File( getUploadDirectory( request ) ) ).listFiles(  );
+        File[] uploadFiles = ( new File( getUploadDirectory( request ) ) ).listFiles( );
 
         if ( uploadFiles != null )
         {
             for ( File current : uploadFiles )
             {
-                colFilenames.add( current.getName(  ) );
+                colFilenames.add( current.getName( ) );
             }
         }
 
@@ -331,7 +328,7 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
 
     /**
      * Gets the MIME type of the file
-     *
+     * 
      * @param file The file
      * @return The MIME type of the file
      */
@@ -339,15 +336,15 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
     {
         try
         {
-            URI uri = file.toURI(  );
-            URL url = uri.toURL(  );
-            URLConnection connection = url.openConnection(  );
+            URI uri = file.toURI( );
+            URL url = uri.toURL( );
+            URLConnection connection = url.openConnection( );
 
-            return connection.getContentType(  );
+            return connection.getContentType( );
         }
         catch ( IOException e )
         {
-            AppLogService.error( e.getMessage(  ), e );
+            AppLogService.error( e.getMessage( ), e );
         }
 
         return null;
@@ -355,14 +352,14 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
 
     /**
      * Validates date value
-     *
+     * 
      * @param strDate The date value to check
      * @param locale The current Locale
      * @return null if valid, otherwise false
      */
     private String validateDateValue( String strDate, Locale locale )
     {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(  );
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat( );
         Date date = null;
 
         if ( ( strDate == null ) || strDate.equals( STRING_EMPTY ) )
@@ -374,7 +371,7 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
         {
             simpleDateFormat.applyPattern( DATE_FORMAT[i] );
 
-            if ( strDate.length(  ) == DATE_FORMAT[i].length(  ) )
+            if ( strDate.length( ) == DATE_FORMAT[i].length( ) )
             {
                 try
                 {
@@ -406,7 +403,7 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
 
     /**
      * Validates numeric text value
-     *
+     * 
      * @param strNumericText The numeric text value to check
      * @return null if valid, otherwise false
      */
@@ -429,7 +426,7 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
 
     /**
      * Replaces tags by real values
-     *
+     * 
      * @param request The HTTP request
      * @param strFormat The mapping format
      * @param strFilename The current filename
@@ -465,7 +462,7 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
         // Replaces '<date>' tag
         if ( ( strReplacedTags != null ) && strReplacedTags.contains( TAG_DATE ) )
         {
-            strReplacedTags = strReplacedTags.replace( TAG_DATE, DateUtil.getCurrentDateString( getLocale(  ) ) );
+            strReplacedTags = strReplacedTags.replace( TAG_DATE, DateUtil.getCurrentDateString( getLocale( ) ) );
         }
 
         return strReplacedTags;
@@ -473,9 +470,10 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
 
     /**
      * Gets the selection of the document type, files and destination space page
-     *
+     * 
      * @param request The HTTP request
-     * @return The selection of the document type, files and destination space page
+     * @return The selection of the document type, files and destination space
+     *         page
      */
     public String getSelectFiles( HttpServletRequest request )
     {
@@ -545,54 +543,54 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
         }
 
         // Gets the document types filtered by fields of type file
-        Collection<DocumentType> colDocumentType = Files2DocsLinkDocument.getInstance(  )
-                                                                         .getListDocumentTypeFile( Files2DocsUtil.getListAttributeTypeFile(  ) );
+        Collection<DocumentType> colDocumentType = Files2DocsLinkDocument.getInstance( ).getListDocumentTypeFile(
+                Files2DocsUtil.getListAttributeTypeFile( ), false );
 
         // Checks if the Regular Expression Service is enabled
-        Map<String, String> mapRegExp = new HashMap<String, String>(  );
+        Map<String, String> mapRegExp = new HashMap<String, String>( );
 
-        if ( RegularExpressionService.getInstance(  ).isAvailable(  ) )
+        if ( RegularExpressionService.getInstance( ).isAvailable( ) )
         {
             for ( DocumentType documentType : colDocumentType )
             {
                 // Gets the document type attribute identifier
                 int nAttributeId = 0;
 
-                for ( DocumentAttribute attribute : Files2DocsLinkDocument.getInstance(  )
-                                                                          .getMandatoryAttributes( documentType.getCode(  ) ) )
+                for ( DocumentAttribute attribute : Files2DocsLinkDocument.getInstance( ).getMandatoryAttributes(
+                        documentType.getCode( ) ) )
                 {
-                    String strCode = attribute.getCodeAttributeType(  );
+                    String strCode = attribute.getCodeAttributeType( );
 
                     if ( strCode.equals( ATTRIBUTE_FILE ) || strCode.equals( ATTRIBUTE_IMAGE ) )
                     {
-                        nAttributeId = attribute.getId(  );
+                        nAttributeId = attribute.getId( );
 
                         break;
                     }
                 }
 
                 // Gets the regular expression list for the current attribute
-                Collection<Integer> colRegularExpression = Files2DocsLinkDocument.getInstance(  )
-                                                                                 .getListRegularExpressionKeyByIdAttribute( nAttributeId );
+                Collection<Integer> colRegularExpression = Files2DocsLinkDocument.getInstance( )
+                        .getListRegularExpressionKeyByIdAttribute( nAttributeId );
 
-                if ( !colRegularExpression.isEmpty(  ) )
+                if ( !colRegularExpression.isEmpty( ) )
                 {
                     String strListRegExp = STRING_EMPTY;
 
                     for ( Integer nExpressionId : colRegularExpression )
                     {
-                        RegularExpression regularExpression = RegularExpressionService.getInstance(  )
-                                                                                      .getRegularExpressionByKey( nExpressionId );
+                        RegularExpression regularExpression = RegularExpressionService.getInstance( )
+                                .getRegularExpressionByKey( nExpressionId );
 
                         // Cuts the current regular expression (".*\.ext" or ".*\.(ext|ext|ext)")
                         Pattern pattern = Pattern.compile( REGEXP_EXTENSION );
-                        Matcher matcher = pattern.matcher( regularExpression.getValue(  ).trim(  ) );
-                        matcher.find(  );
+                        Matcher matcher = pattern.matcher( regularExpression.getValue( ).trim( ) );
+                        matcher.find( );
 
                         String strCutRegExp = matcher.group( 1 );
 
                         // Adds the current extension to the list
-                        String[] strSplitList = strCutRegExp.trim(  ).split( REGEXP_PIPE );
+                        String[] strSplitList = strCutRegExp.trim( ).split( REGEXP_PIPE );
 
                         if ( strSplitList != null )
                         {
@@ -621,12 +619,12 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
                         }
                     }
 
-                    mapRegExp.put( documentType.getCode(  ), strListRegExp );
+                    mapRegExp.put( documentType.getCode( ), strListRegExp );
                 }
             }
         }
 
-        Map<String, Object> model = new HashMap<String, Object>(  );
+        Map<String, Object> model = new HashMap<String, Object>( );
         model.put( MARK_WEBAPP_URL, AppPathService.getBaseUrl( request ) );
 
         // Document type
@@ -636,22 +634,22 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
 
         // Destination space
         model.put( MARK_SPACES_BROWSER,
-            Files2DocsLinkDocument.getInstance(  ).getSpacesBrowser( request, getUser(  ), getLocale(  ) ) );
+                Files2DocsLinkDocument.getInstance( ).getSpacesBrowser( request, getUser( ), getLocale( ) ) );
         model.put( MARK_SUBMIT_BUTTON_DISABLED, bSubmitButtonDisabled );
 
         // Number of imported files
         model.put( MARK_NB_IMPORTED_FILES, nImportedFiles );
 
         // Session identifier
-        model.put( MARK_JSESSIONID, request.getSession(  ).getId(  ) );
+        model.put( MARK_JSESSIONID, request.getSession( ).getId( ) );
 
         // SWFUpload parameters
         model.put( MARK_SWFUPLOAD_FILE_UPLOAD_LIMIT,
-            AppPropertiesService.getProperty( PROPERTY_SWFUPLOAD_FILE_UPLOAD_LIMIT ) );
+                AppPropertiesService.getProperty( PROPERTY_SWFUPLOAD_FILE_UPLOAD_LIMIT ) );
         model.put( MARK_SWFUPLOAD_FILE_QUEUE_LIMIT,
-            AppPropertiesService.getProperty( PROPERTY_SWFUPLOAD_FILE_QUEUE_LIMIT ) );
+                AppPropertiesService.getProperty( PROPERTY_SWFUPLOAD_FILE_QUEUE_LIMIT ) );
         model.put( MARK_SWFUPLOAD_REQUEUE_ON_ERROR,
-            AppPropertiesService.getProperty( PROPERTY_SWFUPLOAD_REQUEUE_ON_ERROR ) );
+                AppPropertiesService.getProperty( PROPERTY_SWFUPLOAD_REQUEUE_ON_ERROR ) );
         model.put( MARK_SWFUPLOAD_DEBUG, AppPropertiesService.getProperty( PROPERTY_SWFUPLOAD_DEBUG ) );
         model.put( MARK_SWFUPLOAD_FILE_SIZE_LIMIT, AppPropertiesService.getProperty( PROPERTY_REQUEST_SIZE_MAX ) );
 
@@ -679,14 +677,14 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
             strTemplate = TEMPLATE_SELECT_FILES;
         }
 
-        HtmlTemplate template = AppTemplateService.getTemplate( strTemplate, getLocale(  ), model );
+        HtmlTemplate template = AppTemplateService.getTemplate( strTemplate, getLocale( ), model );
 
-        return getAdminPage( template.getHtml(  ) );
+        return getAdminPage( template.getHtml( ) );
     }
 
     /**
      * Performs the selection of the document type and destination space
-     *
+     * 
      * @param request The HTTP request
      * @return The URL to go after performing the action
      */
@@ -700,7 +698,7 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
             // Deletes the upload directory
             deleteUploadDirectory( request );
 
-            return AppPathService.getBaseUrl( request ) + AppPathService.getAdminMenuUrl(  );
+            return AppPathService.getBaseUrl( request ) + AppPathService.getAdminMenuUrl( );
         }
 
         // Gets the selected document type code
@@ -755,7 +753,7 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
             url.addParameter( PARAMETER_EXTENSION, strExtensionList );
             url.addParameter( PARAMETER_UPLOAD_MODE, strUploadMode );
 
-            return url.getUrl(  );
+            return url.getUrl( );
         }
 
         // Gets the number of imported files
@@ -773,19 +771,19 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
 
             if ( ( strResult != null ) && strResult.equals( RETURN_IS_NULL ) )
             {
-                strErrorMessage = I18nService.getLocalizedString( MESSAGE_UPLOAD_FAILED, getLocale(  ) );
+                strErrorMessage = I18nService.getLocalizedString( MESSAGE_UPLOAD_FAILED, getLocale( ) );
             }
             else if ( ( strResult != null ) && strResult.equals( RETURN_INVALID_FILENAME ) )
             {
-                strErrorMessage = I18nService.getLocalizedString( MESSAGE_INVALID_FILENAME, getLocale(  ) );
+                strErrorMessage = I18nService.getLocalizedString( MESSAGE_INVALID_FILENAME, getLocale( ) );
             }
             else if ( ( strResult != null ) && strResult.equals( RETURN_IS_DUPLICATED ) )
             {
-                strErrorMessage = I18nService.getLocalizedString( MESSAGE_FILE_IS_DUPLICATED, getLocale(  ) );
+                strErrorMessage = I18nService.getLocalizedString( MESSAGE_FILE_IS_DUPLICATED, getLocale( ) );
             }
             else if ( ( strResult != null ) && strResult.equals( RETURN_IO_ERROR ) )
             {
-                strErrorMessage = I18nService.getLocalizedString( MESSAGE_IO_ERROR, getLocale(  ) );
+                strErrorMessage = I18nService.getLocalizedString( MESSAGE_IO_ERROR, getLocale( ) );
             }
             else
             {
@@ -799,19 +797,19 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
             url.addParameter( PARAMETER_DEGRADED_ERROR, strErrorMessage );
             url.addParameter( PARAMETER_UPLOAD_MODE, strUploadMode );
 
-            return url.getUrl(  );
+            return url.getUrl( );
         }
 
         // Validates the mandatory fields (document type code & destination space)
-        if ( ( strDocumentTypeCode == null ) || strDocumentTypeCode.trim(  ).equals( STRING_EMPTY ) ||
-                ( strSpaceId == null ) || strSpaceId.trim(  ).equals( STRING_EMPTY ) )
+        if ( ( strDocumentTypeCode == null ) || strDocumentTypeCode.trim( ).equals( STRING_EMPTY )
+                || ( strSpaceId == null ) || strSpaceId.trim( ).equals( STRING_EMPTY ) )
         {
             return AdminMessageService.getMessageUrl( request, Messages.MANDATORY_FIELDS, AdminMessage.TYPE_STOP );
         }
 
         // Checks that the user is allowed to access this document type in this document space
-        if ( !Files2DocsLinkDocument.getInstance(  )
-                                        .isAuthorizedAdminDocument( nSpaceId, strDocumentTypeCode, getUser(  ) ) )
+        if ( !Files2DocsLinkDocument.getInstance( )
+                .isAuthorizedAdminDocument( nSpaceId, strDocumentTypeCode, getUser( ) ) )
         {
             return AdminMessageService.getMessageUrl( request, MESSAGE_DOCUMENT_NOT_AUTHORIZED, AdminMessage.TYPE_STOP );
         }
@@ -829,12 +827,12 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
         url.addParameter( PARAMETER_EXTENSION, strExtensionList );
         url.addParameter( PARAMETER_UPLOAD_MODE, strUploadMode );
 
-        return url.getUrl(  );
+        return url.getUrl( );
     }
 
     /**
      * Performs the upload of selected files
-     *
+     * 
      * @param request The HTTP request
      * @return null if the upload is complete, otherwise an error message
      */
@@ -854,7 +852,7 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
         }
 
         // Check for regular expression validation (filename)
-        if ( RegularExpressionService.getInstance(  ).isAvailable(  ) )
+        if ( RegularExpressionService.getInstance( ).isAvailable( ) )
         {
             // Gets the selected document type code
             String strDocumentTypeCode = request.getParameter( PARAMETER_DOCUMENT_TYPE_CODE );
@@ -867,31 +865,31 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
             // Gets the document type attribute identifier
             int nAttributeId = 0;
 
-            for ( DocumentAttribute attribute : Files2DocsLinkDocument.getInstance(  )
-                                                                      .getMandatoryAttributes( strDocumentTypeCode ) )
+            for ( DocumentAttribute attribute : Files2DocsLinkDocument.getInstance( ).getMandatoryAttributes(
+                    strDocumentTypeCode ) )
             {
-                String strCode = attribute.getCodeAttributeType(  );
+                String strCode = attribute.getCodeAttributeType( );
 
                 if ( strCode.equals( ATTRIBUTE_FILE ) || strCode.equals( ATTRIBUTE_IMAGE ) )
                 {
-                    nAttributeId = attribute.getId(  );
+                    nAttributeId = attribute.getId( );
 
                     break;
                 }
             }
 
             // Gets the regular expression list for the current attribute
-            Collection<Integer> colRegularExpression = Files2DocsLinkDocument.getInstance(  )
-                                                                             .getListRegularExpressionKeyByIdAttribute( nAttributeId );
+            Collection<Integer> colRegularExpression = Files2DocsLinkDocument.getInstance( )
+                    .getListRegularExpressionKeyByIdAttribute( nAttributeId );
 
-            if ( !colRegularExpression.isEmpty(  ) )
+            if ( !colRegularExpression.isEmpty( ) )
             {
                 for ( Integer nExpressionId : colRegularExpression )
                 {
-                    RegularExpression regularExpression = RegularExpressionService.getInstance(  )
-                                                                                  .getRegularExpressionByKey( nExpressionId );
+                    RegularExpression regularExpression = RegularExpressionService.getInstance( )
+                            .getRegularExpressionByKey( nExpressionId );
 
-                    if ( !RegularExpressionService.getInstance(  ).isMatches( strFileName, regularExpression ) )
+                    if ( !RegularExpressionService.getInstance( ).isMatches( strFileName, regularExpression ) )
                     {
                         return RETURN_INVALID_FILENAME;
                     }
@@ -914,26 +912,26 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
         // Creates the upload directory if necessary
         File uploadDirectory = new File( strUploadDirectory );
 
-        if ( !uploadDirectory.exists(  ) )
+        if ( !uploadDirectory.exists( ) )
         {
-            uploadDirectory.mkdir(  );
-            uploadDirectory.deleteOnExit(  );
+            uploadDirectory.mkdir( );
+            uploadDirectory.deleteOnExit( );
         }
 
         // Moves the file to the upload directory
         File uploadFile = new File( strUploadDirectory, strCleanName );
-        uploadFile.deleteOnExit(  );
+        uploadFile.deleteOnExit( );
 
         try
         {
             FileOutputStream fos = new FileOutputStream( uploadFile );
-            fos.flush(  );
-            fos.write( item.get(  ) );
-            fos.close(  );
+            fos.flush( );
+            fos.write( item.get( ) );
+            fos.close( );
         }
         catch ( IOException e )
         {
-            AppLogService.error( e.getMessage(  ), e );
+            AppLogService.error( e.getMessage( ), e );
 
             return RETURN_IO_ERROR;
         }
@@ -943,7 +941,7 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
 
     /**
      * Gets the create document(s) form(s) page
-     *
+     * 
      * @param request The HTTP request
      * @return The create document(s) form(s) page
      */
@@ -987,22 +985,22 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
         Collection<String> colFilenames = getListFilename( request );
 
         // Gets the mapping for the current document type code
-        Mapping originalMapping = MappingHome.findByDocumentTypeCode( strDocumentTypeCode, getPlugin(  ) );
+        Mapping originalMapping = MappingHome.findByDocumentTypeCode( strDocumentTypeCode, getPlugin( ) );
 
         // Mapping (title and summary)
-        Collection<Mapping> colMappings = new ArrayList<Mapping>(  );
+        Collection<Mapping> colMappings = new ArrayList<Mapping>( );
 
         for ( String strFilename : colFilenames )
         {
             // Duplicates the original mapping
-            Mapping currentMapping = new Mapping(  );
-            currentMapping.setId( originalMapping.getId(  ) );
-            currentMapping.setDocumentTypeCode( originalMapping.getDocumentTypeCode(  ) );
-            currentMapping.setDescription( originalMapping.getDescription(  ) );
+            Mapping currentMapping = new Mapping( );
+            currentMapping.setId( originalMapping.getId( ) );
+            currentMapping.setDocumentTypeCode( originalMapping.getDocumentTypeCode( ) );
+            currentMapping.setDescription( originalMapping.getDescription( ) );
 
             // Replaces tags by real values
-            String strTitle = getReplacedTags( request, originalMapping.getTitle(  ), strFilename );
-            String strSummary = getReplacedTags( request, originalMapping.getSummary(  ), strFilename );
+            String strTitle = getReplacedTags( request, originalMapping.getTitle( ), strFilename );
+            String strSummary = getReplacedTags( request, originalMapping.getSummary( ), strFilename );
 
             currentMapping.setTitle( strTitle );
             currentMapping.setSummary( strSummary );
@@ -1010,15 +1008,15 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
             colMappings.add( currentMapping );
         }
 
-        Map<String, Object> model = new HashMap<String, Object>(  );
+        Map<String, Object> model = new HashMap<String, Object>( );
 
         model.put( MARK_WEBAPP_URL, AppPathService.getBaseUrl( request ) );
-        model.put( MARK_LOCALE, getLocale(  ) );
+        model.put( MARK_LOCALE, getLocale( ) );
 
         // Hidden fields
         model.put( MARK_DOCUMENT_TYPE_CODE, strDocumentTypeCode );
         model.put( MARK_BROWSER_SELECTED_SPACE_ID, strSpaceId );
-        model.put( MARK_NB_IMPORTED_FILES, colFilenames.size(  ) );
+        model.put( MARK_NB_IMPORTED_FILES, colFilenames.size( ) );
         model.put( MARK_EXTENSION_CHECKED_LIST, strExtensionList );
 
         model.put( MARK_MAPPING_LIST, colMappings );
@@ -1032,64 +1030,63 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
         // Upload mode
         model.put( MARK_UPLOAD_MODE, strUploadMode );
 
-        HtmlTemplate template = AppTemplateService.getTemplate( TEMPLATE_CREATE_DOCUMENTS, getLocale(  ), model );
+        HtmlTemplate template = AppTemplateService.getTemplate( TEMPLATE_CREATE_DOCUMENTS, getLocale( ), model );
 
-        return getAdminPage( template.getHtml(  ) );
+        return getAdminPage( template.getHtml( ) );
     }
 
     /**
      * Gets the HTML form(s) to display the attribute(s) form(s)
-     *
+     * 
      * @param request The HTTP request
      * @param strDocumentTypeCode The document type code
      * @param colFilenames The collection of uploaded filenames
      * @return The HTML form(s)
      */
     private Collection<String> getAttributesForms( HttpServletRequest request, String strDocumentTypeCode,
-        Collection<String> colFilenames )
+            Collection<String> colFilenames )
     {
-        Collection<String> colAttributesForms = new ArrayList<String>(  );
+        Collection<String> colAttributesForms = new ArrayList<String>( );
 
         // Creates all forms
         int nIdentifier = 1;
 
         for ( String strFilename : colFilenames )
         {
-            StringBuffer sbForm = new StringBuffer(  );
+            StringBuffer sbForm = new StringBuffer( );
 
             // Loops on document attributes
-            for ( DocumentAttribute docAttribute : Files2DocsLinkDocument.getInstance(  )
-                                                                         .getMandatoryAttributes( strDocumentTypeCode ) )
+            for ( DocumentAttribute docAttribute : Files2DocsLinkDocument.getInstance( ).getMandatoryAttributes(
+                    strDocumentTypeCode ) )
             {
-                String strCode = docAttribute.getCodeAttributeType(  );
+                String strCode = docAttribute.getCodeAttributeType( );
 
                 // Ignores attributes of type file and image
                 if ( !strCode.equals( ATTRIBUTE_FILE ) && !strCode.equals( ATTRIBUTE_IMAGE ) )
                 {
                     // Gets the list of parameters for the current attribute
-                    List<AttributeTypeParameter> listParameters = (List<AttributeTypeParameter>) Files2DocsLinkDocument.getInstance(  )
-                                                                                                                       .getAttributeParametersValues( docAttribute.getId(  ),
-                            getLocale(  ) );
+                    List<AttributeTypeParameter> listParameters = (List<AttributeTypeParameter>) Files2DocsLinkDocument
+                            .getInstance( ).getAttributeParametersValues( docAttribute.getId( ), getLocale( ) );
 
                     // Gets the mapping format for the current document attribute
-                    Attribute mappingAttribute = AttributeHome.findByDocumentAttribute( docAttribute.getId(  ),
-                            getPlugin(  ) );
+                    Attribute mappingAttribute = AttributeHome.findByDocumentAttribute( docAttribute.getId( ),
+                            getPlugin( ) );
                     String strFormat = STRING_EMPTY;
 
                     if ( mappingAttribute != null )
                     {
-                        strFormat = mappingAttribute.getFormat(  );
+                        strFormat = mappingAttribute.getFormat( );
                     }
 
                     // Replaces tags by real values
                     String strReplacedTags = getReplacedTags( request, strFormat, strFilename );
 
                     // Sets the list of values
-                    List<String> listValues = new ArrayList<String>(  );
+                    List<String> listValues = new ArrayList<String>( );
                     listValues.add( strReplacedTags );
 
                     // Sets the list of parameters
-                    AttributeTypeParameter parameter = new AttributeTypeParameter(  );
+                    AttributeTypeParameter parameter = new AttributeTypeParameter( );
                     parameter.setName( PARAMETER_MAPPING );
                     parameter.setValueList( listValues );
                     listParameters.add( parameter );
@@ -1098,11 +1095,11 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
                     if ( strCode.equals( ATTRIBUTE_TEXT ) )
                     {
                         // Sets the list of values
-                        listValues = new ArrayList<String>(  );
+                        listValues = new ArrayList<String>( );
                         listValues.add( STRING_EMPTY );
 
                         // Sets the list of parameters
-                        parameter = new AttributeTypeParameter(  );
+                        parameter = new AttributeTypeParameter( );
                         parameter.setName( PARAMETER_SIZE );
                         parameter.setValueList( listValues );
                         listParameters.add( parameter );
@@ -1112,39 +1109,38 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
                     docAttribute.setParameters( listParameters );
 
                     // Sets the parameters map
-                    Map<String, Collection<String>> mapParameters = new HashMap<String, Collection<String>>(  );
+                    Map<String, Collection<String>> mapParameters = new HashMap<String, Collection<String>>( );
 
                     for ( AttributeTypeParameter param : listParameters )
                     {
-                        mapParameters.put( param.getName(  ), param.getValueList(  ) );
+                        mapParameters.put( param.getName( ), param.getValueList( ) );
                     }
 
                     // Sets all missing parameters with their default values
-                    for ( AttributeTypeParameter param : Files2DocsLinkDocument.getInstance(  )
-                                                                               .getAttributeTypeParameterList( docAttribute.getCodeAttributeType(  ),
-                            getLocale(  ) ) )
+                    for ( AttributeTypeParameter param : Files2DocsLinkDocument.getInstance( )
+                            .getAttributeTypeParameterList( docAttribute.getCodeAttributeType( ), getLocale( ) ) )
                     {
-                        if ( !mapParameters.containsKey( param.getName(  ) ) )
+                        if ( !mapParameters.containsKey( param.getName( ) ) )
                         {
-                            mapParameters.put( param.getName(  ), param.getDefaultValue(  ) );
+                            mapParameters.put( param.getName( ), param.getDefaultValue( ) );
                         }
                     }
 
-                    Map<String, Object> model = new HashMap<String, Object>(  );
+                    Map<String, Object> model = new HashMap<String, Object>( );
 
                     model.put( MARK_ATTRIBUTE, docAttribute );
                     model.put( MARK_PARAMETERS, mapParameters );
-                    model.put( MARK_LOCALE, getLocale(  ) );
+                    model.put( MARK_LOCALE, getLocale( ) );
                     model.put( MARK_IDENTIFIER, nIdentifier );
 
-                    HtmlTemplate template = AppTemplateService.getTemplate( TEMPLATE_ATTRIBUTES_BEGIN + strCode +
-                            TEMPLATE_ATTRIBUTES_END, getLocale(  ), model );
+                    HtmlTemplate template = AppTemplateService.getTemplate( TEMPLATE_ATTRIBUTES_BEGIN + strCode
+                            + TEMPLATE_ATTRIBUTES_END, getLocale( ), model );
 
-                    sbForm.append( template.getHtml(  ) );
+                    sbForm.append( template.getHtml( ) );
                 }
             }
 
-            colAttributesForms.add( sbForm.toString(  ) );
+            colAttributesForms.add( sbForm.toString( ) );
             nIdentifier++;
         }
 
@@ -1153,7 +1149,7 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
 
     /**
      * Performs the fields validation and creates documents
-     *
+     * 
      * @param request The HTTP request
      * @return The URL to go after performing the action
      */
@@ -1188,32 +1184,32 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
             url.addParameter( PARAMETER_EXTENSION, strExtensionList );
             url.addParameter( PARAMETER_UPLOAD_MODE, strUploadMode );
 
-            return url.getUrl(  );
+            return url.getUrl( );
         }
 
         // Gets the list of uploaded filenames
         List<String> listFilenames = (List<String>) getListFilename( request );
 
         // Defines the list of created documents
-        List<Document> listDocuments = new ArrayList<Document>(  );
+        List<Document> listDocuments = new ArrayList<Document>( );
 
         // Fields validation
-        for ( int identifier = 0; identifier < listFilenames.size(  ); identifier++ )
+        for ( int identifier = 0; identifier < listFilenames.size( ); identifier++ )
         {
-            Document document = new Document(  );
+            Document document = new Document( );
             document.setCodeDocumentType( strDocumentTypeCode );
             document.setSpaceId( nSpaceId );
             document.setStateId( 1 );
-            document.setCreatorId( getUser(  ).getUserId(  ) );
+            document.setCreatorId( getUser( ).getUserId( ) );
 
             // Gets and validates the document title and summary
-            String strDocumentTitle = request.getParameter( PARAMETER_DOCUMENT_TITLE + STRING_UNDERSCORE +
-                    ( identifier + 1 ) );
-            String strDocumentSummary = request.getParameter( PARAMETER_DOCUMENT_SUMMARY + STRING_UNDERSCORE +
-                    ( identifier + 1 ) );
+            String strDocumentTitle = request.getParameter( PARAMETER_DOCUMENT_TITLE + STRING_UNDERSCORE
+                    + ( identifier + 1 ) );
+            String strDocumentSummary = request.getParameter( PARAMETER_DOCUMENT_SUMMARY + STRING_UNDERSCORE
+                    + ( identifier + 1 ) );
 
-            if ( ( strDocumentTitle == null ) || strDocumentTitle.trim(  ).equals( STRING_EMPTY ) ||
-                    ( strDocumentSummary == null ) || strDocumentSummary.trim(  ).equals( STRING_EMPTY ) )
+            if ( ( strDocumentTitle == null ) || strDocumentTitle.trim( ).equals( STRING_EMPTY )
+                    || ( strDocumentSummary == null ) || strDocumentSummary.trim( ).equals( STRING_EMPTY ) )
             {
                 return AdminMessageService.getMessageUrl( request, Messages.MANDATORY_FIELDS, AdminMessage.TYPE_STOP );
             }
@@ -1222,17 +1218,17 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
             document.setSummary( strDocumentSummary );
 
             // Gets and validates the document attributes
-            List<DocumentAttribute> listAttributes = (List<DocumentAttribute>) Files2DocsLinkDocument.getInstance(  )
-                                                                                                     .getMandatoryAttributes( strDocumentTypeCode );
+            List<DocumentAttribute> listAttributes = (List<DocumentAttribute>) Files2DocsLinkDocument.getInstance( )
+                    .getMandatoryAttributes( strDocumentTypeCode );
 
             for ( DocumentAttribute attribute : listAttributes )
             {
-                String strCode = attribute.getCodeAttributeType(  );
+                String strCode = attribute.getCodeAttributeType( );
 
                 // Attribute of type file or image
                 if ( strCode.equals( ATTRIBUTE_FILE ) || strCode.equals( ATTRIBUTE_IMAGE ) )
                 {
-                    Attribute mAttribute = AttributeHome.findByDocumentAttribute( attribute.getId(  ), getPlugin(  ) );
+                    Attribute mAttribute = AttributeHome.findByDocumentAttribute( attribute.getId( ), getPlugin( ) );
 
                     if ( mAttribute != null )
                     {
@@ -1241,25 +1237,25 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
 
                         // Gets values
                         String strContentType = getMimeType( file );
-                        String strFileName = file.getName(  );
+                        String strFileName = file.getName( );
                         byte[] bytes = null;
 
                         try
                         {
                             InputStream in = new FileInputStream( file );
-                            ByteArrayOutputStream result = new ByteArrayOutputStream(  );
+                            ByteArrayOutputStream result = new ByteArrayOutputStream( );
 
-                            for ( int nBytes = in.read(  ); nBytes != -1; nBytes = in.read(  ) )
+                            for ( int nBytes = in.read( ); nBytes != -1; nBytes = in.read( ) )
                             {
                                 result.write( nBytes );
                             }
 
-                            in.close(  );
-                            bytes = result.toByteArray(  );
+                            in.close( );
+                            bytes = result.toByteArray( );
                         }
                         catch ( IOException e )
                         {
-                            AppLogService.error( e.getMessage(  ), e );
+                            AppLogService.error( e.getMessage( ), e );
                         }
 
                         attribute.setBinary( true );
@@ -1272,41 +1268,38 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
                 // Other attributes
                 else
                 {
-                    String strParameterStringValue = request.getParameter( attribute.getCode(  ) + STRING_UNDERSCORE +
-                            ( identifier + 1 ) );
+                    String strParameterStringValue = request.getParameter( attribute.getCode( ) + STRING_UNDERSCORE
+                            + ( identifier + 1 ) );
 
                     // Validates the attribute
-                    if ( ( strParameterStringValue == null ) ||
-                            strParameterStringValue.trim(  ).equals( STRING_EMPTY ) )
+                    if ( ( strParameterStringValue == null ) || strParameterStringValue.trim( ).equals( STRING_EMPTY ) )
                     {
                         return AdminMessageService.getMessageUrl( request, Messages.MANDATORY_FIELDS,
-                            AdminMessage.TYPE_STOP );
+                                AdminMessage.TYPE_STOP );
                     }
 
                     // Checks for regular expression validation
-                    if ( RegularExpressionService.getInstance(  ).isAvailable(  ) )
+                    if ( RegularExpressionService.getInstance( ).isAvailable( ) )
                     {
                         // Gets the regular expression list for the current attribute
-                        Collection<Integer> colRegularExpression = Files2DocsLinkDocument.getInstance(  )
-                                                                                         .getListRegularExpressionKeyByIdAttribute( attribute.getId(  ) );
+                        Collection<Integer> colRegularExpression = Files2DocsLinkDocument.getInstance( )
+                                .getListRegularExpressionKeyByIdAttribute( attribute.getId( ) );
 
-                        if ( !colRegularExpression.isEmpty(  ) )
+                        if ( !colRegularExpression.isEmpty( ) )
                         {
                             for ( Integer nExpressionId : colRegularExpression )
                             {
-                                RegularExpression regularExpression = RegularExpressionService.getInstance(  )
-                                                                                              .getRegularExpressionByKey( nExpressionId );
+                                RegularExpression regularExpression = RegularExpressionService.getInstance( )
+                                        .getRegularExpressionByKey( nExpressionId );
 
-                                if ( !RegularExpressionService.getInstance(  )
-                                                                  .isMatches( strParameterStringValue, regularExpression ) )
+                                if ( !RegularExpressionService.getInstance( ).isMatches( strParameterStringValue,
+                                        regularExpression ) )
                                 {
-                                    String[] listArguments = 
-                                        {
-                                            attribute.getName(  ), regularExpression.getErrorMessage(  ),
-                                        };
+                                    String[] listArguments = { attribute.getName( ),
+                                            regularExpression.getErrorMessage( ), };
 
                                     return AdminMessageService.getMessageUrl( request,
-                                        MESSAGE_ATTRIBUTE_VALIDATION_ERROR, listArguments, AdminMessage.TYPE_STOP );
+                                            MESSAGE_ATTRIBUTE_VALIDATION_ERROR, listArguments, AdminMessage.TYPE_STOP );
                                 }
                             }
                         }
@@ -1317,7 +1310,7 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
 
                     if ( strCode.equals( ATTRIBUTE_DATE ) )
                     {
-                        strValidationErrorMessageKey = validateDateValue( strParameterStringValue, getLocale(  ) );
+                        strValidationErrorMessageKey = validateDateValue( strParameterStringValue, getLocale( ) );
                     }
                     else if ( strCode.equals( ATTRIBUTE_NUMERICTEXT ) )
                     {
@@ -1327,7 +1320,7 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
                     if ( strValidationErrorMessageKey != null )
                     {
                         return AdminMessageService.getMessageUrl( request, strValidationErrorMessageKey,
-                            AdminMessage.TYPE_STOP );
+                                AdminMessage.TYPE_STOP );
                     }
 
                     attribute.setTextValue( strParameterStringValue );
@@ -1346,16 +1339,16 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
         String strListFailure = STRING_EMPTY;
 
         // Creates the documents
-        Iterator<Document> documentIterator = listDocuments.iterator(  );
-        Iterator<String> filenameIterator = listFilenames.iterator(  );
+        Iterator<Document> documentIterator = listDocuments.iterator( );
+        Iterator<String> filenameIterator = listFilenames.iterator( );
 
-        while ( documentIterator.hasNext(  ) && filenameIterator.hasNext(  ) )
+        while ( documentIterator.hasNext( ) && filenameIterator.hasNext( ) )
         {
-            Document document = documentIterator.next(  );
-            String strFilename = filenameIterator.next(  );
+            Document document = documentIterator.next( );
+            String strFilename = filenameIterator.next( );
 
             // Creates the current document
-            String strError = Files2DocsLinkDocument.getInstance(  ).createDocument( document, getUser(  ) );
+            String strError = Files2DocsLinkDocument.getInstance( ).createDocument( document, getUser( ) );
 
             // If the document was created
             if ( strError == null )
@@ -1363,16 +1356,16 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
                 // Gets the document identifier and adds to the imported documents list
                 if ( ( strListImported == null ) || strListImported.equals( STRING_EMPTY ) )
                 {
-                    strListImported += document.getId(  );
+                    strListImported += document.getId( );
                 }
                 else
                 {
-                    strListImported += ( STRING_COMMA + document.getId(  ) );
+                    strListImported += ( STRING_COMMA + document.getId( ) );
                 }
 
                 // Deletes the uploaded file
                 File uploadFile = new File( getUploadDirectory( request ), strFilename );
-                uploadFile.delete(  );
+                uploadFile.delete( );
             }
             else
             {
@@ -1390,7 +1383,7 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
 
         // Deletes the upload directory if empty
         File uploadDirectory = new File( getUploadDirectory( request ) );
-        uploadDirectory.delete(  );
+        uploadDirectory.delete( );
 
         UrlItem url = new UrlItem( JSP_IMPORT_RESULT );
         url.addParameter( PARAMETER_IMPORTED_LIST, strListImported );
@@ -1398,12 +1391,12 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
         url.addParameter( PARAMETER_UPLOAD_MODE, strUploadMode );
         url.addParameter( PARAMETER_BROWSER_SELECTED_SPACE_ID, strSpaceId );
 
-        return url.getUrl(  );
+        return url.getUrl( );
     }
 
     /**
      * Gets the import result page
-     *
+     * 
      * @param request The HTTP request
      * @return The import result page
      */
@@ -1412,17 +1405,17 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
         setPageTitleProperty( PROPERTY_IMPORT_RESULT_PAGE_TITLE );
 
         // Defines the collection of documents
-        Collection<Document> colDocuments = new ArrayList<Document>(  );
+        Collection<Document> colDocuments = new ArrayList<Document>( );
 
         // Gets the upload mode
         String strUploadMode = request.getParameter( PARAMETER_UPLOAD_MODE );
-        
+
         // Gets the spce id
         String strSpaceId = request.getParameter( PARAMETER_BROWSER_SELECTED_SPACE_ID );
 
         // Adds the failure files
         String strListFailure = request.getParameter( PARAMETER_FAILURE_LIST );
-        String[] strSplitFailureList = strListFailure.trim(  ).split( STRING_COMMA );
+        String[] strSplitFailureList = strListFailure.trim( ).split( STRING_COMMA );
         int nFailureFiles = 0;
 
         if ( strSplitFailureList != null )
@@ -1431,7 +1424,7 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
             {
                 if ( ( strFilename != null ) && !strFilename.equals( STRING_EMPTY ) )
                 {
-                    Document document = new Document(  );
+                    Document document = new Document( );
                     document.setId( -1 );
                     document.setTitle( strFilename );
 
@@ -1444,7 +1437,7 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
 
         // Adds the imported files
         String strListImported = request.getParameter( PARAMETER_IMPORTED_LIST );
-        String[] strSplitImportedList = strListImported.trim(  ).split( STRING_COMMA );
+        String[] strSplitImportedList = strListImported.trim( ).split( STRING_COMMA );
         int nImportedFiles = 0;
 
         if ( strSplitImportedList != null )
@@ -1457,12 +1450,12 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
                 {
                     nDocumentId = Files2DocsUtil.convertStringToInt( strDocumentId );
 
-                    Document document = Files2DocsLinkDocument.getInstance(  ).getDocumentById( nDocumentId );
+                    Document document = Files2DocsLinkDocument.getInstance( ).getDocumentById( nDocumentId );
 
                     // Removes binary values (file and image)
-                    for ( DocumentAttribute attribute : document.getAttributes(  ) )
+                    for ( DocumentAttribute attribute : document.getAttributes( ) )
                     {
-                        String strCode = attribute.getCodeAttributeType(  );
+                        String strCode = attribute.getCodeAttributeType( );
 
                         if ( strCode.equals( ATTRIBUTE_FILE ) || strCode.equals( ATTRIBUTE_IMAGE ) )
                         {
@@ -1477,7 +1470,7 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
             }
         }
 
-        UrlItem url = new UrlItem( request.getRequestURI(  ) );
+        UrlItem url = new UrlItem( request.getRequestURI( ) );
         url.addParameter( PARAMETER_IMPORTED_LIST, strListImported );
         url.addParameter( PARAMETER_FAILURE_LIST, strListFailure );
         url.addParameter( PARAMETER_UPLOAD_MODE, strUploadMode );
@@ -1489,10 +1482,10 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
         _nItemsPerPage = Paginator.getItemsPerPage( request, Paginator.PARAMETER_ITEMS_PER_PAGE, _nItemsPerPage,
                 _nDefaultItemsPerPage );
 
-        Paginator paginator = new Paginator( (List<Document>) colDocuments, _nItemsPerPage, url.getUrl(  ),
+        Paginator paginator = new Paginator( (List<Document>) colDocuments, _nItemsPerPage, url.getUrl( ),
                 Paginator.PARAMETER_PAGE_INDEX, _strCurrentPageIndex );
 
-        Map<String, Object> model = new HashMap<String, Object>(  );
+        Map<String, Object> model = new HashMap<String, Object>( );
 
         // Number of imported and failure files
         model.put( MARK_NB_IMPORTED_FILES, nImportedFiles );
@@ -1505,16 +1498,16 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
         // List of documents (paginator)
         model.put( MARK_PAGINATOR, paginator );
         model.put( MARK_NB_ITEMS_PER_PAGE, STRING_EMPTY + _nItemsPerPage );
-        model.put( MARK_DOCUMENT_LIST, paginator.getPageItems(  ) );
+        model.put( MARK_DOCUMENT_LIST, paginator.getPageItems( ) );
 
         // Upload mode
         model.put( MARK_UPLOAD_MODE, strUploadMode );
-        
-         // Space id
+
+        // Space id
         model.put( MARK_BROWSER_SELECTED_SPACE_ID, strSpaceId );
 
-        HtmlTemplate template = AppTemplateService.getTemplate( TEMPLATE_IMPORT_RESULT, getLocale(  ), model );
+        HtmlTemplate template = AppTemplateService.getTemplate( TEMPLATE_IMPORT_RESULT, getLocale( ), model );
 
-        return getAdminPage( template.getHtml(  ) );
+        return getAdminPage( template.getHtml( ) );
     }
 }
