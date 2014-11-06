@@ -5,161 +5,210 @@
 	</#list>
 </#if>
 <#if document_type_code?has_content>
-<form class="form" method="post" action="jsp/admin/plugins/files2docs/DoSelectFiles.jsp" enctype="multipart/form-data">
-<input type="hidden" id="update_document_type" name="update_document_type" value="" />
-<input type="hidden" id="document_type_code_hidden" name="document_type_code_hidden" value="${document_type_code!}" />
-<fieldset>
-	<legend><span class="badge badge-info">#i18n{files2docs.selectFiles.step} 1</span>&nbsp;#i18n{files2docs.selectFiles.pageTitle}*</legend>
-	<div class="row-fluid">
-		<div class="offset1 span11">
-		<div class="controls-group">
-			<label class="control-label">#i18n{files2docs.selectFiles.labelType}*</label>
-			<div class="controls">
-			<select id="document_type_code" name="document_type_code" <#if document_type_code_disabled>disabled="disabled"</#if> onchange="updateDocumentType();">
-				<#list document_type_list?sort_by("name") as type>
-					<#if document_type_code?exists && document_type_code=type.code>
-						<option selected="selected" value="${type.code}">${type.name}</option>
-					<#else>
-						<option value="${type.code}">${type.name}</option>
-					</#if>
-				</#list>
-			</select>
+<div class="row">
+	<div class="col-xs-12 col-sm-12 col-md-12">
+		<div class="box box-primary">
+			<div class="box-header">
+				<h3 class="box-title">#i18n{files2docs.createMapping.pageTitle}</h3>
 			</div>
-		</div>
-		<#if regexp_map[document_type_code]?exists && regexp_map[document_type_code]?split(",")?size &gt; 1>
-		<p id="divExtension" style="display:none;">
-		<script type="text/javascript">
-		// Displays the file type list with checkbox (JS enabled)
-		document.getElementById("divExtension").style.display = "";
-		</script>
-		#i18n{files2docs.selectFiles.labelExtension}* :
-		<#compress>
-		<#assign i = 0>
-			<#list regexp_map[document_type_code]?trim?split(",") as extension>
-			<input type="checkbox" class="checkbox" name="extension" value="${extension}"
-			<#if extension_checked_list?has_content>
-				<#assign bIsChecked = false>
-				<#list extension_checked_list?trim?split(",") as extension_checked>
-					<#if extension = extension_checked>
-						<#assign bIsChecked = true>
-						<#break>
-					</#if>
-				</#list>
-				</#if>
-				<#if !bIsChecked?exists || bIsChecked>
-					checked="checked"
-				</#if>
-				<#if document_type_code_disabled>
-					disabled="disabled"
-				</#if>
-				onclick="updateFileTypeList(${i});" />${extension}
-				<#assign i = i + 1>
-				</#list>
-			</#compress>
-		</p>
-		<input type="hidden" id="extension_hidden" name="extension_hidden" value="<#if extension_checked_list?has_content>${extension_checked_list}</#if>" />
-		</#if>
-		</div>
-	</div>
-</fieldset>
-<fieldset>
-	<legend><span class="badge badge-info">#i18n{files2docs.selectFiles.step} 2</span>&nbsp;#i18n{files2docs.selectFiles.labelUpload}*</legend>
-	<div class="row-fluid">
-	<div class="offset1 span11">
-		<div id="divSWFUploadUI" style="display:none;">
-					<script type="text/javascript">
-						// Displays the SWFUpload UI div (JS enabled)
-						document.getElementById("divSWFUploadUI").style.display = "";
-					</script>
-					<div id="fsUploadProgress" class="fieldset flash">
-						<span class="legend">#i18n{files2docs.selectFiles.UploadQueue}</span>
-					</div>
-						<p id="divStatus" class="span5">
-							<span class="label label-info">
-							<#if nb_imported_files?exists>
-								${nb_imported_files}
-								<#if nb_imported_files &lt; 2>
-									#i18n{files2docs.message.swfupload.complete.singular}
-								<#else>
-									#i18n{files2docs.message.swfupload.complete.plural}
+			<div class="box-body">	
+				<form class="form" method="post" action="jsp/admin/plugins/files2docs/DoSelectFiles.jsp" enctype="multipart/form-data">
+				<input type="hidden" id="update_document_type" name="update_document_type" value="" />
+				<input type="hidden" id="document_type_code_hidden" name="document_type_code_hidden" value="${document_type_code!}" />
+				<fieldset>
+					<legend>
+						<span class="badge badge-info">#i18n{files2docs.selectFiles.step} 1</span>&nbsp;#i18n{files2docs.selectFiles.pageTitle}*
+					</legend>
+					<div class="form-group">
+						<label class="control-label col-xs-12 col-sm-2 col-md-2">#i18n{files2docs.selectFiles.labelType}*</label>
+						<div class="col-xs-12 col-sm-3 col-md-3">
+							<select id="document_type_code" class="form-control" name="document_type_code" <#if document_type_code_disabled>disabled="disabled"</#if> onchange="updateDocumentType();">
+								<option selected="selected" value="">#i18n{files2docs.selectFiles.labelType} </option>
+								<#list document_type_list?sort_by("name") as type>
+									<#if document_type_code?exists && document_type_code=type.code>
+										<option selected="selected" value="${type.code}">${type.name}</option>
+									<#else>
+										<option value="${type.code}">${type.name}</option>
+									</#if>
+								</#list>
+							</select>
+							</div>
+						</div>
+						<#if regexp_map[document_type_code]?exists && regexp_map[document_type_code]?split(",")?size &gt; 1>
+						<p id="divExtension" style="display:none;">
+						<script type="text/javascript">
+							// Displays the file type list with checkbox (JS enabled)
+							document.getElementById("divExtension").style.display = "";
+						</script>
+						#i18n{files2docs.selectFiles.labelExtension}* :
+						<#compress>
+						<#assign i = 0>
+							<#list regexp_map[document_type_code]?trim?split(",") as extension>
+							<input type="checkbox" class="checkbox" name="extension" value="${extension}"
+							<#if extension_checked_list?has_content>
+								<#assign bIsChecked = false>
+								<#list extension_checked_list?trim?split(",") as extension_checked>
+									<#if extension = extension_checked>
+										<#assign bIsChecked = true>
+										<#break>
+									</#if>
+								</#list>
 								</#if>
-							</#if>
-							</span>
+								<#if !bIsChecked?exists || bIsChecked>
+									checked="checked"
+								</#if>
+								<#if document_type_code_disabled>
+									disabled="disabled"
+								</#if>
+								onclick="updateFileTypeList(${i});" />${extension}
+								<#assign i = i + 1>
+								</#list>
+							</#compress>
 						</p>
-					<input type="hidden" id="nb_imported_files" name="nb_imported_files" value="<#if nb_imported_files?exists>${nb_imported_files}<#else>0</#if>" />
-					<p class="span12">
-						<span id="spanButtonPlaceholder"></span>
-						<button type="submit" class="btn btn-primary btn-small">
-							<i class="icon-upload icon-white"></i>&nbsp;#i18n{files2docs.selectFiles.buttonUpload}
-						</button>
-						<input type="submit" class="btn btn-danger btn-small" id="delete" name="delete" value="#i18n{files2docs.selectFiles.buttonDelete}">
-					</p>
-		</div>
-		<noscript>
-				<p class="alert" style="text-align:left;">#i18n{files2docs.message.swfupload.label.javascript}</p>
-				<p class="alert" style="text-align:left;">#i18n{files2docs.message.swfupload.label.degraded}</p>
-				<p>
-					<a href="jsp/admin/plugins/files2docs/SelectFiles.jsp?mode=degraded">
-						#i18n{files2docs.selectFiles.linkDegraded}
-					</a>
-				</p>
-			</noscript>
-			<div id="divLoadingContent" style="display:none;">
-				<p class="alert" style="text-align:left;">#i18n{files2docs.message.swfupload.label.loading}</p>
-			</div>
-
-			<div id="divLongLoading" style="display:none;">
-				<p class="alert" style="text-align:left;">
-					#i18n{files2docs.message.swfupload.label.longFirst}
-				</p>
-				<p class="alert" style="text-align:left;">
-					#i18n{files2docs.message.swfupload.label.longSecond}
-				</p>
-				<p class="alert" style="text-align:left;">
-					#i18n{files2docs.message.swfupload.label.degraded}
-				</p>
-				<p>
-					<a href="jsp/admin/plugins/files2docs/SelectFiles.jsp?mode=degraded">
-						#i18n{files2docs.selectFiles.linkDegraded}
-					</a>
-				</p>
-			</div>
-			<div id="divAlternateContent" style="display:none;">
-				<p class="alert" style="text-align:left;">
-					#i18n{files2docs.message.swfupload.label.flash}
-				</p>
-				<p class="alert" style="text-align:left;">
-					#i18n{files2docs.message.swfupload.label.flashLink.begin}
-					<a target="_blank" href="http://get.adobe.com/fr/flashplayer">
-						#i18n{files2docs.message.swfupload.label.flashLink.name}
-					</a>
-					#i18n{files2docs.message.swfupload.label.flashLink.end}
-				</p>
-				<p class="alert" style="text-align:left;">
-					#i18n{files2docs.message.swfupload.label.degraded}
-				</p>
-				<p>
-					<a href="jsp/admin/plugins/files2docs/SelectFiles.jsp?mode=degraded">
-						#i18n{files2docs.selectFiles.linkDegraded}
-					</a>
-				</p>
-			</div>
-		</div>
-	</div>
-	</fieldset>
-	<fieldset>
-	<legend><span class="badge badge-info">#i18n{files2docs.selectFiles.step} 3</span>&nbsp;#i18n{files2docs.selectFiles.labelSpace}* </legend>
-	${spaces_browser}
-	<div class="row-fluid">
-		<div class="offset1 span11">
-			<button type="submit" class="btn btn-primary btn-small" <#if submit_button_disabled>disabled</#if>>
-				<i class="icon-ok icon-white"></i>
-				&nbsp;#i18n{files2docs.selectFiles.buttonSubmit}
-			</button> 
-		</div>
-	</div>
-	</fieldset>
-</form>
+						<input type="hidden" id="extension_hidden" name="extension_hidden" value="<#if extension_checked_list?has_content>${extension_checked_list}</#if>" />
+						</#if>
+				</fieldset>
+				<fieldset>
+					<legend>
+						<span class="badge badge-info">#i18n{files2docs.selectFiles.step} 2</span>&nbsp;#i18n{files2docs.selectFiles.labelUpload}*</legend>
+							<div id="divSWFUploadUI" style="display:none;">
+									<script type="text/javascript">
+										// Displays the SWFUpload UI div (JS enabled)
+										document.getElementById("divSWFUploadUI").style.display = "";
+									</script>
+									<div class="form-group">
+										<div class="col-xs-12 col-sm-offset-2 col-sm-5 col-md-offset-2 col-md-5">
+											<div class="box box-solid box-upload">
+												<div class="box-header">
+													<h3 class="box-title">#i18n{files2docs.selectFiles.UploadQueue}</h3>
+												</div>
+												<div class="box-body">
+													<div id="fsUploadProgress"></div>
+												</div>
+											</div>
+										</div>
+									</div>
+									<div class="form-group">
+										<div class="col-xs-12 col-sm-offset-2 col-sm-5 col-md-offset-2 col-md-5">
+												<div class="alert alert-info">
+													<i class="fa fa-info"></i>
+													<div id="divStatus">
+													<#if nb_imported_files?exists>
+														${nb_imported_files}
+														<#if nb_imported_files &lt; 2>
+															#i18n{files2docs.message.swfupload.complete.singular}
+														<#else>
+															#i18n{files2docs.message.swfupload.complete.plural}
+														</#if>
+													</#if>
+													</div>
+												</div>
+										</div>
+									</div>
+									<input type="hidden" id="nb_imported_files" name="nb_imported_files" value="<#if nb_imported_files?exists>${nb_imported_files}<#else>0</#if>" />
+									<div class="form-group">
+										<div class="col-xs-12 col-sm-offset-2 col-sm-10 col-md-offset-2 col-md-10">
+											<br>
+											<span id="spanButtonPlaceholder"></span>
+											<button type="submit" class="btn btn-primary btn-sm btn-flat">
+												<i class="fa fa-folder-open-o"></i>&nbsp;#i18n{files2docs.selectFiles.buttonUpload}
+											</button>
+											<button type="submit" class="btn btn-danger btn-sm btn-flat" id="delete" name="delete" value="#i18n{files2docs.selectFiles.buttonDelete}">
+												<i class="fa fa-trash"></i>&nbsp;#i18n{files2docs.selectFiles.buttonDelete}
+											</button>	
+										</div>
+									</div>
+							</div>
+							<noscript>
+								<div class="form-group">
+									<div class="col-xs-12 col-sm-offset-2 col-sm-10 col-md-offset-2 col-md-10">
+										<p class="alert alert-warning">
+											<i class="fa fa-warning">
+											<b>#i18n{files2docs.message.swfupload.label.javascript}</b>
+											<br>
+											<b>#i18n{files2docs.message.swfupload.label.degraded}</b>
+											<br>
+											<a href="jsp/admin/plugins/files2docs/SelectFiles.jsp?mode=degraded">
+												#i18n{files2docs.selectFiles.linkDegraded}
+											</a>
+										</p>
+									</div>	
+								</div>	
+							</noscript>
+							<div class="form-group">
+								<div class="col-xs-12 col-sm-offset-2 col-sm-10 col-md-offset-2 col-md-10">
+									<div id="divLoadingContent" style="display:none;">
+										<p class="alert" style="text-align:left;">#i18n{files2docs.message.swfupload.label.loading}</p>
+									</div>
+									<div id="divLongLoading" style="display:none;">
+										<p class="alert" style="text-align:left;">
+											#i18n{files2docs.message.swfupload.label.longFirst}
+										</p>
+										<p class="alert" style="text-align:left;">
+											#i18n{files2docs.message.swfupload.label.longSecond}
+										</p>
+										<p class="alert" style="text-align:left;">
+											#i18n{files2docs.message.swfupload.label.degraded}
+										</p>
+										<p>
+											<a href="jsp/admin/plugins/files2docs/SelectFiles.jsp?mode=degraded">
+												#i18n{files2docs.selectFiles.linkDegraded}
+											</a>
+										</p>
+									</div>
+									<div id="divAlternateContent" style="display:none;">
+										<p class="alert" style="text-align:left;">
+											#i18n{files2docs.message.swfupload.label.flash}
+										</p>
+										<p class="alert" style="text-align:left;">
+											#i18n{files2docs.message.swfupload.label.flashLink.begin}
+											<a target="_blank" href="http://get.adobe.com/fr/flashplayer">
+												#i18n{files2docs.message.swfupload.label.flashLink.name}
+											</a>
+											#i18n{files2docs.message.swfupload.label.flashLink.end}
+										</p>
+										<p class="alert" style="text-align:left;">
+											#i18n{files2docs.message.swfupload.label.degraded}
+										</p>
+										<p>
+											<a href="jsp/admin/plugins/files2docs/SelectFiles.jsp?mode=degraded">
+												#i18n{files2docs.selectFiles.linkDegraded}
+											</a>
+										</p>
+									</div>
+								</div>
+							</div>
+					</fieldset>
+					<fieldset>
+						<legend>
+							<span class="badge badge-info">#i18n{files2docs.selectFiles.step} 3</span>&nbsp;#i18n{files2docs.selectFiles.labelSpace}*
+						</legend>
+						<div class="form-group">
+							<div class="col-xs-12 col-sm-offset-2 col-sm-5 col-md-offset-2 col-md-5">
+							<div class="box box-solid">
+								<div class="box-header"></div>
+								<div class="box-body">
+									${spaces_browser}
+									<div class="clearfix"></div>
+								</div>
+							</div>
+							</div>
+						</div>
+						<div class="form-group sr-only">
+							<div class="col-xs-12 col-sm-offset-2 col-sm-10 col-md-offset-2 col-md-10">
+								<button type="submit" class="btn btn-primary btn-small" <#if submit_button_disabled>disabled</#if>>
+									<i class="fa fa-check"></i>
+									&nbsp;#i18n{files2docs.selectFiles.buttonSubmit}
+								</button> 
+							</div>
+						</div>
+					</fieldset>
+				</form>
+			</div>				
+		</div>				
+	</div>				
+</div>				
+			
 <!-- SWFUpload Component -->
 <script type="text/javascript" src="js/plugins/files2docs/swfupload/swfupload.js"></script>
 
@@ -354,10 +403,6 @@
 			}
 		}
 	}
-	
-	$(document).ready( function(){
-		$("head").append('<link rel="stylesheet" href="css/plugins/files2docs/swfupload/swfupload.css" >');
-	});
 	
 </script>
 <#else>

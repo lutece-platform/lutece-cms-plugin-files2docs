@@ -1,102 +1,95 @@
-<div class="row-fluid">
-	<div class="span5">
-	<fieldset>
-	<legend>#i18n{files2docs.modifyMapping.contentBoxTitle1}</legend>
-	<form class="form-horizontal" method="post" action="jsp/admin/plugins/files2docs/DoModifyMapping.jsp">
-	<input type="hidden" name="mapping_id" value="${mapping.id}" />
-	<div class="control-group">
-		<label class="control-label" >#i18n{files2docs.modifyMapping.labelDocumentType}&nbsp;*&nbsp;:</label>
-		<div class="controls">
-			<input type="text" class="input-normal" disabled value="<#if mapping.documentTypeName?has_content>${mapping.documentTypeName}</#if>" >
-		</div>
-	</div>
-	<div class="control-group">
-		<label class="control-label" for="description">#i18n{files2docs.modifyMapping.labelDescription}&nbsp;*&nbsp;:</label>
-		<div class="controls">
-			<input type="text" class="input-normal" id="description" name="description" value="${mapping.description}"  maxlength="255" >
-		</div>
-	</div>
-    <div class="form-actions">
-        	<button class="btn btn-primary btn-small" type="submit">
-				<i class="icon-ok icon-white"></i>&nbsp;#i18n{files2docs.modifyMapping.buttonModify}
-			</button>
-			<a href="jsp/admin/plugins/files2docs/ManageMapping.jsp" class="btn btn-small" type="submit">
-				<i class="icon-remove-circle"></i>&nbsp;#i18n{files2docs.modifyMapping.buttonCancel}
-			</a>
-		</div>
-    </fieldset>
-	</form>
-	</div>
-	<div class="span7">
-	<fieldset>
-	<legend>#i18n{files2docs.modifyMapping.contentBoxTitle2}</legend>
-	<table class="table table-striped table-condensed">
-		<tbody>
-			<tr>
-				<th>#i18n{files2docs.modifyMapping.columnAttribute}</th>
-				<th>#i18n{files2docs.modifyMapping.columnValue}</th>
-				<th>#i18n{files2docs.modifyMapping.columnActions}</th>
-			</tr>
-			<tr>
-				<td>#i18n{files2docs.modifyMapping.labelTitle}</td>
-			    <td><#if mapping.title?exists>${mapping.title}</#if></td>
-			    <td>
-					<a class="btn btn-primary btn-mini" href="jsp/admin/plugins/files2docs/ModifyAttribute.jsp?mapping_id=${mapping.id}&attribute_name=title"  title="null" >
-						<i class="icon-edit icon-white"></i>
+<div class="row">
+	<div class="col-xs-12 col-sm-12 col-md-12">
+		<div class="box box-primary">
+			<div class="box-header">
+				<h3 class="box-title">#i18n{files2docs.modifyMapping.contentBoxTitle1} / #i18n{files2docs.modifyMapping.contentBoxTitle2}</h3>
+			</div>
+            <div class="box-body">	
+				<form class="form-inline" role="form" method="post" action="jsp/admin/plugins/files2docs/DoModifyMapping.jsp">
+					<input type="hidden" name="mapping_id" value="${mapping.id}">
+					<div class="form-group">
+						<label>#i18n{files2docs.modifyMapping.labelDocumentType}&nbsp;*&nbsp;</label>
+						<input type="text" class="form-control input-xs" disabled value="<#if mapping.documentTypeName?has_content>${mapping.documentTypeName}</#if>" >
+					</div>
+					<div class="form-group">
+						<label for="description">#i18n{files2docs.modifyMapping.labelDescription}&nbsp;*&nbsp;</label>
+						<input type="text" class="form-control input-xs" size="80" id="description" name="description" value="${mapping.description}" maxlength="255" >
+					</div>
+					<button class="btn btn-primary btn-xs btn-flat" type="submit">
+						<i class="fa fa-check"></i>&nbsp;#i18n{files2docs.modifyMapping.buttonModify}
+					</button>
+					<a href="jsp/admin/plugins/files2docs/ManageMapping.jsp" class="btn btn-default btn-xs btn-flat" type="submit">
+						<i class="fa fa-close"></i>&nbsp;#i18n{files2docs.modifyMapping.buttonCancel}
 					</a>
-				</td>
-			</tr>
-			<tr>
-				<td>#i18n{files2docs.modifyMapping.labelSummary}</td>
-			    <td><#if mapping.summary?exists>${mapping.summary}</#if></td>
-			    <td>
-					<a class="btn btn-primary btn-mini" href="jsp/admin/plugins/files2docs/ModifyAttribute.jsp?mapping_id=${mapping.id}&attribute_name=summary"  title="null" >
-						<i class="icon-edit icon-white"></i>
-					</a>
-				</td>
-			</tr>
-			<#if attribute_list?exists>
-				<#assign i = 0>
-				<#list attribute_list as attribute>
-					<#if document_attribute_name_list[i]?exists && document_attribute_code_list[i]?exists>
+				</form>
+				<hr>
+				<table class="table table-striped table-condensed">
+					<tbody>
 						<tr>
-							<td>${document_attribute_name_list[i]}</td>
-						    <td>
-						    	<#switch document_attribute_code_list[i]>
-									<#case "file">
-										#i18n{files2docs.modifyMapping.labelFile}
-										<#break>
-									<#case "image">
-										#i18n{files2docs.modifyMapping.labelImage}
-										<#break>
-									<#default>
-										<#if attribute.format?exists>${attribute.format}</#if>
-								</#switch>
-						    </td>
-						    <td>
-							<#if document_attribute_code_list[i] != "file" && document_attribute_code_list[i] != "image">
-								<a class="btn btn-primary btn-mini" href="jsp/admin/plugins/files2docs/ModifyAttribute.jsp?attribute_id=${attribute.id}"  title="null" >
-									<i class="icon-edit icon-white"></i>
+							<th>#i18n{files2docs.modifyMapping.columnAttribute}</th>
+							<th>#i18n{files2docs.modifyMapping.columnValue}</th>
+							<th>#i18n{files2docs.modifyMapping.columnActions}</th>
+						</tr>
+						<tr>
+							<td>#i18n{files2docs.modifyMapping.labelTitle}</td>
+							<td><#if mapping.title?exists>${mapping.title}</#if></td>
+							<td>
+								<a class="btn btn-primary btn-xs btn-flat" href="jsp/admin/plugins/files2docs/ModifyAttribute.jsp?mapping_id=${mapping.id}&attribute_name=title"  title="#i18n{portal.util.labelModify}" >
+									<i class="fa fa-pencil"></i>
 								</a>
-							<#elseif attribute.id != -1>
-								<span class="label label-success"><i class="icon-ok-sign icon-white"></i> #i18n{portal.util.labelEnabled}</span>
-							<#elseif !id_mandatory_doc_attr_file_img??>
-								<#-- No mandatory document attribute type file/image, then display the button to change the assignment for attribute file/image -->
-								<form class="form-horizontal" method="post" action="jsp/admin/plugins/files2docs/DoChangeAttributeFileImage.jsp">
-										<input type="hidden" name="mapping_id" value="${mapping.id}" />
-										<input type="hidden" name="id_document_attr" value="${attribute.documentAttributeId}" />
-										<button class="btn btn-primary" type="submit" >#i18n{files2docs.modifyMapping.buttonModifyAttributeFileImage}</button>
-								
-								</form>
-								</#if>
 							</td>
 						</tr>
-						<#assign i = i + 1>
+						<tr>
+							<td>#i18n{files2docs.modifyMapping.labelSummary}</td>
+							<td><#if mapping.summary?exists>${mapping.summary}</#if></td>
+							<td>
+								<a class="btn btn-primary btn-xs btn-flat" href="jsp/admin/plugins/files2docs/ModifyAttribute.jsp?mapping_id=${mapping.id}&attribute_name=summary"  title="#i18n{portal.util.labelModify}" >
+									<i class="fa fa-pencil"></i>
+								</a>
+							</td>
+						</tr>
+						<#if attribute_list?exists>
+							<#assign i = 0>
+							<#list attribute_list as attribute>
+							<#if document_attribute_name_list[i]?exists && document_attribute_code_list[i]?exists>
+								<tr>
+									<td>${document_attribute_name_list[i]}</td>
+									<td>
+										<#switch document_attribute_code_list[i]>
+											<#case "file">
+												#i18n{files2docs.modifyMapping.labelFile}
+												<#break>
+											<#case "image">
+												#i18n{files2docs.modifyMapping.labelImage}
+												<#break>
+											<#default>
+												<#if attribute.format?exists>${attribute.format}</#if>
+										</#switch>
+									</td>
+									<td>
+									<#if document_attribute_code_list[i] != "file" && document_attribute_code_list[i] != "image">
+										<a class="btn btn-primary btn-xs btn-flat" href="jsp/admin/plugins/files2docs/ModifyAttribute.jsp?attribute_id=${attribute.id}"  title="#i18n{portal.util.labelModify}" >
+											<i class="fa fa-pencil"></i>
+										</a>
+									<#elseif attribute.id != -1>
+										<span class="label label-success"><i class="fa fa-check"></i> #i18n{portal.util.labelEnabled}</span>
+									<#elseif !id_mandatory_doc_attr_file_img??>
+										<#-- No mandatory document attribute type file/image, then display the button to change the assignment for attribute file/image -->
+										<form class="form-horizontal" method="post" action="jsp/admin/plugins/files2docs/DoChangeAttributeFileImage.jsp">
+												<input type="hidden" name="mapping_id" value="${mapping.id}" />
+												<input type="hidden" name="id_document_attr" value="${attribute.documentAttributeId}" />
+											<button class="btn btn-primary btn-xs btn-flat" type="submit" >#i18n{files2docs.modifyMapping.buttonModifyAttributeFileImage}</button>
+										</form>
+										</#if>
+									</td>
+								</tr>
+								<#assign i = i + 1>
+							</#if>
+						</#list>
 					</#if>
-				</#list>
-			</#if>
-			</tbody>
-		</table>
-		</fieldset>
+					</tbody>
+				</table>
+			</div>
+		</div>
 	</div>
 </div>
