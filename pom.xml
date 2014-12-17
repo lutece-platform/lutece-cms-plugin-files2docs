@@ -43,8 +43,9 @@
 		<jiraComponentId>10201</jiraComponentId>
 	</properties>
     <scm>
-        <connection>scm:svn:http://dev.lutece.paris.fr/svn/lutece/portal/trunk/plugins/cms/plugin-files2docs</connection>
-        <developerConnection>scm:svn:https://dev.lutece.paris.fr/svn/lutece/portal/trunk/plugins/cms/plugin-files2docs</developerConnection>
-        <url>http://dev.lutece.paris.fr/viewvc/lutece/portal/trunk/plugins/cms/plugin-files2docs</url>
+        <connection>scm:git:https://github.com/lutece-platform/lutece-cms-plugin-files2docs.git</connection>
+        <developerConnection>scm:git:https://github.com/lutece-platform/lutece-cms-plugin-files2docs.git</developerConnection>
+        <developerConnection>scm:git:https://github.com/lutece-platform/lutece-cms-plugin-files2docs.git</developerConnection>
+        <url>https://github.com/lutece-platform/lutece-cms-plugin-files2docs.git</url>
     </scm>
 </project>
