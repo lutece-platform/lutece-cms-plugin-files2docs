@@ -45,7 +45,6 @@
     <scm>
         <connection>scm:git:https://github.com/lutece-platform/lutece-cms-plugin-files2docs.git</connection>
         <developerConnection>scm:git:https://github.com/lutece-platform/lutece-cms-plugin-files2docs.git</developerConnection>
-        <developerConnection>scm:git:https://github.com/lutece-platform/lutece-cms-plugin-files2docs.git</developerConnection>
         <url>https://github.com/lutece-platform/lutece-cms-plugin-files2docs.git</url>
     </scm>
 </project>
