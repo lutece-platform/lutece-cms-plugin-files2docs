@@ -10,7 +10,7 @@
     <groupId>fr.paris.lutece.plugins</groupId>
     <artifactId>plugin-files2docs</artifactId>
     <packaging>lutece-plugin</packaging>
-    <version>1.0.6-SNAPSHOT</version>
+    <version>1.1.0</version>
     <name>Lutece files2docs plugin</name>
 
     <repositories>
@@ -47,6 +47,7 @@
         <connection>scm:git:https://github.com/lutece-platform/lutece-cms-plugin-files2docs.git</connection>
         <developerConnection>scm:git:https://github.com/lutece-platform/lutece-cms-plugin-files2docs.git</developerConnection>
         <url>https://github.com/lutece-platform/lutece-cms-plugin-files2docs.git</url>
-    </scm>
+      <tag>lutece-cms-plugin-files2docs-1.1.0</tag>
+  </scm>
     
 </project>
