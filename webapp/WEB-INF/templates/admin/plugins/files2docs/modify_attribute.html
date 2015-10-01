@@ -4,7 +4,7 @@
 			<div class="box-header">
 				<h3 class="box-title">#i18n{files2docs.modifyAttribute.contentBoxTitle} <#if mapping.documentTypeName?has_content>${mapping.documentTypeName}</#if></h3>
 			</div>
-            <div class="box-body table-responsive">	
+      <div class="box-body table-responsive">
 				<form class="form-horizontal" method="post" action="jsp/admin/plugins/files2docs/DoModifyAttribute.jsp">
 					<input type="hidden" name="attribute_id" value="<#if attribute?exists>${attribute.id}</#if>">
 					<input type="hidden" name="attribute_name" value="<#if attribute_name?exists>${attribute_name}</#if>">
@@ -20,17 +20,17 @@
 						<label class="control-label col-xs-12 col-sm-2 col-md-2" >#i18n{files2docs.modifyAttribute.labelExample} &nbsp;</label>
 						<div class="col-xs-12 col-sm-10 col-md-10">
 							<p class="control-static-form">
-								<#list mapping_tag_list as mapping_tag>${mapping_tag}&nbsp;</#list>
+								<#list mapping_tag_list as mapping_tag>${mapping_tag}</#list>
 							</p>
 						</div>
 					</div>
 					<div class="form-group">
 						<div class="col-xs-12 col-sm-offset-2 col-sm-10 col-md-offset-2 col-md-10 ">
 							<button class="btn btn-primary btn-flat" type="submit" >
-								<i class="fa fa-check"></i>&nbsp;#i18n{files2docs.modifyAttribute.buttonSubmit}
+								<i class="fa fa-check"></i> #i18n{files2docs.modifyAttribute.buttonSubmit}
 							</button>
 							<a href="jsp/admin/plugins/files2docs/ModifyMapping.jsp?mapping_id=${mapping.id}" class="btn btn-default btn-flat">
-								<i class="fa fa-close"></i>&nbsp;#i18n{files2docs.modifyAttribute.buttonCancel}
+								<i class="fa fa-close"></i> #i18n{files2docs.modifyAttribute.buttonCancel}
 							</a>
 						</div>
 					</div>
