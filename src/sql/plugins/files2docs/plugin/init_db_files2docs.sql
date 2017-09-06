@@ -40,7 +40,8 @@ INSERT INTO files2docs_mapping_attribute(id_attribute,id_mapping,id_document_att
 INSERT INTO files2docs_mapping_attribute(id_attribute,id_mapping,id_document_attribute,format) VALUES(14,5,61,NULL);
 INSERT INTO files2docs_mapping_attribute(id_attribute,id_mapping,id_document_attribute,format) VALUES(15,5,62,NULL);
 INSERT INTO files2docs_mapping_attribute(id_attribute,id_mapping,id_document_attribute,format) VALUES(16,6,43,NULL);
-INSERT INTO files2docs_mapping_attribute(id_attribute,id_mapping,id_document_attribute,format) VALUES(17,6,44,NULL);
+INSERT INTO files2docs_mapping_attribute(id_attribute,id_mapping,id_document_attribute,format) VALUES(17,6,44,'<user>');
 INSERT INTO files2docs_mapping_attribute(id_attribute,id_mapping,id_document_attribute,format) VALUES(18,7,48,NULL);
 INSERT INTO files2docs_mapping_attribute(id_attribute,id_mapping,id_document_attribute,format) VALUES(19,8,39,NULL);
 INSERT INTO files2docs_mapping_attribute(id_attribute,id_mapping,id_document_attribute,format) VALUES(20,8,40,NULL);
+INSERT INTO files2docs_mapping_attribute(id_attribute,id_mapping,id_document_attribute,format) VALUES(21,6,63,'<filename>');

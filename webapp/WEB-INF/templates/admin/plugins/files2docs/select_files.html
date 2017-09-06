@@ -8,20 +8,45 @@
 <div class="row">
 	<div class="col-xs-12 col-sm-12 col-md-12">
 		<div class="box box-primary">
-			<div class="box-header">
-				<h3 class="box-title">#i18n{files2docs.createMapping.pageTitle}</h3>
-			</div>
+			
 			<div class="box-body">	
-				<form class="form" method="post" action="jsp/admin/plugins/files2docs/DoSelectFiles.jsp" enctype="multipart/form-data">
+                            <div class="row">
+
+<!-- space Browser and select file type ----------------------------------------------------- -->
+                                <div class="col-xs-12 col-sm-12 col-md-4">
+
+				<form id="selectFilesForm" class="form" method="post" action="jsp/admin/plugins/files2docs/DoSelectFiles.jsp" enctype="multipart/form-data">
 				<input type="hidden" id="update_document_type" name="update_document_type" value="" />
 				<input type="hidden" id="document_type_code_hidden" name="document_type_code_hidden" value="${document_type_code!}" />
-				<fieldset>
-					<legend>
-						<span class="badge badge-info">#i18n{files2docs.selectFiles.step} 1</span>&nbsp;#i18n{files2docs.selectFiles.pageTitle}*
-					</legend>
+
+					<fieldset>
+						<legend>
+							<span class="badge badge-info">#i18n{files2docs.selectFiles.step} 1</span>&nbsp;#i18n{files2docs.selectFiles.labelSpace}*
+						</legend>
+						<div class="form-group">
+							<div class="box box-solid">
+								<div class="box-header"></div>
+								<div class="box-body">
+									${spaces_browser}
+									<div class="clearfix"></div>
+								</div>
+							</div>
+						</div>
+						<div class="form-group sr-only">
+							<div class="col-xs-12 col-sm-offset-2 col-sm-10 col-md-offset-2 col-md-10">
+								<button type="submit" class="btn btn-primary btn-small" <#if submit_button_disabled>disabled</#if>>
+									<i class="fa fa-check"></i>
+									&nbsp;#i18n{files2docs.selectFiles.buttonSubmit}
+								</button> 
+							</div>
+						</div>
+                                </fieldset>
+                           
+
+                                <fieldset>
 					<div class="form-group">
-						<label class="control-label col-xs-12 col-sm-2 col-md-2">#i18n{files2docs.selectFiles.labelType}*</label>
-						<div class="col-xs-12 col-sm-3 col-md-3">
+						<label class="control-label col-xs-12 col-sm-6 col-md-6">#i18n{files2docs.selectFiles.labelType}*</label>
+						<div class="col-xs-12 col-sm-6 col-md-6">
 							<select id="document_type_code" class="form-control" name="document_type_code" <#if document_type_code_disabled>disabled="disabled"</#if> onchange="updateDocumentType();">
 								<option selected="selected" value="">#i18n{files2docs.selectFiles.labelType} </option>
 								<#list document_type_list?sort_by("name") as type>
@@ -66,347 +91,289 @@
 							</#compress>
 						</p>
 						<input type="hidden" id="extension_hidden" name="extension_hidden" value="<#if extension_checked_list?has_content>${extension_checked_list}</#if>" />
-						</#if>
+						
+                                                </#if>
 				</fieldset>
+                                
+                                <input type="hidden" id="nb_imported_files" name="nb_imported_files" value="0">
+                                </form>
+
+                                </div>
+               
+<!-- JQUERY upload ---------------------------------------------------------------------------- -->
+                                <div class="col-xs-12 col-sm-12 col-md-6">
+                                
 				<fieldset>
 					<legend>
 						<span class="badge badge-info">#i18n{files2docs.selectFiles.step} 2</span>&nbsp;#i18n{files2docs.selectFiles.labelUpload}*</legend>
-							<div id="divSWFUploadUI" style="display:none;">
-									<script type="text/javascript">
-										// Displays the SWFUpload UI div (JS enabled)
-										document.getElementById("divSWFUploadUI").style.display = "";
-									</script>
-									<div class="form-group">
-										<div class="col-xs-12 col-sm-offset-2 col-sm-5 col-md-offset-2 col-md-5">
-											<div class="box box-solid box-upload">
-												<div class="box-header">
-													<h3 class="box-title">#i18n{files2docs.selectFiles.UploadQueue}</h3>
-												</div>
-												<div class="box-body">
-													<div id="fsUploadProgress"></div>
-												</div>
-											</div>
-										</div>
-									</div>
-									<div class="form-group">
-										<div class="col-xs-12 col-sm-offset-2 col-sm-5 col-md-offset-2 col-md-5">
-												<div class="alert alert-info">
-													<i class="fa fa-info"></i>
-													<div id="divStatus">
-													<#if nb_imported_files?exists>
-														${nb_imported_files}
-														<#if nb_imported_files &lt; 2>
-															#i18n{files2docs.message.swfupload.complete.singular}
-														<#else>
-															#i18n{files2docs.message.swfupload.complete.plural}
-														</#if>
-													</#if>
-													</div>
-												</div>
-										</div>
-									</div>
-									<input type="hidden" id="nb_imported_files" name="nb_imported_files" value="<#if nb_imported_files?exists>${nb_imported_files}<#else>0</#if>" />
-									<div class="form-group">
-										<div class="col-xs-12 col-sm-offset-2 col-sm-10 col-md-offset-2 col-md-10">
-											<br>
-											<span id="spanButtonPlaceholder"></span>
-											<button type="submit" class="btn btn-primary btn-sm btn-flat">
-												<i class="fa fa-folder-open-o"></i>&nbsp;#i18n{files2docs.selectFiles.buttonUpload}
-											</button>
-											<button type="submit" class="btn btn-danger btn-sm btn-flat" id="delete" name="delete" value="#i18n{files2docs.selectFiles.buttonDelete}">
-												<i class="fa fa-trash"></i>&nbsp;#i18n{files2docs.selectFiles.buttonDelete}
-											</button>	
-										</div>
-									</div>
+							<div id="divJqueryUpload" >
+
+<!-- blueImp Jquery upload script ----------------------------------------------------------------------- -->
+<!-- Generic page styles -->
+<link rel="stylesheet" href="js/plugins/files2docs/jQuery-File-Upload-9.19.0/css/style.css">
+
+<!-- CSS to style the file input field as button and adjust the Bootstrap progress bars -->
+<link rel="stylesheet" href="js/plugins/files2docs/jQuery-File-Upload-9.19.0/css/jquery.fileupload.css">
+<link rel="stylesheet" href="js/plugins/files2docs/jQuery-File-Upload-9.19.0/css/jquery.fileupload-ui.css">
+
+<!-- The file upload form used as target for the file upload widget -->
+ <form id="fileupload" action="${webapp_url}/jsp/admin/plugins/files2docs/Upload.jsp;jsessionid=${jsessionid};document_type_code=${document_type_code}" method="POST" enctype="multipart/form-data">
+   
+        <!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
+        <div class="row fileupload-buttonbar">
+            <div class="col-lg-7">
+                <!-- The fileinput-button span is used to style the file input field as button -->
+                <span class="btn btn-success fileinput-button">
+                    <i class="glyphicon glyphicon-plus"></i>
+                    <span>#i18n{files2docs.selectFiles.buttonAdd}</span>
+                    <input id="fileSelectBlueImpInput" type="file" name="files[]" multiple class="noBootstrapFilestyle">
+                </span>
+                <button type="submit" class="btn btn-primary start">
+                    <i class="glyphicon glyphicon-upload"></i>
+                    <span>#i18n{files2docs.selectFiles.buttonStart}</span>
+                </button>
+                <button type="reset" class="btn btn-warning cancel">
+                    <i class="glyphicon glyphicon-ban-circle"></i>
+                    <span>#i18n{files2docs.selectFiles.buttonStop}</span>
+                </button>
+                <!-- button type="button" class="btn btn-danger delete">
+                    <i class="glyphicon glyphicon-trash"></i>
+                    <span>#i18n{files2docs.selectFiles.buttonDelete}</span>
+                </button -->
+                <input type="checkbox" class="toggle">
+                <!-- The global file processing state -->
+                <span class="fileupload-process"></span>
+            </div>
+            <!-- The global progress state -->
+            <div class="col-lg-5 fileupload-progress fade">
+                <!-- The global progress bar -->
+                <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+                    <div class="progress-bar progress-bar-success" style="width:0%;"></div>
+                </div>
+                <!-- The extended global progress state -->
+                <div class="progress-extended">&nbsp;</div>
+            </div>
+        </div>
+        
+        <input type="hidden" id="document_type_code" name="document_type_code" value="${document_type_code!}" />
+
+        <!-- The table listing the files available for upload/download -->
+        <table role="presentation" class="table table-striped"><tbody class="files"></tbody></table>
+    </form>
+    <br>
+
+<!-- The blueimp Gallery widget -->
+<div id="blueimp-gallery" class="blueimp-gallery blueimp-gallery-controls" data-filter=":even">
+    <div class="slides"></div>
+    <h3 class="title"></h3>
+    <a class="prev">‹</a>
+    <a class="next">›</a>
+    <a class="close">×</a>
+    <a class="play-pause"></a>
+    <ol class="indicator"></ol>
+</div>
+<!-- The template to display files available for upload -->
+<script id="template-upload" type="text/x-tmpl">
+{% for (var i=0, file; file=o.files[i]; i++) { %}
+    <tr class="template-upload fade">
+        <td>
+            <span class="preview"></span>
+        </td>
+        <td>
+            <p class="name">{%=file.name%}</p>
+            <strong class="error text-danger"></strong>
+        </td>
+        <td>
+            <p class="size">Processing...</p>
+            <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-bar progress-bar-success" style="width:0%;"></div></div>
+        </td>
+        <td>
+            {% if (!i && !o.options.autoUpload) { %}
+                <button class="btn btn-primary start" disabled>
+                    <i class="glyphicon glyphicon-upload"></i>
+                    <span>#i18n{files2docs.selectFiles.buttonStart}</span>
+                </button>
+            {% } %}
+            {% if (!i) { %}
+                <button class="btn btn-warning cancel">
+                    <i class="glyphicon glyphicon-ban-circle"></i>
+                    <span>#i18n{files2docs.selectFiles.buttonCancel}</span>
+                </button>
+            {% } %}
+        </td>
+    </tr>
+{% } %}
+</script>
+<!-- The template to display files available for download -->
+<script id="template-download" type="text/x-tmpl">
+{% for (var i=0, file; file=o.files[i]; i++) { %}
+    <tr class="template-download fade">
+        <td>
+            <span class="preview">
+                {% if (file.thumbnailUrl) { %}
+                    <a href="{%=file.url%}" title="{%=file.name%}" download="{%=file.name%}" data-gallery><img src="{%=file.thumbnailUrl%}"></a>
+                {% } %}
+            </span>
+        </td>
+        <td>
+            <p class="name">
+                {% if (file.url) { %}
+                    <a href="{%=file.url%}" title="{%=file.name%}" download="{%=file.name%}" {%=file.thumbnailUrl?'data-gallery':''%}>{%=file.name%}</a>
+                {% } else { %}
+                    <span>{%=file.name%}</span>
+                {% } %}
+            </p>
+            {% if (file.error) { %}
+                <div><span class="label label-danger">Error</span> {%=file.error%}</div>
+            {% } %}
+        </td>
+        <td>
+            <span class="size">{%=o.formatFileSize(file.size)%}</span>
+        </td>
+        <!-- td>
+            {% if (file.deleteUrl) { %}
+                <button class="btn btn-danger delete" data-type="{%=file.deleteType%}" data-url="{%=file.deleteUrl%}"{% if (file.deleteWithCredentials) { %} data-xhr-fields='{"withCredentials":true}'{% } %}>
+                    <i class="glyphicon glyphicon-trash"></i>
+                    <span>#i18n{files2docs.selectFiles.buttonDelete}</span>
+                </button>
+                <input type="checkbox" name="delete" value="1" class="toggle">
+            {% } else { %}
+                <button class="btn btn-warning cancel">
+                    <i class="glyphicon glyphicon-ban-circle"></i>
+                    <span>#i18n{files2docs.selectFiles.buttonCancel}</span>
+                </button>
+            {% } %}
+        </td -->
+    </tr>
+{% } 
+   
+    // sets the nb_imported_files
+    $("#nb_imported_files").val( $(".progress-bar").length ) ;
+    if ( $(".progress-bar").length > 1 ) {
+        $("#btnLinkValidate").show();
+    } else {
+        $("#btnLinkValidate").hide();
+    }
+     
+%}
+</script>
+
+<!-- The jQuery UI widget factory, can be omitted if jQuery UI is already included -->
+<script src="js/plugins/files2docs/jQuery-File-Upload-9.19.0/js/vendor/jquery.ui.widget.js"></script>
+<!-- The Templates plugin is included to render the upload/download listings -->
+<script src="js/plugins/files2docs/jQuery-File-Upload-9.19.0/js/tmpl.min.js"></script>
+<!-- The Load Image plugin is included for the preview images and image resizing functionality -->
+<script src="js/plugins/files2docs/jQuery-File-Upload-9.19.0/js/load-image.all.min.js"></script>
+<!-- The Canvas to Blob plugin is included for image resizing functionality -->
+<script src="js/plugins/files2docs/jQuery-File-Upload-9.19.0/js/canvas-to-blob.min.js"></script>
+<!-- blueimp Gallery script -->
+<script src="js/plugins/files2docs/jQuery-File-Upload-9.19.0/js/jquery.blueimp-gallery.min.js"></script>
+<!-- The Iframe Transport is required for browsers without support for XHR file uploads -->
+<script src="js/plugins/files2docs/jQuery-File-Upload-9.19.0/js/jquery.iframe-transport.js"></script>
+<!-- The basic File Upload plugin -->
+<script src="js/plugins/files2docs/jQuery-File-Upload-9.19.0/js/jquery.fileupload.js"></script>
+<!-- The File Upload processing plugin -->
+<script src="js/plugins/files2docs/jQuery-File-Upload-9.19.0/js/jquery.fileupload-process.js"></script>
+<!-- The File Upload image preview & resize plugin -->
+<script src="js/plugins/files2docs/jQuery-File-Upload-9.19.0/js/jquery.fileupload-image.js"></script>
+<!-- The File Upload audio preview plugin -->
+<script src="js/plugins/files2docs/jQuery-File-Upload-9.19.0/js/jquery.fileupload-audio.js"></script>
+<!-- The File Upload video preview plugin -->
+<script src="js/plugins/files2docs/jQuery-File-Upload-9.19.0/js/jquery.fileupload-video.js"></script>
+<!-- The File Upload validation plugin -->
+<script src="js/plugins/files2docs/jQuery-File-Upload-9.19.0/js/jquery.fileupload-validate.js"></script>
+<!-- The File Upload user interface plugin -->
+<script src="js/plugins/files2docs/jQuery-File-Upload-9.19.0/js/jquery.fileupload-ui.js"></script>
+<!-- The XDomainRequest Transport is included for cross-domain file deletion for IE 8 and IE 9 -->
+<!--[if (gte IE 8)&(lt IE 10)]>
+<script src="js/plugins/files2docs/jQuery-File-Upload-9.19.0/js/cors/jquery.xdr-transport.js"></script>
+<![endif]-->
+
+<script  type="text/javascript">
+/*
+ * jQuery File Upload Plugin JS Main script
+ * https://github.com/blueimp/jQuery-File-Upload
+ *
+ * Copyright 2010, Sebastian Tschan
+ * https://blueimp.net
+ *
+ * Licensed under the MIT license:
+ * https://opensource.org/licenses/MIT
+ */
+
+/* global $, window */
+
+$(function () {
+    'use strict';
+
+    // Initialize the jQuery File Upload widget:
+    $('#fileupload').fileupload({
+        // Uncomment the following to send cross-domain cookies:
+        //xhrFields: {withCredentials: true},
+        url: '${webapp_url}/jsp/admin/plugins/files2docs/Upload.jsp;document_type_code=${document_type_code!}',
+        sequentialUploads: true
+    });
+
+
+    // Load existing files:
+    /*$('#fileupload').addClass('fileupload-processing');
+    $.ajax({
+        // Uncomment the following to send cross-domain cookies:
+        //xhrFields: {withCredentials: true},
+        url: $('#fileupload').fileupload('option', 'url'),
+        dataType: 'json',
+        context: $('#fileupload')[0]
+    }).always(function () {
+        $(this).removeClass('fileupload-processing');
+    }).done(function (result) {
+        $(this).fileupload('option', 'done')
+            .call(this, $.Event('done'), {result: result});
+    });*/
+
+
+});
+</script>
+
+<!-- --------------------------------------------------------------------------------------- -->			
+
 							</div>
-							<noscript>
-								<div class="form-group">
-									<div class="col-xs-12 col-sm-offset-2 col-sm-10 col-md-offset-2 col-md-10">
-										<p class="alert alert-warning">
-											<i class="fa fa-warning">
-											<b>#i18n{files2docs.message.swfupload.label.javascript}</b>
-											<br>
-											<b>#i18n{files2docs.message.swfupload.label.degraded}</b>
-											<br>
-											<a href="jsp/admin/plugins/files2docs/SelectFiles.jsp?mode=degraded">
-												#i18n{files2docs.selectFiles.linkDegraded}
-											</a>
-										</p>
-									</div>	
-								</div>	
-							</noscript>
-							<div class="form-group">
-								<div class="col-xs-12 col-sm-offset-2 col-sm-10 col-md-offset-2 col-md-10">
-									<div id="divLoadingContent" style="display:none;">
-										<p class="alert" style="text-align:left;">#i18n{files2docs.message.swfupload.label.loading}</p>
-									</div>
-									<div id="divLongLoading" style="display:none;">
-										<p class="alert" style="text-align:left;">
-											#i18n{files2docs.message.swfupload.label.longFirst}
-										</p>
-										<p class="alert" style="text-align:left;">
-											#i18n{files2docs.message.swfupload.label.longSecond}
-										</p>
-										<p class="alert" style="text-align:left;">
-											#i18n{files2docs.message.swfupload.label.degraded}
-										</p>
-										<p>
-											<a href="jsp/admin/plugins/files2docs/SelectFiles.jsp?mode=degraded">
-												#i18n{files2docs.selectFiles.linkDegraded}
-											</a>
-										</p>
-									</div>
-									<div id="divAlternateContent" style="display:none;">
-										<p class="alert" style="text-align:left;">
-											#i18n{files2docs.message.swfupload.label.flash}
-										</p>
-										<p class="alert" style="text-align:left;">
-											#i18n{files2docs.message.swfupload.label.flashLink.begin}
-											<a target="_blank" href="http://get.adobe.com/fr/flashplayer">
-												#i18n{files2docs.message.swfupload.label.flashLink.name}
-											</a>
-											#i18n{files2docs.message.swfupload.label.flashLink.end}
-										</p>
-										<p class="alert" style="text-align:left;">
-											#i18n{files2docs.message.swfupload.label.degraded}
-										</p>
-										<p>
-											<a href="jsp/admin/plugins/files2docs/SelectFiles.jsp?mode=degraded">
-												#i18n{files2docs.selectFiles.linkDegraded}
-											</a>
-										</p>
-									</div>
-								</div>
-							</div>
-					</fieldset>
-					<fieldset>
-						<legend>
-							<span class="badge badge-info">#i18n{files2docs.selectFiles.step} 3</span>&nbsp;#i18n{files2docs.selectFiles.labelSpace}*
-						</legend>
-						<div class="form-group">
-							<div class="col-xs-12 col-sm-offset-2 col-sm-5 col-md-offset-2 col-md-5">
-							<div class="box box-solid">
-								<div class="box-header"></div>
-								<div class="box-body">
-									${spaces_browser}
-									<div class="clearfix"></div>
-								</div>
-							</div>
-							</div>
-						</div>
-						<div class="form-group sr-only">
-							<div class="col-xs-12 col-sm-offset-2 col-sm-10 col-md-offset-2 col-md-10">
-								<button type="submit" class="btn btn-primary btn-small" <#if submit_button_disabled>disabled</#if>>
-									<i class="fa fa-check"></i>
-									&nbsp;#i18n{files2docs.selectFiles.buttonSubmit}
-								</button> 
-							</div>
-						</div>
-					</fieldset>
-				</form>
+				</fieldset>
+                                </div>
+               
+<!-- Validate step ---------------------------------------------------------------------------- -->
+                                <div class="col-xs-12 col-sm-12 col-md-2">
+                                    <fieldset>
+                                    <legend>
+					<span class="badge badge-info">#i18n{files2docs.selectFiles.step} 3</span>&nbsp;#i18n{files2docs.selectFiles.titleSubmit}*</legend>
+						
+                                        <div id="btnLinkValidate" class="btn btn-primary btn-small" display="none">
+                                            <i class="fa fa-check"></i>
+                                    &nbsp;#i18n{files2docs.selectFiles.buttonSubmit}
+                                        </div> 
+                                    </fieldset>
+
+                                </div>
+				
 			</div>				
 		</div>				
 	</div>				
 </div>				
-			
-<!-- SWFUpload Component -->
-<script type="text/javascript" src="js/plugins/files2docs/swfupload/swfupload.js"></script>
 
-<!-- SWFUpload SWFObject plug-in -->
-<script type="text/javascript" src="js/plugins/files2docs/swfupload/plugins/swfupload.swfobject.js"></script>
-
-<!-- SWFUpload Queue handling plug-in -->
-<script type="text/javascript" src="js/plugins/files2docs/swfupload/plugins/swfupload.queue.js"></script>
-
-<!-- SWFUpload Event handlers -->
-<script type="text/javascript" src="js/plugins/files2docs/swfupload/plugins/fileprogress.js"></script>
-<script type="text/javascript" src="js/plugins/files2docs/swfupload/plugins/handlers.js"></script>
-
-
-<!-- Initialization and settings -->
-<script type="text/javascript">
-	// Declares variables
-	var swfu;
-	var fileTypes;
-	
-	// Internationalization messages (i18n)
-	var message_complete_singular = "#i18n{files2docs.message.swfupload.complete.singular}";
-	var message_complete_plural = "#i18n{files2docs.message.swfupload.complete.plural}";
-	
-	var message_alert_intro = "#i18n{files2docs.message.swfupload.alert.intro}";
-	var message_alert_limit_reached = "#i18n{files2docs.message.swfupload.alert.limit_reached}";
-	var message_alert_select_begin = "#i18n{files2docs.message.swfupload.alert.select_begin}";
-	var message_alert_select_singular = "#i18n{files2docs.message.swfupload.alert.select_singular}";
-	var message_alert_select_plural_first_part = "#i18n{files2docs.message.swfupload.alert.select_plural_first_part}";
-	var message_alert_select_plural_second_part = "#i18n{files2docs.message.swfupload.alert.select_plural_second_part}";
-	
-	var message_status_pending = "#i18n{files2docs.message.swfupload.status.pending}";
-	var message_status_uploading = "#i18n{files2docs.message.swfupload.status.uploading}";
-	var message_status_complete = "#i18n{files2docs.message.swfupload.status.complete}";
-	var message_status_cancelled = "#i18n{files2docs.message.swfupload.status.cancelled}";
-	var message_status_stopped = "#i18n{files2docs.message.swfupload.status.stopped}";
-	
-	var message_error_file_exceeds_size_limit = "#i18n{files2docs.message.swfupload.error.file_exceeds_size_limit}";
-	var message_error_zero_byte_file = "#i18n{files2docs.message.swfupload.error.zero_byte_file}";
-	var message_error_invalid_filetype = "#i18n{files2docs.message.swfupload.error.invalid_filetype}";
-	var message_error_unhandled_error = "#i18n{files2docs.message.swfupload.error.unhandled_error}";
-	var message_error_http_error = "#i18n{files2docs.message.swfupload.error.http_error}";
-	var message_error_upload_failed = "#i18n{files2docs.message.swfupload.error.upload_failed}";
-	var message_error_io_error = "#i18n{files2docs.message.swfupload.error.io_error}";
-	var message_error_security_error = "#i18n{files2docs.message.swfupload.error.security_error}";
-	var message_error_upload_limit_exceeded = "#i18n{files2docs.message.swfupload.error.upload_limit_exceeded}";
-	var message_error_file_validation_failed = "#i18n{files2docs.message.swfupload.error.file_validation_failed}";
-	var message_error_file_is_duplicated = "#i18n{files2docs.message.swfupload.error.file_is_duplicated}";
-	var message_error_invalid_filename = "#i18n{files2docs.message.swfupload.error.invalid_filename}";
-	
-	// Loads SWFUpload
-	SWFUpload.onload = function (  )
-	{
-		// Inits the file type list
-		<#if regexp_map[document_type_code]?exists>
-			fileTypes = "";
-			<#list regexp_map[document_type_code]?trim?split(",") as extension>
-				<#if extension_checked_list?has_content>
-					<#assign bIsChecked = false>
-					<#list extension_checked_list?trim?split(",") as extension_checked>
-						<#if extension = extension_checked>
-							<#assign bIsChecked = true>
-							<#break>
-						</#if>
-					</#list>
-				</#if>
-				<#if !bIsChecked?exists || bIsChecked>
-					if ( fileTypes == null || fileTypes == "" )
-					{
-						fileTypes = "*.${extension}";
-					}
-					else
-					{
-						fileTypes += "; *.${extension}";
-					}
-				</#if>
-			</#list>
-		<#else>
-			fileTypes = "*.*";
-		</#if>
-		
-		// Loads SWFUpload
-		swfu = new SWFUpload( getSettings ( fileTypes ) );
-	}
-	
-	// Reloads SWFUpload
-	function reloadSWFUpload ( fileTypes )
-	{
-		var movie = swfu.getMovieElement(  );
-		var placeHolder = document.createElement( "span" );
-		placeHolder.id = "spanButtonPlaceholder";
-		movie.parentNode.replaceChild( placeHolder, movie );
-		
-		swfu.destroy(  );
-		swfu = new SWFUpload( getSettings ( fileTypes ) );
-	}
-	
-	// Gets the SWFUpload settings
-	function getSettings ( fileTypes )
-	{
-		var settings =
-		{
-			flash_url : "plugins/files2docs/swf/swfupload/swfupload.swf",
-			upload_url : "${webapp_url}jsp/admin/plugins/files2docs/Upload.jsp;jsessionid=${jsessionid}",
-			post_params :
-			{
-				// Minimum interval (in ms) allowed between two uploads
-				"min_interval" : "${min_interval}",
-				// Document type code
-				"document_type_code" : "${document_type_code}"
-			},
-			file_size_limit : "${file_size_limit} B",
-			file_types : fileTypes,
-			file_types_description : "${document_type_code?cap_first}",
-			file_upload_limit : ${file_upload_limit},
-			file_queue_limit : ${file_queue_limit},
-			custom_settings :
-			{
-				progressTarget : "fsUploadProgress"
-			},
-			requeue_on_error : ${requeue_on_error},
-			debug : ${debug},
-			
-			// Button settings
-			button_placeholder_id : "spanButtonPlaceholder",
-			button_width : 71,
-			button_height : 18,
-			button_window_mode : SWFUpload.WINDOW_MODE.TRANSPARENT,
-			button_cursor : SWFUpload.CURSOR.HAND,
-			
-			// The event handler functions are defined in handlers.js
-			swfupload_loaded_handler : swfUploadLoaded,
-			file_queued_handler : fileQueued,
-			file_queue_error_handler : fileQueueError,
-			file_dialog_complete_handler : fileDialogComplete,
-			upload_start_handler : uploadStart,
-			upload_progress_handler : uploadProgress,
-			upload_error_handler : uploadError,
-			upload_success_handler : uploadSuccess,
-			queue_complete_handler : queueComplete,	// Queue handling plug-in event
-			
-			// SWFObject settings
-			minimum_flash_version : "9.0.28",
-			swfupload_pre_load_handler : swfUploadPreLoad,
-			swfupload_load_failed_handler : swfUploadLoadFailed
-		};
-		
-		return settings;
-	}
-	
-	// Updates the selected document type
-	function updateDocumentType(  )
-	{
-		document.getElementById("update_document_type").value = "update_document_type";
-		
-		// Reloads the page
-		document.forms[0].action="${webapp_url}jsp/admin/plugins/files2docs/SelectFiles.jsp";
-		document.forms[0].submit(  );
-	}
-	
-	// Updates the file type list
-	function updateFileTypeList( identifier )
-	{	
-		// Defines the file types list
-		fileTypes = "";
-		if ( document.forms[0].extension.length != null )
-		{
-			for ( var i = 0; i < document.forms[0].extension.length; i++ )
-			{
-				if ( document.forms[0].extension[i].checked )
-				{
-					if ( fileTypes == null || fileTypes == "" )
-					{
-						fileTypes = "*." + document.forms[0].extension[i].value;
-					}
-					else
-					{
-						fileTypes += "; *." + document.forms[0].extension[i].value;
-					}
-				}
-			}
-			
-			if ( fileTypes != null && fileTypes != "" )
-			{
-				// Reloads SWFUpload
-				reloadSWFUpload( fileTypes );
-			}
-			else
-			{
-				// Checks the last modified
-				document.forms[0].extension[identifier].checked = true;
-			}
-		}
-	}
-	
-</script>
 <#else>
 	<div class="alert alert-error">
 	#i18n{files2docs.selectFiles.noMapping}
 	</div>
 </#if>
+
+<script type="text/javascript">
+/* document MASS import redirection */
+jQuery(function($) {
+    $("#btnLinkValidate").click( function() {
+        $("#selectFilesForm").submit();
+    });
+    
+    /* reinit CSS bootstrap fileStyle default for this input */
+    $('#fileSelectBlueImpInput').filestyle('destroy');
+});
+</script>
+
