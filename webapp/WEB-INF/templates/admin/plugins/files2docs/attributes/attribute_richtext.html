@@ -1,2 +1,2 @@
 <label for="${attribute.code}_${identifier}">${attribute.name}<#if attribute.required>*</#if>&nbsp;:&nbsp;</label> 
-<textarea id="${attribute.code}_${identifier}" class="richtext" name="${attribute.code}_${identifier}"  class="form-control" rows="20"><#if (parameters.mapping)?has_content><#list parameters.mapping as mapping>${mapping?if_exists}</#list></#if></textarea>
+<textarea id="${attribute.code}_${identifier}" class="richtext" name="${attribute.code}_${identifier}"  class="form-control" rows="4"><#if (parameters.mapping)?has_content><#list parameters.mapping as mapping>${mapping?if_exists}</#list></#if></textarea>

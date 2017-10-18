@@ -8,6 +8,7 @@
 	
 	// Gets the minimum interval (in ms) allowed between two uploads
 	String strMinInterval = request.getParameter( "min_interval" );
+        if ( strMinInterval == null ) strMinInterval = "1000" ;
 	int nMinInterval = Files2DocsUtil.convertStringToInt( strMinInterval );
 
 	// Performs the upload of the selected file
@@ -41,4 +42,8 @@
 	{
 		response.setStatus( 504 );
 	}
+        else 
+        {
+                out.println( strResult );
+        }
 %>
