@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002-2014, Mairie de Paris
+ * Copyright (c) 2002-2017, Mairie de Paris
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,58 +37,68 @@ import fr.paris.lutece.portal.service.plugin.Plugin;
 
 import java.util.Collection;
 
-
 /**
  * Files2Docs Mapping interface
  */
 public interface IMappingDAO
 {
     /**
-    * Loads the data of all the mapping
-    *
-    * @param plugin The plugin
-    * @return A collection which contains the data of all the mapping
-    */
+     * Loads the data of all the mapping
+     *
+     * @param plugin
+     *            The plugin
+     * @return A collection which contains the data of all the mapping
+     */
     Collection<Mapping> selectAll( Plugin plugin );
 
     /**
-    * Inserts a new record in the table
-    *
-    * @param mapping Instance of the Mapping object to insert
-    * @param plugin The plugin
-    */
+     * Inserts a new record in the table
+     *
+     * @param mapping
+     *            Instance of the Mapping object to insert
+     * @param plugin
+     *            The plugin
+     */
     void insert( Mapping mapping, Plugin plugin );
 
     /**
-    * Loads the data of the mapping from the table
-    *
-    * @param nMappingId The mapping identifier
-    * @param plugin The plugin
-    * @return The instance of the Mapping
-    */
+     * Loads the data of the mapping from the table
+     *
+     * @param nMappingId
+     *            The mapping identifier
+     * @param plugin
+     *            The plugin
+     * @return The instance of the Mapping
+     */
     Mapping load( int nMappingId, Plugin plugin );
 
     /**
-    * Updates the record in the table
-    *
-    * @param mapping The reference of the mapping
-    * @param plugin The plugin
-    */
+     * Updates the record in the table
+     *
+     * @param mapping
+     *            The reference of the mapping
+     * @param plugin
+     *            The plugin
+     */
     void store( Mapping mapping, Plugin plugin );
 
     /**
-    * Deletes a record from the table
-    *
-    * @param nMappingId The mapping identifier
-    * @param plugin The plugin
-    */
+     * Deletes a record from the table
+     *
+     * @param nMappingId
+     *            The mapping identifier
+     * @param plugin
+     *            The plugin
+     */
     void delete( int nMappingId, Plugin plugin );
 
     /**
      * Loads the data of the mapping filtered by document type code
      *
-     * @param strDocumentTypeCode The document type code
-     * @param plugin The plugin
+     * @param strDocumentTypeCode
+     *            The document type code
+     * @param plugin
+     *            The plugin
      * @return The instance of the Mapping
      */
     Mapping selectByDocumentTypeCode( String strDocumentTypeCode, Plugin plugin );

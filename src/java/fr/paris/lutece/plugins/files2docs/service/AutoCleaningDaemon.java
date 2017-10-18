@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002-2014, Mairie de Paris
+ * Copyright (c) 2002-2017, Mairie de Paris
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,17 +35,16 @@ package fr.paris.lutece.plugins.files2docs.service;
 
 import fr.paris.lutece.portal.service.daemon.Daemon;
 
-
 /**
  * AutoCleaning Daemon
  */
 public class AutoCleaningDaemon extends Daemon
 {
     /**
-    * Runs the AutoCleaning process
-    */
-    public void run(  )
+     * Runs the AutoCleaning process
+     */
+    public void run( )
     {
-        setLastRunLogs( AutoCleaningService.getInstance(  ).processAutoCleaning(  ) );
+        setLastRunLogs( AutoCleaningService.getInstance( ).processAutoCleaning( ) );
     }
 }

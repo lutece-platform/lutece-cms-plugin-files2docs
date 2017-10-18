@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002-2014, Mairie de Paris
+ * Copyright (c) 2002-2017, Mairie de Paris
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,7 +42,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
-
 /**
  * AutoCleaning Service
  */
@@ -52,9 +51,9 @@ public final class AutoCleaningService
     private static AutoCleaningService _singleton;
 
     /**
-    * Creates a new instance of AutoCleaningService
-    */
-    private AutoCleaningService(  )
+     * Creates a new instance of AutoCleaningService
+     */
+    private AutoCleaningService( )
     {
     }
 
@@ -63,11 +62,11 @@ public final class AutoCleaningService
      *
      * @return The unique instance of AutoArchivingService
      */
-    public static AutoCleaningService getInstance(  )
+    public static AutoCleaningService getInstance( )
     {
         if ( _singleton == null )
         {
-            _singleton = new AutoCleaningService(  );
+            _singleton = new AutoCleaningService( );
         }
 
         return _singleton;
@@ -78,59 +77,59 @@ public final class AutoCleaningService
      *
      * @return The logs
      */
-    public String processAutoCleaning(  )
+    public String processAutoCleaning( )
     {
-        StringBuffer sbLogs = new StringBuffer(  );
+        StringBuffer sbLogs = new StringBuffer( );
 
         sbLogs.append( "\r\n[Start] Starting Auto cleaning daemon...\r\n" );
 
-        long lDuration = System.currentTimeMillis(  );
+        long lDuration = System.currentTimeMillis( );
 
         // Gets the parent directory
         String strParentPath = AppPropertiesService.getProperty( PROPERTY_PARENT_PATH );
-        File parentDirectory = new File( AppPathService.getWebAppPath(  ) + strParentPath );
+        File parentDirectory = new File( AppPathService.getWebAppPath( ) + strParentPath );
 
         // Deletes old directories in the parent directory
-        File[] uploadDirectories = parentDirectory.listFiles(  );
+        File [ ] uploadDirectories = parentDirectory.listFiles( );
 
         if ( uploadDirectories != null )
         {
             for ( File currentDirectory : uploadDirectories )
             {
                 // Gets the last modified date
-                Date lastModified = new Date( currentDirectory.lastModified(  ) );
+                Date lastModified = new Date( currentDirectory.lastModified( ) );
 
                 // Adds one day to this date
-                GregorianCalendar calendar = new GregorianCalendar(  );
+                GregorianCalendar calendar = new GregorianCalendar( );
                 calendar.setTime( lastModified );
                 calendar.add( Calendar.DATE, 1 );
 
                 // Checks the last modified date
-                if ( calendar.getTime(  ).before( new Date(  ) ) )
+                if ( calendar.getTime( ).before( new Date( ) ) )
                 {
-                    sbLogs.append( "\r\nCleaning upload directory : '" + currentDirectory.getName(  ) + "'...\r\n" );
+                    sbLogs.append( "\r\nCleaning upload directory : '" + currentDirectory.getName( ) + "'...\r\n" );
 
-                    if ( currentDirectory.isDirectory(  ) )
+                    if ( currentDirectory.isDirectory( ) )
                     {
                         // Deletes all files in the current directory
-                        File[] uploadFiles = currentDirectory.listFiles(  );
+                        File [ ] uploadFiles = currentDirectory.listFiles( );
 
                         if ( uploadFiles != null )
                         {
                             for ( File currentFile : uploadFiles )
                             {
-                                currentFile.delete(  );
+                                currentFile.delete( );
                             }
                         }
                     }
 
-                    currentDirectory.delete(  );
+                    currentDirectory.delete( );
                 }
             }
         }
 
-        sbLogs.append( "\r\n[End] Duration : " + ( System.currentTimeMillis(  ) - lDuration ) + " milliseconds\r\n" );
+        sbLogs.append( "\r\n[End] Duration : " + ( System.currentTimeMillis( ) - lDuration ) + " milliseconds\r\n" );
 
-        return sbLogs.toString(  );
+        return sbLogs.toString( );
     }
 }
