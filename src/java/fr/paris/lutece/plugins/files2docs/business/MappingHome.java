@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002-2014, Mairie de Paris
+ * Copyright (c) 2002-2017, Mairie de Paris
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,27 +38,26 @@ import fr.paris.lutece.portal.service.spring.SpringContextService;
 
 import java.util.Collection;
 
-
 /**
  * This class provides instances management methods (create, find, ...) for Mapping objects
  */
 public final class MappingHome
 {
     // Static variable pointed at the DAO instance
-    private static IMappingDAO _dao = (IMappingDAO) SpringContextService.getPluginBean( "files2docs",
-            "files2docsMappingDAO" );
+    private static IMappingDAO _dao = (IMappingDAO) SpringContextService.getPluginBean( "files2docs", "files2docsMappingDAO" );
 
     /**
      * Private constructor - this class does not need to be instantiated
      */
-    private MappingHome(  )
+    private MappingHome( )
     {
     }
 
     /**
      * Loads the data of all the mapping objects
      *
-     * @param plugin The plugin
+     * @param plugin
+     *            The plugin
      * @return A collection which contains the data of all the mapping objects
      */
     public static Collection<Mapping> findAllMapping( Plugin plugin )
@@ -69,8 +68,10 @@ public final class MappingHome
     /**
      * Creates an instance of the mapping class
      *
-     * @param mapping The instance of the Mapping which contains the informations to store
-     * @param plugin The plugin
+     * @param mapping
+     *            The instance of the Mapping which contains the informations to store
+     * @param plugin
+     *            The plugin
      */
     public static void create( Mapping mapping, Plugin plugin )
     {
@@ -80,8 +81,10 @@ public final class MappingHome
     /**
      * Returns an instance of a mapping whose identifier is specified in parameter
      *
-     * @param nMappingId The mapping primary key
-     * @param plugin The plugin
+     * @param nMappingId
+     *            The mapping primary key
+     * @param plugin
+     *            The plugin
      * @return An instance of Mapping
      */
     public static Mapping findByPrimaryKey( int nMappingId, Plugin plugin )
@@ -92,8 +95,10 @@ public final class MappingHome
     /**
      * Updates the mapping which is specified in parameter
      *
-     * @param mapping The instance of the Mapping which contains the data to store
-     * @param plugin The plugin
+     * @param mapping
+     *            The instance of the Mapping which contains the data to store
+     * @param plugin
+     *            The plugin
      */
     public static void update( Mapping mapping, Plugin plugin )
     {
@@ -103,8 +108,10 @@ public final class MappingHome
     /**
      * Removes the mapping whose identifier is specified in parameter
      *
-     * @param nMappingId The mapping identifier
-     * @param plugin The plugin
+     * @param nMappingId
+     *            The mapping identifier
+     * @param plugin
+     *            The plugin
      */
     public static void remove( int nMappingId, Plugin plugin )
     {
@@ -114,8 +121,10 @@ public final class MappingHome
     /**
      * Loads the data of the mapping object filtered by document type code
      *
-     * @param strDocumentTypeCode The document type code
-     * @param plugin The plugin
+     * @param strDocumentTypeCode
+     *            The document type code
+     * @param plugin
+     *            The plugin
      * @return An instance of Mapping
      */
     public static Mapping findByDocumentTypeCode( String strDocumentTypeCode, Plugin plugin )

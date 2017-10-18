@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002-2014, Mairie de Paris
+ * Copyright (c) 2002-2017, Mairie de Paris
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,59 +37,70 @@ import fr.paris.lutece.portal.service.plugin.Plugin;
 
 import java.util.Collection;
 
-
 /**
  * Files2Docs Attribute interface
  */
 public interface IAttributeDAO
 {
     /**
-    * Inserts a new record in the table
-    *
-    * @param attribute Instance of the Attribute object to insert
-    * @param plugin The plugin
-    */
+     * Inserts a new record in the table
+     *
+     * @param attribute
+     *            Instance of the Attribute object to insert
+     * @param plugin
+     *            The plugin
+     */
     void insert( Attribute attribute, Plugin plugin );
 
     /**
-    * Loads the data of the attributes filtered by mapping
-    *
-    * @param nMappingId The mapping identifier
-    * @param plugin The plugin
-    * @return A collection which contains the data of the attributes filtered by mapping
-    */
+     * Loads the data of the attributes filtered by mapping
+     *
+     * @param nMappingId
+     *            The mapping identifier
+     * @param plugin
+     *            The plugin
+     * @return A collection which contains the data of the attributes filtered by mapping
+     */
     Collection<Attribute> selectByMapping( int nMappingId, Plugin plugin );
 
     /**
-    * Loads the data of the attribute from the table
-    *
-    * @param nAttributeId The attribute identifier
-    * @param plugin The plugin
-    * @return The instance of the Attribute
-    */
+     * Loads the data of the attribute from the table
+     *
+     * @param nAttributeId
+     *            The attribute identifier
+     * @param plugin
+     *            The plugin
+     * @return The instance of the Attribute
+     */
     Attribute load( int nAttributeId, Plugin plugin );
 
     /**
-    * Updates the record in the table
-    *
-    * @param attribute The reference of the attribute
-    * @param plugin The plugin
-    */
+     * Updates the record in the table
+     *
+     * @param attribute
+     *            The reference of the attribute
+     * @param plugin
+     *            The plugin
+     */
     void store( Attribute attribute, Plugin plugin );
 
     /**
-    * Deletes a record from the table
-    *
-    * @param nMappingId The mapping identifier
-    * @param plugin The plugin
-    */
+     * Deletes a record from the table
+     *
+     * @param nMappingId
+     *            The mapping identifier
+     * @param plugin
+     *            The plugin
+     */
     void deleteByMapping( int nMappingId, Plugin plugin );
 
     /**
      * Loads the data of the attribute filtered by document attribute
      *
-     * @param nDocumentAttributeId The document attribute identifier
-     * @param plugin The plugin
+     * @param nDocumentAttributeId
+     *            The document attribute identifier
+     * @param plugin
+     *            The plugin
      * @return The instance of the Attribute
      */
     Attribute selectByDocumentAttribute( int nDocumentAttributeId, Plugin plugin );

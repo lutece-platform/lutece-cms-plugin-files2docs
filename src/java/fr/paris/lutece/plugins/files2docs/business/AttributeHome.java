@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002-2014, Mairie de Paris
+ * Copyright (c) 2002-2017, Mairie de Paris
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,28 +38,28 @@ import fr.paris.lutece.portal.service.spring.SpringContextService;
 
 import java.util.Collection;
 
-
 /**
  * This class provides instances management methods (create, find, ...) for Attribute objects
  */
 public final class AttributeHome
 {
     // Static variable pointed at the DAO instance
-    private static IAttributeDAO _dao = (IAttributeDAO) SpringContextService.getPluginBean( "files2docs",
-            "files2docsAttributeDAO" );
+    private static IAttributeDAO _dao = (IAttributeDAO) SpringContextService.getPluginBean( "files2docs", "files2docsAttributeDAO" );
 
     /**
      * Private constructor - this class does not need to be instantiated
      */
-    private AttributeHome(  )
+    private AttributeHome( )
     {
     }
 
     /**
      * Creates an instance of the attribute class
      *
-     * @param attribute The instance of the Attribute which contains the informations to store
-     * @param plugin The plugin
+     * @param attribute
+     *            The instance of the Attribute which contains the informations to store
+     * @param plugin
+     *            The plugin
      */
     public static void create( Attribute attribute, Plugin plugin )
     {
@@ -69,8 +69,10 @@ public final class AttributeHome
     /**
      * Loads the data of the attribute objects filtered by mapping
      *
-     * @param nMappingId The mapping identifier
-     * @param plugin The plugin
+     * @param nMappingId
+     *            The mapping identifier
+     * @param plugin
+     *            The plugin
      * @return A collection which contains the data of the attribute objects filtered by mapping
      */
     public static Collection<Attribute> findByMapping( int nMappingId, Plugin plugin )
@@ -81,8 +83,10 @@ public final class AttributeHome
     /**
      * Returns an instance of a attribute whose identifier is specified in parameter
      *
-     * @param nAttributeId The attribute primary key
-     * @param plugin The plugin
+     * @param nAttributeId
+     *            The attribute primary key
+     * @param plugin
+     *            The plugin
      * @return An instance of Attribute
      */
     public static Attribute findByPrimaryKey( int nAttributeId, Plugin plugin )
@@ -93,8 +97,10 @@ public final class AttributeHome
     /**
      * Updates the attribute which is specified in parameter
      *
-     * @param attribute The instance of the Attribute which contains the data to store
-     * @param plugin The plugin
+     * @param attribute
+     *            The instance of the Attribute which contains the data to store
+     * @param plugin
+     *            The plugin
      */
     public static void update( Attribute attribute, Plugin plugin )
     {
@@ -104,8 +110,10 @@ public final class AttributeHome
     /**
      * Removes the attribute whose mapping identifier is specified in parameter
      *
-     * @param nMappingId The mapping identifier
-     * @param plugin The plugin
+     * @param nMappingId
+     *            The mapping identifier
+     * @param plugin
+     *            The plugin
      */
     public static void removeByMapping( int nMappingId, Plugin plugin )
     {
@@ -115,8 +123,10 @@ public final class AttributeHome
     /**
      * Loads the data of the attribute object filtered by document attribute
      *
-     * @param nDocumentAttributeId The document attribute identifier
-     * @param plugin The plugin
+     * @param nDocumentAttributeId
+     *            The document attribute identifier
+     * @param plugin
+     *            The plugin
      * @return An instance of Attribute
      */
     public static Attribute findByDocumentAttribute( int nDocumentAttributeId, Plugin plugin )

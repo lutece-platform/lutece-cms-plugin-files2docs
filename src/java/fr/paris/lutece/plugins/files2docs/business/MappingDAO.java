@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002-2014, Mairie de Paris
+ * Copyright (c) 2002-2017, Mairie de Paris
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,6 @@ import fr.paris.lutece.util.sql.DAOUtil;
 import java.util.ArrayList;
 import java.util.Collection;
 
-
 /**
  * This class provides Data Access methods for Mapping objects
  */
@@ -55,26 +54,27 @@ public class MappingDAO implements IMappingDAO
     private static final String SQL_QUERY_SELECT_DOCUMENT_TYPE_CODE = "SELECT id_mapping, code_document_type, description, title, summary FROM files2docs_mapping WHERE code_document_type=?";
 
     /**
-    * Generates a new primary key
-    *
-    * @param plugin The plugin
-    * @return The new primary key
-    */
+     * Generates a new primary key
+     *
+     * @param plugin
+     *            The plugin
+     * @return The new primary key
+     */
     private int newPrimaryKey( Plugin plugin )
     {
         DAOUtil daoUtil = new DAOUtil( SQL_QUERY_NEW_PK, plugin );
-        daoUtil.executeQuery(  );
+        daoUtil.executeQuery( );
 
         int nKey;
 
-        if ( !daoUtil.next(  ) )
+        if ( !daoUtil.next( ) )
         {
             // If the table is empty
             nKey = 1;
         }
 
         nKey = daoUtil.getInt( 1 ) + 1;
-        daoUtil.free(  );
+        daoUtil.free( );
 
         return nKey;
     }
@@ -82,18 +82,19 @@ public class MappingDAO implements IMappingDAO
     /**
      * Loads the data of all the mapping
      *
-     * @param plugin The plugin
+     * @param plugin
+     *            The plugin
      * @return A collection which contains the data of all the mapping
      */
     public Collection<Mapping> selectAll( Plugin plugin )
     {
-        Collection<Mapping> colMapping = new ArrayList<Mapping>(  );
+        Collection<Mapping> colMapping = new ArrayList<Mapping>( );
         DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SELECT_ALL, plugin );
-        daoUtil.executeQuery(  );
+        daoUtil.executeQuery( );
 
-        while ( daoUtil.next(  ) )
+        while ( daoUtil.next( ) )
         {
-            Mapping mapping = new Mapping(  );
+            Mapping mapping = new Mapping( );
             mapping.setId( daoUtil.getInt( 1 ) );
             mapping.setDocumentTypeCode( daoUtil.getString( 2 ) );
             mapping.setDescription( daoUtil.getString( 3 ) );
@@ -102,47 +103,51 @@ public class MappingDAO implements IMappingDAO
             colMapping.add( mapping );
         }
 
-        daoUtil.free(  );
+        daoUtil.free( );
 
         return colMapping;
     }
 
     /**
-    * Inserts a new record in the table
-    *
-    * @param mapping Instance of the Mapping object to insert
-    * @param plugin The plugin
-    */
+     * Inserts a new record in the table
+     *
+     * @param mapping
+     *            Instance of the Mapping object to insert
+     * @param plugin
+     *            The plugin
+     */
     public void insert( Mapping mapping, Plugin plugin )
     {
         DAOUtil daoUtil = new DAOUtil( SQL_QUERY_INSERT_MAPPING, plugin );
 
         mapping.setId( newPrimaryKey( plugin ) );
-        daoUtil.setInt( 1, mapping.getId(  ) );
-        daoUtil.setString( 2, mapping.getDocumentTypeCode(  ) );
-        daoUtil.setString( 3, mapping.getDescription(  ) );
-        daoUtil.executeUpdate(  );
-        daoUtil.free(  );
+        daoUtil.setInt( 1, mapping.getId( ) );
+        daoUtil.setString( 2, mapping.getDocumentTypeCode( ) );
+        daoUtil.setString( 3, mapping.getDescription( ) );
+        daoUtil.executeUpdate( );
+        daoUtil.free( );
     }
 
     /**
-    * Loads the data of the mapping from the table
-    *
-    * @param nMappingId The mapping identifier
-    * @param plugin The plugin
-    * @return The instance of the Mapping
-    */
+     * Loads the data of the mapping from the table
+     *
+     * @param nMappingId
+     *            The mapping identifier
+     * @param plugin
+     *            The plugin
+     * @return The instance of the Mapping
+     */
     public Mapping load( int nMappingId, Plugin plugin )
     {
         Mapping mapping = null;
 
         DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SELECT_MAPPING, plugin );
         daoUtil.setInt( 1, nMappingId );
-        daoUtil.executeQuery(  );
+        daoUtil.executeQuery( );
 
-        if ( daoUtil.next(  ) )
+        if ( daoUtil.next( ) )
         {
-            mapping = new Mapping(  );
+            mapping = new Mapping( );
             mapping.setId( daoUtil.getInt( 1 ) );
             mapping.setDocumentTypeCode( daoUtil.getString( 2 ) );
             mapping.setDescription( daoUtil.getString( 3 ) );
@@ -150,47 +155,53 @@ public class MappingDAO implements IMappingDAO
             mapping.setSummary( daoUtil.getString( 5 ) );
         }
 
-        daoUtil.free(  );
+        daoUtil.free( );
 
         return mapping;
     }
 
     /**
-    * Updates the record in the table
-    *
-    * @param mapping The reference of the mapping
-    * @param plugin The plugin
-    */
+     * Updates the record in the table
+     *
+     * @param mapping
+     *            The reference of the mapping
+     * @param plugin
+     *            The plugin
+     */
     public void store( Mapping mapping, Plugin plugin )
     {
         DAOUtil daoUtil = new DAOUtil( SQL_QUERY_UPDATE_MAPPING, plugin );
-        daoUtil.setString( 1, mapping.getDescription(  ) );
-        daoUtil.setString( 2, mapping.getTitle(  ) );
-        daoUtil.setString( 3, mapping.getSummary(  ) );
-        daoUtil.setInt( 4, mapping.getId(  ) );
-        daoUtil.executeUpdate(  );
-        daoUtil.free(  );
+        daoUtil.setString( 1, mapping.getDescription( ) );
+        daoUtil.setString( 2, mapping.getTitle( ) );
+        daoUtil.setString( 3, mapping.getSummary( ) );
+        daoUtil.setInt( 4, mapping.getId( ) );
+        daoUtil.executeUpdate( );
+        daoUtil.free( );
     }
 
     /**
-    * Deletes a record from the table
-    *
-    * @param nMappingId The mapping identifier
-    * @param plugin The plugin
-    */
+     * Deletes a record from the table
+     *
+     * @param nMappingId
+     *            The mapping identifier
+     * @param plugin
+     *            The plugin
+     */
     public void delete( int nMappingId, Plugin plugin )
     {
         DAOUtil daoUtil = new DAOUtil( SQL_QUERY_REMOVE_MAPPING, plugin );
         daoUtil.setInt( 1, nMappingId );
-        daoUtil.executeUpdate(  );
-        daoUtil.free(  );
+        daoUtil.executeUpdate( );
+        daoUtil.free( );
     }
 
     /**
      * Loads the data of the mapping filtered by document type code
      *
-     * @param strDocumentTypeCode The document type code
-     * @param plugin The plugin
+     * @param strDocumentTypeCode
+     *            The document type code
+     * @param plugin
+     *            The plugin
      * @return The instance of the Mapping
      */
     public Mapping selectByDocumentTypeCode( String strDocumentTypeCode, Plugin plugin )
@@ -199,11 +210,11 @@ public class MappingDAO implements IMappingDAO
 
         DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SELECT_DOCUMENT_TYPE_CODE, plugin );
         daoUtil.setString( 1, strDocumentTypeCode );
-        daoUtil.executeQuery(  );
+        daoUtil.executeQuery( );
 
-        if ( daoUtil.next(  ) )
+        if ( daoUtil.next( ) )
         {
-            mapping = new Mapping(  );
+            mapping = new Mapping( );
             mapping.setId( daoUtil.getInt( 1 ) );
             mapping.setDocumentTypeCode( daoUtil.getString( 2 ) );
             mapping.setDescription( daoUtil.getString( 3 ) );
@@ -211,7 +222,7 @@ public class MappingDAO implements IMappingDAO
             mapping.setSummary( daoUtil.getString( 5 ) );
         }
 
-        daoUtil.free(  );
+        daoUtil.free( );
 
         return mapping;
     }

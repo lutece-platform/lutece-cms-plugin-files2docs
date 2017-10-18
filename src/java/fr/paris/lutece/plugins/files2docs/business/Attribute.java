@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002-2014, Mairie de Paris
+ * Copyright (c) 2002-2017, Mairie de Paris
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,6 @@
  */
 package fr.paris.lutece.plugins.files2docs.business;
 
-
 /**
  * This class defines the Files2Docs Attribute business object
  */
@@ -49,7 +48,7 @@ public class Attribute
      *
      * @return The attribute identifier
      */
-    public int getId(  )
+    public int getId( )
     {
         return _nAttributeId;
     }
@@ -57,7 +56,8 @@ public class Attribute
     /**
      * Sets the attribute identifier
      *
-     * @param nAttributeId The attribute identifier
+     * @param nAttributeId
+     *            The attribute identifier
      */
     public void setId( int nAttributeId )
     {
@@ -69,7 +69,7 @@ public class Attribute
      *
      * @return The mapping identifier
      */
-    public int getMappingId(  )
+    public int getMappingId( )
     {
         return _nMappingId;
     }
@@ -77,7 +77,8 @@ public class Attribute
     /**
      * Sets the mapping identifier
      *
-     * @param nMappingId The mapping identifier
+     * @param nMappingId
+     *            The mapping identifier
      */
     public void setMappingId( int nMappingId )
     {
@@ -89,7 +90,7 @@ public class Attribute
      *
      * @return The document attribute identifier
      */
-    public int getDocumentAttributeId(  )
+    public int getDocumentAttributeId( )
     {
         return _nDocumentAttributeId;
     }
@@ -97,7 +98,8 @@ public class Attribute
     /**
      * Sets the document attribute identifier
      *
-     * @param nDocumentAttributeId The document attribute identifier
+     * @param nDocumentAttributeId
+     *            The document attribute identifier
      */
     public void setDocumentAttributeId( int nDocumentAttributeId )
     {
@@ -109,7 +111,7 @@ public class Attribute
      *
      * @return The attribute format
      */
-    public String getFormat(  )
+    public String getFormat( )
     {
         return _strFormat;
     }
@@ -117,7 +119,8 @@ public class Attribute
     /**
      * Sets the attribute format
      *
-     * @param strFormat The attribute format
+     * @param strFormat
+     *            The attribute format
      */
     public void setFormat( String strFormat )
     {

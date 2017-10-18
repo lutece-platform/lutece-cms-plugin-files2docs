@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002-2014, Mairie de Paris
+ * Copyright (c) 2002-2017, Mairie de Paris
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,6 @@
  */
 package fr.paris.lutece.plugins.files2docs.business;
 
-
 /**
  * This class defines the Files2Docs Mapping business object
  */
@@ -51,7 +50,7 @@ public class Mapping
      *
      * @return The mapping identifier
      */
-    public int getId(  )
+    public int getId( )
     {
         return _nMappingId;
     }
@@ -59,7 +58,8 @@ public class Mapping
     /**
      * Sets the mapping identifier
      *
-     * @param nMappingId The mapping identifier
+     * @param nMappingId
+     *            The mapping identifier
      */
     public void setId( int nMappingId )
     {
@@ -71,7 +71,7 @@ public class Mapping
      *
      * @return The document type code
      */
-    public String getDocumentTypeCode(  )
+    public String getDocumentTypeCode( )
     {
         return _strDocumentTypeCode;
     }
@@ -79,7 +79,8 @@ public class Mapping
     /**
      * Sets the document type code
      *
-     * @param strDocumentTypeCode The document type code
+     * @param strDocumentTypeCode
+     *            The document type code
      */
     public void setDocumentTypeCode( String strDocumentTypeCode )
     {
@@ -91,7 +92,7 @@ public class Mapping
      *
      * @return The document type name
      */
-    public String getDocumentTypeName(  )
+    public String getDocumentTypeName( )
     {
         return _strDocumentTypeName;
     }
@@ -99,7 +100,8 @@ public class Mapping
     /**
      * Sets the document type name
      *
-     * @param strDocumentTypeName The document type name
+     * @param strDocumentTypeName
+     *            The document type name
      */
     public void setDocumentTypeName( String strDocumentTypeName )
     {
@@ -111,7 +113,7 @@ public class Mapping
      *
      * @return The mapping description
      */
-    public String getDescription(  )
+    public String getDescription( )
     {
         return _strDescription;
     }
@@ -119,7 +121,8 @@ public class Mapping
     /**
      * Sets the mapping description
      *
-     * @param strDescription The mapping description
+     * @param strDescription
+     *            The mapping description
      */
     public void setDescription( String strDescription )
     {
@@ -131,7 +134,7 @@ public class Mapping
      *
      * @return The title format
      */
-    public String getTitle(  )
+    public String getTitle( )
     {
         return _strTitle;
     }
@@ -139,7 +142,8 @@ public class Mapping
     /**
      * Sets the title format
      *
-     * @param strTitle The title format
+     * @param strTitle
+     *            The title format
      */
     public void setTitle( String strTitle )
     {
@@ -151,7 +155,7 @@ public class Mapping
      *
      * @return The summary format
      */
-    public String getSummary(  )
+    public String getSummary( )
     {
         return _strSummary;
     }
@@ -159,7 +163,8 @@ public class Mapping
     /**
      * Sets the summary format
      *
-     * @param strSummary The summary format
+     * @param strSummary
+     *            The summary format
      */
     public void setSummary( String strSummary )
     {

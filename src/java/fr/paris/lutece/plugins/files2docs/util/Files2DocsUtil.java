@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002-2014, Mairie de Paris
+ * Copyright (c) 2002-2017, Mairie de Paris
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,6 @@ import org.apache.commons.lang.StringUtils;
 import java.util.ArrayList;
 import java.util.Collection;
 
-
 /**
  * Files2Docs Util class
  */
@@ -64,20 +63,20 @@ public final class Files2DocsUtil
     /**
      *
      */
-    private Files2DocsUtil(  )
+    private Files2DocsUtil( )
     {
     }
 
     /**
-    * Gets document attribute types (codes) with a field of type file
-    *
-    * @return A collection of document attribute types (codes) with a field of type file
-    */
-    public static Collection<String> getListAttributeTypeFile(  )
+     * Gets document attribute types (codes) with a field of type file
+     *
+     * @return A collection of document attribute types (codes) with a field of type file
+     */
+    public static Collection<String> getListAttributeTypeFile( )
     {
         String strListAttributeTypeFile = AppPropertiesService.getProperty( PROPERTY_LIST_ATTRIBUTE_TYPE_FILE );
-        String[] strSplitList = strListAttributeTypeFile.trim(  ).split( STRING_COMMA );
-        Collection<String> colAttributeTypeFile = new ArrayList<String>(  );
+        String [ ] strSplitList = strListAttributeTypeFile.trim( ).split( STRING_COMMA );
+        Collection<String> colAttributeTypeFile = new ArrayList<String>( );
 
         if ( strSplitList != null )
         {
@@ -93,7 +92,8 @@ public final class Files2DocsUtil
     /**
      * Converts a String value to an int
      *
-     * @param strValue the String value to convert
+     * @param strValue
+     *            the String value to convert
      * @return The converted value
      */
     public static int convertStringToInt( String strValue )
@@ -107,9 +107,9 @@ public final class Files2DocsUtil
                 nValue = Integer.parseInt( strValue );
             }
         }
-        catch ( NumberFormatException e )
+        catch( NumberFormatException e )
         {
-            AppLogService.error( e.getMessage(  ), e );
+            AppLogService.error( e.getMessage( ), e );
         }
 
         return nValue;
@@ -121,7 +121,9 @@ public final class Files2DocsUtil
      * <li><code><</code> is replaced by <code>&amp;lt;</code></li>
      * <li><code>></code> is replaced by <code>&amp;gt;</code></li>
      * </ul>
-     * @param strToFormat the String to format
+     * 
+     * @param strToFormat
+     *            the String to format
      * @return the formatted String
      */
     public static String formatToHtml( String strToFormat )
