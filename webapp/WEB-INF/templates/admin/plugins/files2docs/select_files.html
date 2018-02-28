@@ -18,18 +18,18 @@
 				<form id="selectFilesForm" class="form" method="post" action="jsp/admin/plugins/files2docs/DoSelectFiles.jsp" enctype="multipart/form-data">
 				<input type="hidden" id="update_document_type" name="update_document_type" value="" />
 				<input type="hidden" id="document_type_code_hidden" name="document_type_code_hidden" value="${document_type_code!}" />
-
-					<fieldset>
+                                <#if no_header?? >
+                                <input type="hidden" id="no_header" name="no_header" value="${no_header!}" />
+                                </#if>
+                                
+                                <fieldset>
 						<legend>
 							<span class="badge badge-info">#i18n{files2docs.selectFiles.step} 1</span>&nbsp;#i18n{files2docs.selectFiles.labelSpace}*
 						</legend>
 						<div class="form-group">
-							<div class="box box-solid">
-								<div class="box-header"></div>
-								<div class="box-body">
+							<div class="box-body">
 									${spaces_browser}
-									<div class="clearfix"></div>
-								</div>
+                                                                        <div class="clearfix"></div>
 							</div>
 						</div>
 						<div class="form-group sr-only">
@@ -47,7 +47,7 @@
 					<div class="form-group">
 						<label class="control-label col-xs-12 col-sm-6 col-md-6">#i18n{files2docs.selectFiles.labelType}*</label>
 						<div class="col-xs-12 col-sm-6 col-md-6">
-							<select id="document_type_code" class="form-control" name="document_type_code" <#if document_type_code_disabled>disabled="disabled"</#if> onchange="updateDocumentType();">
+							<select id="document_type_code" class="form-control" name="document_type_code" <#if document_type_code_disabled>disabled="disabled"</#if> >
 								<option selected="selected" value="">#i18n{files2docs.selectFiles.labelType} </option>
 								<#list document_type_list?sort_by("name") as type>
 									<#if document_type_code?exists && document_type_code=type.code>
@@ -303,6 +303,20 @@
 
 /* global $, window */
 
+function changeQueryParameter( aObjSelector, param, new_value ) {
+	$(aObjSelector).each(function() {
+	    var href = $(this).attr( "href" ) ;    
+	    var posParamStart = href.indexOf( "&" + param + "=" ) ;
+	    if (posParamStart <= 0) posParamStart = href.indexOf( "?" + param + "=" ) ;
+	    if (posParamStart <= 0) return;
+
+	    var posNextParam = href.indexOf( "&" , posParamStart + param.length + 2 ) ;   
+	    var new_href = href.substring( 0, posParamStart + param.length + 2) + new_value ;
+	    if (posNextParam > 0) new_href += href.substring( posNextParam ) ;
+	    $(this).attr( "href" ,  new_href ) ;    
+	});
+}
+        
 $(function () {
     'use strict';
 
@@ -310,7 +324,7 @@ $(function () {
     $('#fileupload').fileupload({
         // Uncomment the following to send cross-domain cookies:
         //xhrFields: {withCredentials: true},
-        url: '${webapp_url}/jsp/admin/plugins/files2docs/Upload.jsp;document_type_code=${document_type_code!}',
+        url: '${webapp_url}/jsp/admin/plugins/files2docs/Upload.jsp;document_type_code=' + ( $("#document_type_code").val().length > 0 ? $("#document_type_code").val() : "image") , 
         sequentialUploads: true
     });
 
@@ -329,6 +343,24 @@ $(function () {
         $(this).fileupload('option', 'done')
             .call(this, $.Event('done'), {result: result});
     });*/
+
+
+    // changement dynamique des paramètres du lien vers l'upload en masse de documents
+    $("#document_type_code").change(function(index){
+        changeQueryParameter("a.btn-space-action", "document_type", $(this).val( ) );    
+    });
+    $(".new_space_name").change(function(index){
+        changeQueryParameter("a.btn-space-action", "name", $(this).val( ) );    
+    });
+
+    $(".new_space_name").hide().next("a").hide() ;
+    $("a.btn-show-name").click( function( e ) {
+	e.preventDefault();
+	$(this).next(".new_space_name").toggle().next("a").toggle();    
+    });
+
+
+
 
 
 });

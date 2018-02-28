@@ -17,6 +17,10 @@
 				</div>
 				<form class="form-horizontal" method="post" action="jsp/admin/plugins/files2docs/DoSelectFiles.jsp">
 					<input type="hidden" name="mode" value="${mode}" />
+                                        <input type="hidden" name="document_type_code" value="${(document_type_code)!}">
+					<input type="hidden" name="browser_selected_space_id" value="${browser_selected_space_id}">
+					<input type="hidden" name="nb_imported_files" value="${(nb_imported_files)!}">
+					<input type="hidden" name="extension" value="${(extension_checked_list)!}">
 					<table class="table table-striped table-hover">
 						<thead>
 						<tr>

@@ -65,11 +65,18 @@ import fr.paris.lutece.plugins.document.business.DocumentType;
 import fr.paris.lutece.plugins.document.business.IndexerAction;
 import fr.paris.lutece.plugins.document.business.attributes.AttributeTypeParameter;
 import fr.paris.lutece.plugins.document.business.attributes.DocumentAttribute;
+import fr.paris.lutece.plugins.document.business.spaces.DocumentSpace;
+import fr.paris.lutece.plugins.document.business.spaces.DocumentSpaceHome;
+import fr.paris.lutece.plugins.document.business.spaces.SpaceAction;
+import fr.paris.lutece.plugins.document.business.spaces.SpaceActionHome;
 import fr.paris.lutece.plugins.document.business.workflow.DocumentState;
 import fr.paris.lutece.plugins.document.service.DocumentException;
 import fr.paris.lutece.plugins.document.service.DocumentService;
 import fr.paris.lutece.plugins.document.service.search.DocumentIndexer;
+import fr.paris.lutece.plugins.document.service.spaces.DocumentSpacesService;
+import fr.paris.lutece.plugins.document.service.spaces.SpaceResourceIdService;
 import fr.paris.lutece.plugins.document.utils.DocumentIndexerUtils;
+import fr.paris.lutece.plugins.document.utils.IntegerUtils;
 import fr.paris.lutece.plugins.files2docs.business.Attribute;
 import fr.paris.lutece.plugins.files2docs.business.AttributeHome;
 import fr.paris.lutece.plugins.files2docs.business.Mapping;
@@ -83,6 +90,7 @@ import fr.paris.lutece.portal.service.fileupload.FileUploadService;
 import fr.paris.lutece.portal.service.i18n.I18nService;
 import fr.paris.lutece.portal.service.message.AdminMessage;
 import fr.paris.lutece.portal.service.message.AdminMessageService;
+import fr.paris.lutece.portal.service.rbac.RBACService;
 import fr.paris.lutece.portal.service.regularexpression.RegularExpressionService;
 import fr.paris.lutece.portal.service.search.IndexationService;
 import fr.paris.lutece.portal.service.template.AppTemplateService;
@@ -97,7 +105,12 @@ import fr.paris.lutece.util.filesystem.UploadUtil;
 import fr.paris.lutece.util.html.HtmlTemplate;
 import fr.paris.lutece.util.html.Paginator;
 import fr.paris.lutece.util.url.UrlItem;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import net.sf.json.JSONArray;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.time.DateFormatUtils;
 import org.json.simple.JSONObject;
 
 /**
@@ -121,6 +134,7 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
     private static final String MARK_DOCUMENT_TYPE_CODE_DISABLED = "document_type_code_disabled";
     private static final String MARK_DOCUMENT_TYPE_LIST = "document_type_list";
     private static final String MARK_SPACES_BROWSER = "spaces_browser";
+    private static final String MARK_SPACE_ACTIONS_LIST = "space_actions_list";
     private static final String MARK_SUBMIT_BUTTON_DISABLED = "submit_button_disabled";
     private static final String MARK_NB_IMPORTED_FILES = "nb_imported_files";
     private static final String MARK_NB_FAILURE_FILES = "nb_failure_files";
@@ -149,11 +163,14 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
     private static final String MARK_REGEXP_MAP = "regexp_map";
     private static final String MARK_EXTENSION_CHECKED_LIST = "extension_checked_list";
     private static final String MARK_UPLOAD_MODE = "mode";
+    private static final String MARK_NO_HEADER = "no_header";
 
     // Parameters
+    private static final String PARAMETER_DOCUMENT_TYPE = "document_type";
     private static final String PARAMETER_DOCUMENT_TYPE_CODE = "document_type_code";
     private static final String PARAMETER_DOCUMENT_TYPE_CODE_HIDDEN = "document_type_code_hidden";
     private static final String PARAMETER_BROWSER_SELECTED_SPACE_ID = "browser_selected_space_id";
+    private static final String PARAMETER_BROWSER_SPACE_ID = "browser_id_space";
     private static final String PARAMETER_NB_IMPORTED_FILES = "nb_imported_files";
     private static final String PARAMETER_DELETE = "delete";
     private static final String PARAMETER_FILEDATA = "files[]";
@@ -170,7 +187,18 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
     private static final String PARAMETER_EXTENSION_HIDDEN = "extension_hidden";
     private static final String PARAMETER_UPDATE_DOCUMENT_TYPE = "update_document_type";
     private static final String PARAMETER_UPLOAD_MODE = "mode";
-
+    private static final String PARAMETER_REQUEST_FROM = "request_from" ;
+    private static final String PARAMETER_NO_HEADER = "no_header" ;
+    
+    private static final String PARAMETER_PARENT_SPACE_ID = "id_parent_space" ;
+    private static final String PARAMETER_NAME  = "name" ;
+    private static final String PARAMETER_DESCRIPTION = "description" ;
+    private static final String PARAMETER_VIEW_TYPE = "view_type" ;
+    private static final String PARAMETER_ICON = "icon" ;
+    private static final String PARAMETER_ALLOW_CREATION = "allow_creation" ;
+    private static final String PARAMETER_WORKGROUP_KEY ="workgroup_key" ;
+    
+    
     // Properties
     private static final String PROPERTY_ITEMS_PER_PAGE = "files2docs.itemsPerPage";
     private static final String PROPERTY_PARENT_PATH = "files2docs.parentPath";
@@ -240,6 +268,10 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
     private int _nItemsPerPage;
     private int _nDefaultItemsPerPage;
     private String _strCurrentPageIndex;
+    private String _originRequestURI;
+    
+    // Defaults constants 
+    private static final String DEFAULT_SPACE_ID = "0" ;
 
     /**
      * Constructor
@@ -553,7 +585,20 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
 
         // Gets the selected document type code
         String strDocumentTypeCode = request.getParameter( PARAMETER_DOCUMENT_TYPE_CODE );
-
+        
+        // remember the origin the request (in case of external use of files2doc by the library plugin)
+        if ( request.getParameter( PARAMETER_REQUEST_FROM ) !=null && "librarySelectMedia".equals( request.getParameter( PARAMETER_REQUEST_FROM ) ) ) 
+        {
+            _originRequestURI = "../library/SelectMedia.jsp?plugin_name=library";
+            _originRequestURI += "&media_type=" + request.getParameter("media_type");
+            _originRequestURI += "&input=" + request.getParameter("input");
+            _originRequestURI += "&browser_selected_space_id=" + request.getParameter( "browser_selected_space_id" );
+            _originRequestURI += "&document_type_code=" + request.getParameter( "document_type_code" );
+        } 
+        
+        
+        boolean noHeader = (request.getParameter( PARAMETER_NO_HEADER ) != null );
+                
         if ( ( strDocumentTypeCode == null ) || strDocumentTypeCode.equals( STRING_EMPTY ) )
         {
             strDocumentTypeCode = request.getParameter( PARAMETER_DOCUMENT_TYPE_CODE_HIDDEN );
@@ -589,6 +634,9 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
 
         // Gets the selected space identifier and defines the submit button status
         String strSpaceId = request.getParameter( PARAMETER_BROWSER_SELECTED_SPACE_ID );
+        if (strSpaceId == null) strSpaceId = request.getParameter( PARAMETER_BROWSER_SPACE_ID );
+        if (strSpaceId == null) strSpaceId = DEFAULT_SPACE_ID;
+        
         boolean bSubmitButtonDisabled = Boolean.TRUE;
 
         if ( ( strSpaceId != null ) && !strSpaceId.equals( STRING_EMPTY ) && !strSpaceId.equals( STRING_NULL ) )
@@ -702,8 +750,15 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
         model.put( MARK_DOCUMENT_TYPE_LIST, colDocumentType );
 
         // Destination space
+        List<SpaceAction> listSpaceActions = SpaceActionHome.getActionsList( getLocale(  ) );
+        int nCurrentSpaceId = IntegerUtils.convert( strSpaceId );
+        DocumentSpace currentSpace = DocumentSpaceHome.findByPrimaryKey( nCurrentSpaceId );
+        listSpaceActions = (List<SpaceAction>) RBACService.getAuthorizedActionsCollection( listSpaceActions,
+                currentSpace, getUser(  ) );
+        model.put( MARK_SPACE_ACTIONS_LIST, listSpaceActions );
         model.put( MARK_SPACES_BROWSER, Files2DocsLinkDocument.getInstance( ).getSpacesBrowser( request, getUser( ), getLocale( ) ) );
         model.put( MARK_SUBMIT_BUTTON_DISABLED, bSubmitButtonDisabled );
+        model.put( MARK_BROWSER_SELECTED_SPACE_ID, strSpaceId );
 
         // Number of imported files
         model.put( MARK_NB_IMPORTED_FILES, nImportedFiles );
@@ -728,6 +783,9 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
         model.put( MARK_REGEXP_MAP, mapRegExp );
         model.put( MARK_EXTENSION_CHECKED_LIST, strExtensionList );
 
+        // transfer no header mode
+        if ( noHeader ) model.put( MARK_NO_HEADER, "true" ) ;
+        
         // Upload mode
         String strTemplate;
 
@@ -744,9 +802,103 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
 
         HtmlTemplate template = AppTemplateService.getTemplate( strTemplate, getLocale( ), model );
 
-        return getAdminPage( template.getHtml( ) );
+        return getAdminPage(template.getHtml( ) );
     }
 
+    /**
+     * Perform the space creation
+     * 
+     * @param request The HTTP request
+     * @return The Feature Home Page
+     */
+    public String doCreateSpace( HttpServletRequest request )
+    {
+        DocumentSpace space = new DocumentSpace(  );
+        String strParentSpaceId = request.getParameter( PARAMETER_PARENT_SPACE_ID );
+        
+        // Gets the selected document type code
+        String strDocumentTypeCode = request.getParameter( PARAMETER_DOCUMENT_TYPE_CODE );
+
+        if ( ( strDocumentTypeCode == null ) || strDocumentTypeCode.equals( STRING_EMPTY ) )
+        {
+            strDocumentTypeCode = request.getParameter( PARAMETER_DOCUMENT_TYPE_CODE_HIDDEN );
+        }
+
+        if ( !RBACService.isAuthorized( DocumentSpace.RESOURCE_TYPE, strParentSpaceId,
+                    SpaceResourceIdService.PERMISSION_CREATE, getUser(  ) ) ||
+                !DocumentSpacesService.getInstance(  )
+                                          .isAuthorizedViewByWorkgroup( IntegerUtils.convert( strParentSpaceId ), getUser(  ) ) )
+        {
+            return AdminMessageService.getMessageUrl( request, Messages.USER_ACCESS_DENIED, AdminMessage.TYPE_STOP );
+        }
+        else 
+        {
+            space.setIdParent( IntegerUtils.convert( strParentSpaceId ) );
+        }
+        
+        String strErrorUrl = getRequestData( request, space );
+        
+        if ( strErrorUrl != null )
+        {
+            return strErrorUrl;
+        }
+
+        DocumentSpaceHome.create( space );
+
+        UrlItem url = new UrlItem( JSP_SELECT_FILES );
+        url.addParameter( PARAMETER_DOCUMENT_TYPE_CODE, strDocumentTypeCode );
+        url.addParameter( PARAMETER_BROWSER_SELECTED_SPACE_ID, space.getId( ) );
+        url.addParameter( PARAMETER_BROWSER_SPACE_ID, strParentSpaceId );
+        
+        if (request.getParameter( PARAMETER_NO_HEADER ) != null ) url.addParameter( PARAMETER_NO_HEADER, request.getParameter( PARAMETER_NO_HEADER ) );
+
+        return url.getUrl( );
+    }
+    
+    /**
+     * get Request data for space creation
+     * 
+     * @param request
+     * @param space
+     * @return 
+     */
+    private String getRequestData( HttpServletRequest request, DocumentSpace space )
+    {
+        String strErrorUrl = null;
+        String strName = request.getParameter( PARAMETER_NAME );
+        String strDescription = request.getParameter( PARAMETER_DESCRIPTION );
+        String strViewType = request.getParameter( PARAMETER_VIEW_TYPE );
+        String strIcon = request.getParameter( PARAMETER_ICON );
+        String[] strDocumentType = request.getParameterValues( PARAMETER_DOCUMENT_TYPE );
+        String strAllowCreation = request.getParameter( PARAMETER_ALLOW_CREATION );
+        String strWorkgroup = request.getParameter( PARAMETER_WORKGROUP_KEY );
+        boolean bAllowCreation = ( ( strAllowCreation != null ) && ( strAllowCreation.equals( "on" ) ) ) ? true : false;
+
+        // Mandatory fields
+        if ( StringUtils.isBlank( strName ) )
+        {
+            strName = LocalDateTime.now( ).format( DateTimeFormatter.ISO_LOCAL_DATE_TIME );
+        }
+        
+        space.setName( strName );
+        space.setDescription( strDescription );
+        space.setViewType( strViewType );
+        space.setIdIcon( IntegerUtils.convert( strIcon ) );
+        space.resetAllowedDocumentTypesList(  );
+        space.setDocumentCreationAllowed( bAllowCreation );
+        space.setWorkgroup( strWorkgroup );
+
+        if ( strDocumentType != null )
+        {
+            for ( int i = 0; i < strDocumentType.length; i++ )
+            {
+                space.addAllowedDocumentType( strDocumentType[i] );
+            }
+        }
+
+        return strErrorUrl;
+    }
+    
     /**
      * Performs the selection of the document type and destination space
      *
@@ -894,6 +1046,8 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
         url.addParameter( PARAMETER_NB_IMPORTED_FILES, nImportedFiles );
         url.addParameter( PARAMETER_EXTENSION, strExtensionList );
         url.addParameter( PARAMETER_UPLOAD_MODE, strUploadMode );
+        
+        if (request.getParameter( PARAMETER_NO_HEADER ) != null ) url.addParameter( PARAMETER_NO_HEADER, request.getParameter( PARAMETER_NO_HEADER ) );
 
         return url.getUrl( );
     }
@@ -1057,7 +1211,7 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
         // Gets the extension list
         String [ ] strCheckbox = request.getParameterValues( PARAMETER_EXTENSION );
         String strExtensionList = STRING_EMPTY;
-
+        
         if ( ( strCheckbox != null ) && ( strCheckbox.length > 0 ) )
         {
             for ( String strExtension : strCheckbox )
@@ -1499,6 +1653,16 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
         File uploadDirectory = new File( getUploadDirectory( request ) );
         uploadDirectory.delete( );
 
+        // case of external use of files2doc 
+        if (_originRequestURI != null ) {
+            if ( _originRequestURI.indexOf( PARAMETER_BROWSER_SELECTED_SPACE_ID ) > 0 ) 
+            {
+                _originRequestURI = changeQueryParameter( _originRequestURI, PARAMETER_BROWSER_SELECTED_SPACE_ID, strSpaceId ) ;
+            }
+            
+            return _originRequestURI;
+        }
+        
         UrlItem url = new UrlItem( JSP_IMPORT_RESULT );
         url.addParameter( PARAMETER_IMPORTED_LIST, strListImported );
         url.addParameter( PARAMETER_FAILURE_LIST, strListFailure );
@@ -1639,4 +1803,24 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
             I18nService.getLocalizedString( strI18nMessage, getLocale( ) )
         }, AdminMessage.TYPE_ERROR );
     }
+    
+    /**
+     * Replace a value of an URL parameter
+     * 
+     * @param url
+     * @param param
+     * @param new_value
+     * @return  the new url
+     */
+    private String changeQueryParameter( String url, String param, String new_value ) {
+	    int posParamStart = url.indexOf( "&" + param + "=" ) ;
+	    if (posParamStart <= 0) posParamStart = url.indexOf( "?" + param + "=" ) ;
+	    if (posParamStart <= 0) return url ;
+
+	    int posNextParam = url.indexOf( "&" , posParamStart + param.length() + 2 ) ;   
+	    String new_url = url.substring( 0, posParamStart + param.length() + 2) + new_value ;
+	    if (posNextParam > 0) new_url += url.substring( posNextParam ) ;
+	    return new_url ;    
+    }
+
 }
