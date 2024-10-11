@@ -108,7 +108,7 @@ import fr.paris.lutece.util.url.UrlItem;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import net.sf.json.JSONArray;
+import org.json.simple.JSONArray;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.json.simple.JSONObject;
