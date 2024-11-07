@@ -4,109 +4,93 @@
 		<#break>
 	</#list>
 </#if>
+
 <#if document_type_code?has_content>
-<div class="row">
-	<div class="col-xs-12 col-sm-12 col-md-12">
-		<div class="box box-primary">
-			
-			<div class="box-body">	
-                            <div class="row">
-
+<@row>
+    <@columns xs=12 sm=12 md=12>
+        <@box color='primary'>
+            <@boxBody>
+                <@box>
 <!-- space Browser and select file type ----------------------------------------------------- -->
-                                <div class="col-xs-12 col-sm-12 col-md-4">
-
-				<form id="selectFilesForm" class="form" method="post" action="jsp/admin/plugins/files2docs/DoSelectFiles.jsp" enctype="multipart/form-data">
-				<input type="hidden" id="update_document_type" name="update_document_type" value="" />
-				<input type="hidden" id="document_type_code_hidden" name="document_type_code_hidden" value="${document_type_code!}" />
+                    <@row>
+                        <@columns xs=12 sm=12 md=4>
+                            <@tform id="selectFilesForm" class="form" method="post" action="jsp/admin/plugins/files2docs/DoSelectFiles.jsp" enctype="multipart/form-data">
+                                <@input type="hidden" id="update_document_type" name="update_document_type" value="" />
+                                <@input type="hidden" id="document_type_code_hidden" name="document_type_code_hidden" value="${document_type_code!}" />
                                 <#if no_header?? >
-                                <input type="hidden" id="no_header" name="no_header" value="${no_header!}" />
-                                </#if>
-                                
-                                <fieldset>
-						<legend>
-							<span class="badge badge-info">#i18n{files2docs.selectFiles.step} 1</span>&nbsp;#i18n{files2docs.selectFiles.labelSpace}*
-						</legend>
-						<div class="form-group">
-							<div class="box-body">
-									${spaces_browser}
-                                                                        <div class="clearfix"></div>
-							</div>
-						</div>
-						<div class="form-group sr-only">
-							<div class="col-xs-12 col-sm-offset-2 col-sm-10 col-md-offset-2 col-md-10">
-								<button type="submit" class="btn btn-primary btn-small" <#if submit_button_disabled>disabled</#if>>
-									<i class="fa fa-check"></i>
-									&nbsp;#i18n{files2docs.selectFiles.buttonSubmit}
-								</button> 
-							</div>
-						</div>
-                                </fieldset>
-                           
-
-                                <fieldset>
-					<div class="form-group">
-						<label class="control-label col-xs-12 col-sm-6 col-md-6">#i18n{files2docs.selectFiles.labelType}*</label>
-						<div class="col-xs-12 col-sm-6 col-md-6">
-							<select id="document_type_code" class="form-control" name="document_type_code" <#if document_type_code_disabled>disabled="disabled"</#if> >
-								<option selected="selected" value="">#i18n{files2docs.selectFiles.labelType} </option>
-								<#list document_type_list?sort_by("name") as type>
-									<#if document_type_code?exists && document_type_code=type.code>
-										<option selected="selected" value="${type.code}">${type.name}</option>
-									<#else>
-										<option value="${type.code}">${type.name}</option>
-									</#if>
-								</#list>
-							</select>
-							</div>
-						</div>
-						<#if regexp_map[document_type_code]?exists && regexp_map[document_type_code]?split(",")?size &gt; 1>
-						<p id="divExtension" style="display:none;">
-						<script type="text/javascript">
-							// Displays the file type list with checkbox (JS enabled)
-							document.getElementById("divExtension").style.display = "";
-						</script>
-						#i18n{files2docs.selectFiles.labelExtension}* :
-						<#compress>
-						<#assign i = 0>
-							<#list regexp_map[document_type_code]?trim?split(",") as extension>
-							<input type="checkbox" class="checkbox" name="extension" value="${extension}"
-							<#if extension_checked_list?has_content>
-								<#assign bIsChecked = false>
-								<#list extension_checked_list?trim?split(",") as extension_checked>
-									<#if extension = extension_checked>
-										<#assign bIsChecked = true>
-										<#break>
-									</#if>
-								</#list>
-								</#if>
-								<#if !bIsChecked?exists || bIsChecked>
-									checked="checked"
-								</#if>
-								<#if document_type_code_disabled>
-									disabled="disabled"
-								</#if>
-								onclick="updateFileTypeList(${i});" />${extension}
-								<#assign i = i + 1>
-								</#list>
-							</#compress>
-						</p>
-						<input type="hidden" id="extension_hidden" name="extension_hidden" value="<#if extension_checked_list?has_content>${extension_checked_list}</#if>" />
-						
-                                                </#if>
-				</fieldset>
-                                
-                                <input type="hidden" id="nb_imported_files" name="nb_imported_files" value="0">
-                                </form>
-
-                                </div>
+					    			<@input type="hidden" id="no_header" name="no_header" value="${no_header!}" />
+					    	    </#if>    
+                                <@fieldSet>
+					    		    <@p class="h2"><@tag color="secondary">#i18n{files2docs.selectFiles.step} 1</@tag>&nbsp;#i18n{files2docs.selectFiles.labelSpace}*</@p>
+                                    <@formGroup>
+                                    	<@div class="box-body">
+                                    		${spaces_browser}
+                                            <@div class='clearfix'></@div>
+                                    	</@div>
+                                    </@formGroup>
+                                </@fieldSet>
+                                <@fieldSet>
+                                <@formGroup>
+                                    <label class="control-label col-xs-12 col-sm-6 col-md-6">#i18n{files2docs.selectFiles.labelType}*</label>
+                                	<@div class="col-xs-12 col-sm-6 col-md-6">
+                    					<#assign disableSelectState = false>
+                    					<#if document_type_code_disabled><#assign disableSelectState = true></#if>
+                                		<@select id="document_type_code" class="form-control" name="document_type_code" disabled=disableSelectState>
+                                			<@option selected=true value="" label='#i18n{files2docs.selectFiles.labelType}'/>
+                                    			<#list document_type_list?sort_by("name") as type>
+                                    				<#if document_type_code?exists && document_type_code=type.code>
+                                                        <@option selected=true value=type.code label=type.name />
+                                    				<#else>
+                                    					<@option value=type.code label=type.name />
+                                    				</#if>
+                                    			</#list>
+                                    		</@select>
+                                    	</@div>
+                                    </@formGroup>
+                                    <#if regexp_map[document_type_code]?exists && regexp_map[document_type_code]?split(",")?size &gt; 1>
+                                    	<@p id="divExtension" style="display:none;">
+                                    	    <script type="text/javascript">
+                                    	    	// Displays the file type list with checkbox (JS enabled)
+                                    	    	document.getElementById("divExtension").style.display = "";
+                                    	    </script>
+                                    	    #i18n{files2docs.selectFiles.labelExtension}* :
+                                    	    <#compress>
+                                    	        <#assign i = 0>
+                                    	    	<#list regexp_map[document_type_code]?trim?split(",") as extension>
+                        						    <#assign check_extension = false>
+                        							<#assign disable_extension = false>
+                        							<#if extension_checked_list?has_content>
+                                    	    		    <#assign bIsChecked = false>
+                                    	    		    <#list extension_checked_list?trim?split(",") as extension_checked>
+                                    	    		    	<#if extension = extension_checked>
+                                    	    		    		<#assign check_extension = true>
+                                    	    		    		<#break>
+                                    	    		    	</#if>
+                                    	    		    </#list>
+                                                    </#if>
+                                                    <#if document_type_code_disabled>
+                                    	    			<#assign disable_extension = true>
+                                                    </#if>
+                                    	    	    <@checkBox name="extension" value="${extension}" checked=check_extension disabled=disable_extension  
+                                    	    		    params='onclick="updateFileTypeList(${i});"' />${extension}
+                                    	    		<#assign i = i + 1>
+                                    	    	</#list>
+                                    	    </#compress>
+                                    	</@p>
+                                    	<@input type="hidden" id="extension_hidden" name="extension_hidden" value="${extension_checked_list!''}" />
+                                    </#if>
+                                </@fieldSet>
+                                <@input type="hidden" id="nb_imported_files" name="nb_imported_files" value="0"/>
+                            </@tform>
+                        </@columns>
+                    </@row>
                
 <!-- JQUERY upload ---------------------------------------------------------------------------- -->
-                                <div class="col-xs-12 col-sm-12 col-md-6">
-                                
-				<fieldset>
-					<legend>
-						<span class="badge badge-info">#i18n{files2docs.selectFiles.step} 2</span>&nbsp;#i18n{files2docs.selectFiles.labelUpload}*</legend>
-							<div id="divJqueryUpload" >
+                    <@row>
+                        <@columns xs=12 sm=12 md=6>
+                            <@fieldSet>
+                                <@p class="h2"><@tag color="secondary">#i18n{files2docs.selectFiles.step} 2</@tag>&nbsp;#i18n{files2docs.selectFiles.labelUpload}*</@p>
+                               	<@div id="divJqueryUpload" >
 
 <!-- blueImp Jquery upload script ----------------------------------------------------------------------- -->
 <!-- Generic page styles -->
@@ -117,105 +101,92 @@
 <link rel="stylesheet" href="js/plugins/files2docs/jQuery-File-Upload-9.19.0/css/jquery.fileupload-ui.css">
 
 <!-- The file upload form used as target for the file upload widget -->
- <form id="fileupload" action="${webapp_url}/jsp/admin/plugins/files2docs/Upload.jsp;jsessionid=${jsessionid};document_type_code=${document_type_code}" method="POST" enctype="multipart/form-data">
-   
+    <@tform id='fileupload' action='${webapp_url}/jsp/admin/plugins/files2docs/Upload.jsp;jsessionid=${jsessionid};document_type_code=${document_type_code}' method='POST' enctype='multipart/form-data'>
         <!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
-        <div class="row fileupload-buttonbar">
-            <div class="col-lg-7">
+        <@div class="row fileupload-buttonbar">
+            <@div class="col-lg-7">
                 <!-- The fileinput-button span is used to style the file input field as button -->
-                <span class="btn btn-success fileinput-button">
-                    <i class="glyphicon glyphicon-plus"></i>
-                    <span>#i18n{files2docs.selectFiles.buttonAdd}</span>
-                    <input id="fileSelectBlueImpInput" type="file" name="files[]" multiple class="noBootstrapFilestyle">
-                </span>
-                <button type="submit" class="btn btn-primary start">
-                    <i class="glyphicon glyphicon-upload"></i>
-                    <span>#i18n{files2docs.selectFiles.buttonStart}</span>
-                </button>
-                <button type="reset" class="btn btn-warning cancel">
-                    <i class="glyphicon glyphicon-ban-circle"></i>
-                    <span>#i18n{files2docs.selectFiles.buttonStop}</span>
-                </button>
+                <@span class="btn btn-success fileinput-button">
+                    <@icon style='plus' />
+                    <@span>#i18n{files2docs.selectFiles.buttonAdd}</@span>
+                    <@input type='file' id='fileSelectBlueImpInput' name='files[]' params='multiple' class='noBootstrapFilestyle' />
+                </@span>
+                <@button type='submit' buttonIcon='upload' class='btn btn-primary start' title='#i18n{files2docs.selectFiles.buttonStart}' />
+                <@button type='reset' buttonIcon='stop' class='btn btn-warning cancel' title='#i18n{files2docs.selectFiles.buttonStop}' />
                 <!-- button type="button" class="btn btn-danger delete">
                     <i class="glyphicon glyphicon-trash"></i>
                     <span>#i18n{files2docs.selectFiles.buttonDelete}</span>
                 </button -->
-                <input type="checkbox" class="toggle">
+                <@checkBox class='toggle' name='cbx' />
                 <!-- The global file processing state -->
-                <span class="fileupload-process"></span>
-            </div>
+                <@span class='fileupload-process'></@span>
+            </@div>
             <!-- The global progress state -->
-            <div class="col-lg-5 fileupload-progress fade">
+            <@div class="col-lg-5 fileupload-progress fade">
                 <!-- The global progress bar -->
-                <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
-                    <div class="progress-bar progress-bar-success" style="width:0%;"></div>
-                </div>
+                <@div class="progress progress-striped active" params='role="progressbar" aria-valuemin="0" aria-valuemax="100"'>
+                    <@div class="progress-bar progress-bar-success" params='style="width:0%;"'></@div>
+                </@div>
                 <!-- The extended global progress state -->
-                <div class="progress-extended">&nbsp;</div>
-            </div>
-        </div>
+                <@div class="progress-extended">&nbsp;</@div>
+            </@div>
+        </@div>
         
-        <input type="hidden" id="document_type_code" name="document_type_code" value="${document_type_code!}" />
+        <@input type="hidden" id="document_type_code" name="document_type_code" value="${document_type_code!}" />
 
         <!-- The table listing the files available for upload/download -->
-        <table role="presentation" class="table table-striped"><tbody class="files"></tbody></table>
-    </form>
+        <@table class='table table-striped' params='role="presentation"' ><@tableBody class='files'></@tableBody></@table>
+    </@tform>
     <br>
 
 <!-- The blueimp Gallery widget -->
-<div id="blueimp-gallery" class="blueimp-gallery blueimp-gallery-controls" data-filter=":even">
-    <div class="slides"></div>
+<@div id='blueimp-gallery' class='blueimp-gallery blueimp-gallery-controls' params='data-filter=":even"'>
+    <@div class="slides"></@div>
     <h3 class="title"></h3>
     <a class="prev">‹</a>
     <a class="next">›</a>
     <a class="close">×</a>
     <a class="play-pause"></a>
     <ol class="indicator"></ol>
-</div>
+</@div>
 <!-- The template to display files available for upload -->
 <script id="template-upload" type="text/x-tmpl">
 {% for (var i=0, file; file=o.files[i]; i++) { %}
-    <tr class="template-upload fade">
-        <td>
-            <span class="preview"></span>
-        </td>
-        <td>
-            <p class="name">{%=file.name%}</p>
+    <@tr class="template-upload fade">
+        <@td>
+            <@span class="preview"></@span>
+        </@td>
+        <@td>
+            <@p class="name">{%=file.name%}</@p>
             <strong class="error text-danger"></strong>
-        </td>
-        <td>
-            <p class="size">Processing...</p>
-            <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-bar progress-bar-success" style="width:0%;"></div></div>
-        </td>
-        <td>
+        </@td>
+        <@td>
+            <@p class="size">Processing...</@p>
+            <@div class='progress progress-striped active' params='role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"'><@div class='progress-bar progress-bar-success' params='style="width:0%;"'></@div></@div>
+        </@td>
+        <@td>
             {% if (!i && !o.options.autoUpload) { %}
-                <button class="btn btn-primary start" disabled>
-                    <i class="glyphicon glyphicon-upload"></i>
-                    <span>#i18n{files2docs.selectFiles.buttonStart}</span>
-                </button>
+                <@button type='button' class='btn btn-primary start' title='#i18n{files2docs.selectFiles.buttonStart}' buttonIcon='upload' disabled=true />
             {% } %}
             {% if (!i) { %}
-                <button class="btn btn-warning cancel">
-                    <i class="glyphicon glyphicon-ban-circle"></i>
-                    <span>#i18n{files2docs.selectFiles.buttonCancel}</span>
-                </button>
+			    <@button type='button' class='btn btn-warning cancel' title='#i18n{files2docs.selectFiles.buttonCancel}' buttonIcon='circle' disabled=true />
             {% } %}
-        </td>
-    </tr>
+        </@td>
+    </@tr>
 {% } %}
 </script>
 <!-- The template to display files available for download -->
 <script id="template-download" type="text/x-tmpl">
 {% for (var i=0, file; file=o.files[i]; i++) { %}
-    <tr class="template-download fade">
-        <td>
-            <span class="preview">
+    <@tr class="template-download fade">
+        <@td>
+            <@span class="preview">
                 {% if (file.thumbnailUrl) { %}
                     <a href="{%=file.url%}" title="{%=file.name%}" download="{%=file.name%}" data-gallery><img src="{%=file.thumbnailUrl%}"></a>
                 {% } %}
-            </span>
-        </td>
-        <td>
+            </@span>
+        </@td>
+        <@td>
             <p class="name">
                 {% if (file.url) { %}
                     <a href="{%=file.url%}" title="{%=file.name%}" download="{%=file.name%}" {%=file.thumbnailUrl?'data-gallery':''%}>{%=file.name%}</a>
@@ -226,10 +197,10 @@
             {% if (file.error) { %}
                 <div><span class="label label-danger">Error</span> {%=file.error%}</div>
             {% } %}
-        </td>
-        <td>
+        </@td>
+        <@td>
             <span class="size">{%=o.formatFileSize(file.size)%}</span>
-        </td>
+        </@td>
         <!-- td>
             {% if (file.deleteUrl) { %}
                 <button class="btn btn-danger delete" data-type="{%=file.deleteType%}" data-url="{%=file.deleteUrl%}"{% if (file.deleteWithCredentials) { %} data-xhr-fields='{"withCredentials":true}'{% } %}>
@@ -244,7 +215,7 @@
                 </button>
             {% } %}
         </td -->
-    </tr>
+    </@tr>
 {% } 
    
     // sets the nb_imported_files
@@ -359,42 +330,35 @@ $(function () {
 	$(this).next(".new_space_name").toggle().next("a").toggle();    
     });
 
-
-
-
-
 });
 </script>
 
 <!-- --------------------------------------------------------------------------------------- -->			
 
-							</div>
-				</fieldset>
-                                </div>
-               
-<!-- Validate step ---------------------------------------------------------------------------- -->
-                                <div class="col-xs-12 col-sm-12 col-md-2">
-                                    <fieldset>
-                                    <legend>
-					<span class="badge badge-info">#i18n{files2docs.selectFiles.step} 3</span>&nbsp;#i18n{files2docs.selectFiles.titleSubmit}*</legend>
-						
-                                        <div id="btnLinkValidate" class="btn btn-primary btn-small" display="none">
-                                            <i class="fa fa-check"></i>
-                                    &nbsp;#i18n{files2docs.selectFiles.buttonSubmit}
-                                        </div> 
-                                    </fieldset>
+                                </@div>
+                            </@fieldSet>
+                        </@columns>
+					</@row>
 
-                                </div>
-				
-			</div>				
-		</div>				
-	</div>				
-</div>				
+<!-- Validate step ---------------------------------------------------------------------------- -->
+                    <@row>
+                        <@columns xs=12 sm=12 md=2>
+                            <@fieldSet>
+                                <@p class="h2"><@tag color="secondary">#i18n{files2docs.selectFiles.step} 3</@tag>&nbsp;#i18n{files2docs.selectFiles.titleSubmit}*</@p>
+                                <@button type='button' id='btnLinkValidate' buttonIcon='check' class='btn btn-primary btn-small' title='#i18n{files2docs.selectFiles.buttonSubmit}' style='display="none"' />
+                            </@fieldSet>
+                        </@columns>
+                    </@row>
+                </@box>
+            </@boxBody>
+        </@box>
+    </@columns>
+</@row>
 
 <#else>
-	<div class="alert alert-error">
-	#i18n{files2docs.selectFiles.noMapping}
-	</div>
+    <@alert class='alert-error' color='warning'>
+        #i18n{files2docs.selectFiles.noMapping}
+    </@alert>
 </#if>
 
 <script type="text/javascript">
