@@ -1,2 +1,4 @@
-<label for="${attribute.code}_${identifier}">${attribute.name}<#if attribute.required>*</#if>&nbsp;:&nbsp;</label> 
-<input type="text" name="${attribute.code}_${identifier}" id="${attribute.code}_${identifier}" class="form-control"	value="<#if (parameters.mapping)?has_content><#list parameters.mapping as mapping>${mapping?if_exists}</#list><#else>http://</#if>">
+<@formGroup labelFor='${attribute.code}_${identifier}' labelKey='${attribute.name}' mandatory=attribute.required>
+    <#assign value><#if (parameters.mapping)?has_content><#list parameters.mapping as mapping>${mapping?if_exists}</#list><#else>http://</#if></#assign>
+    <@input type='text' id='${attribute.code}_${identifier}' name='${attribute.code}_${identifier}' value=value />
+</@formGroup>

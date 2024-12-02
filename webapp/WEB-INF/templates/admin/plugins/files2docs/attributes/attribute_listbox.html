@@ -1,4 +1,4 @@
-<label for="${attribute.code}_${identifier}">${attribute.name}<#if attribute.required>*</#if>&nbsp;:&nbsp;</label> 
+<@formGroup labelFor='${attribute.code}_${identifier}' labelKey='${attribute.name}' mandatory=attribute.required>
     <#if (parameters.mapping)?has_content>
     	<#list parameters.mapping as mapping>
 	    	<#if mapping?has_content>
@@ -18,7 +18,7 @@
 		    </#list>
 		</#if>
 	</#if>
-<select id="${attribute.code}_${identifier}" name="${attribute.code}_${identifier}" class="form-control">
+<@select id='${attribute.code}_${identifier}' name='${attribute.code}_${identifier}'>
 		<#if parameters.items?size != 0>
 			<#list parameters.items as item>
 				<#if defaultValue="${item}">
@@ -28,4 +28,5 @@
 				</#if>
 			</#list>
 		</#if>
-</select>
+</@select>
+</@formGroup>

@@ -1,2 +1,3 @@
-<label for="${attribute.code}_${identifier}">${attribute.name}<#if attribute.required>*</#if>&nbsp;:&nbsp;</label> 
-<textarea name="${attribute.code}_${identifier}"  class="form-control" id="${attribute.code}_${identifier}"><#if (parameters.mapping)?has_content><#list parameters.mapping as mapping>${mapping?if_exists}</#list></#if></textarea>
+<@formGroup labelFor='${attribute.code}_${identifier}' labelKey='${attribute.name}' mandatory=attribute.required>
+    <@input type='textarea' name='${attribute.code}_${identifier}' id='${attribute.code}_${identifier}'><#if (parameters.mapping)?has_content><#list parameters.mapping as mapping>${mapping?if_exists}</#list></#if></@textarea>
+</@formGroup>

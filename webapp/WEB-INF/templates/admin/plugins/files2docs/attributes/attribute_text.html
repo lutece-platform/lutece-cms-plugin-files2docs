@@ -1,2 +1,6 @@
-<label for="${attribute.code}_${identifier}">${attribute.name}<#if attribute.required>*</#if>&nbsp;:&nbsp;</label> 
-<input type="text" id="${attribute.code}_${identifier}" name="${attribute.code}_${identifier}" class="form-control" size="<#list parameters.size as size>${size}</#list>" maxlength="<#list parameters.maxlength as maxlength>${maxlength}</#list>" value="<#if (parameters.mapping)?has_content><#list parameters.mapping as mapping>${mapping?if_exists}</#list></#if>">
+<@formGroup labelFor='${attribute.code}_${identifier}' labelKey='${attribute.name}' mandatory=attribute.required>
+    <#assign size><#list parameters.size as size>${size}</#list></#assign>
+    <#assign maxlength><#list parameters.maxlength as maxlength>${maxlength}</#list></#assign>
+    <#assign value><#if (parameters.mapping)?has_content><#list parameters.mapping as mapping>${mapping?if_exists}</#list></#if></#assign>
+    <@input type='text' id='${attribute.code}_${identifier}' name='${attribute.code}_${identifier}' size=size maxlength=maxlength?number value=value />
+</@formGroup>
