@@ -1,3 +1,6 @@
+-- liquibase formatted sql
+-- changeset files2docs:init_db_files2docs.sql
+-- preconditions onFail:MARK_RAN onError:WARN
 -- files2docs_mapping
 INSERT INTO files2docs_mapping(id_mapping,code_document_type,description,title,summary)
 VALUES(1,'article','Mapping du type de document Article',NULL,NULL);

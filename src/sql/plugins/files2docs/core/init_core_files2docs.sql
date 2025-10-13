@@ -1,3 +1,6 @@
+-- liquibase formatted sql
+-- changeset files2docs:init_core_files2docs.sql
+-- preconditions onFail:MARK_RAN onError:WARN
 -- core_admin_right
 INSERT INTO core_admin_right(id_right,name,level_right,admin_url,description,is_updatable,plugin_name,id_feature_group,icon_url,documentation_url)
 VALUES('FILES2DOCS_MANAGEMENT','files2docs.adminFeature.files2docs_management.name',3,'jsp/admin/plugins/files2docs/SelectFiles.jsp','files2docs.adminFeature.files2docs_management.description',0,'files2docs','CONTENT',NULL,NULL);
