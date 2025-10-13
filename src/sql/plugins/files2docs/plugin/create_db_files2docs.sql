@@ -1,3 +1,6 @@
+-- liquibase formatted sql
+-- changeset files2docs:create_db_files2docs.sql
+-- preconditions onFail:MARK_RAN onError:WARN
 -- files2docs_mapping
 DROP TABLE IF EXISTS files2docs_mapping;
 CREATE TABLE files2docs_mapping (
