@@ -3,7 +3,7 @@
 	<!-- Plugin informations -->
 	<name>files2docs</name>
 	<class>fr.paris.lutece.portal.service.plugin.PluginDefaultImplementation</class>
-	<version>1.1.4-SNAPSHOT</version>
+	<version>1.1.4-beta-01</version>
 	<documentation/>
 	<installation/>
 	<changes/>
