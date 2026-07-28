@@ -244,8 +244,6 @@
 
 				<!-- The jQuery UI widget factory, can be omitted if jQuery UI is already included -->
 				<script src="js/plugins/files2docs/jQuery-File-Upload-9.19.0/js/vendor/jquery.ui.widget.js"></script>
-				<!-- The Templates plugin is included to render the upload/download listings -->
-				<script src="js/plugins/files2docs/jQuery-File-Upload-9.19.0/js/tmpl.min.js"></script>
 				<!-- The Load Image plugin is included for the preview images and image resizing functionality -->
 				<script src="js/plugins/files2docs/jQuery-File-Upload-9.19.0/js/load-image.all.min.js"></script>
 				<!-- The Canvas to Blob plugin is included for image resizing functionality -->
@@ -305,11 +303,69 @@
 					'use strict';
 
 					// Initialize the jQuery File Upload widget:
+					function escapeHtml(str) {
+						return String(str)
+								.replace(/&/g, '&amp;')
+								.replace(/</g, '&lt;')
+								.replace(/>/g, '&gt;')
+								.replace(/"/g, '&quot;');
+					}
+
 					$('#fileupload').fileupload({
-						// Uncomment the following to send cross-domain cookies:
-						//xhrFields: {withCredentials: true},
-						url: '${webapp_url}/jsp/admin/plugins/files2docs/Upload.jsp;document_type_code=' + ( $("#document_type_code").val().length > 0 ? $("#document_type_code").val() : "image") , 
-						sequentialUploads: true
+						url: '${webapp_url}/jsp/admin/plugins/files2docs/Upload.jsp;document_type_code=' + ( $("#document_type_code").val().length > 0 ? $("#document_type_code").val() : "image") ,
+						sequentialUploads: true,
+						uploadTemplate: function (o) {
+							var rows = '';
+							for (var i = 0; i < o.files.length; i++) {
+								var file = o.files[i];
+								rows += '<tr class="template-upload fade show">' +
+										'<td><span class="preview"></span></td>' +
+										'<td><p class="name">' + escapeHtml(file.name) + '</p>' +
+										'<strong class="error text-danger"></strong></td>' +
+										'<td><p class="size">Processing...</p>' +
+										'<div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">' +
+										'<div class="progress-bar progress-bar-success" style="width:0%;"></div></div></td>' +
+										'<td>' +
+										(!i && !o.options.autoUpload ?
+												'<button class="btn btn-primary start" disabled><i class="fa fa-upload"></i></button>' : '') +
+										(!i ?
+												'<button class="btn btn-warning cancel"><i class="fa fa-times"></i></button>' : '') +
+										'</td></tr>';
+							}
+							return rows;
+						},
+						downloadTemplate: function (o) {
+							var rows = '';
+							for (var i = 0; i < o.files.length; i++) {
+								var file = o.files[i];
+								var preview = file.thumbnailUrl ?
+										'<a href="' + escapeHtml(file.url) + '" title="' + escapeHtml(file.name) + '" download="' + escapeHtml(file.name) + '" data-gallery><img src="' + escapeHtml(file.thumbnailUrl) + '"></a>' : '';
+								var nameCell = file.url ?
+										'<a href="' + escapeHtml(file.url) + '" title="' + escapeHtml(file.name) + '" download="' + escapeHtml(file.name) + '"' + (file.thumbnailUrl ? ' data-gallery' : '') + '>' + escapeHtml(file.name) + '</a>' :
+										'<span>' + escapeHtml(file.name) + '</span>';
+								var errorHtml = file.error ?
+										'<div><span class="label label-danger">Error</span> ' + escapeHtml(file.error) + '</div>' : '';
+								var actionCell = file.deleteUrl ?
+										'<button class="btn btn-danger btn-sm delete" data-type="' + escapeHtml(file.deleteType) + '" data-url="' + escapeHtml(file.deleteUrl) + '">' +
+										'<i class="fa fa-trash"></i></button><input type="checkbox" name="delete" value="1" class="toggle">' :
+										'<button class="btn btn-warning cancel"><i class="fa fa-ban-circle"></i></button>';
+								rows += '<tr class="template-download fade show">' +
+										'<td><span class="preview">' + preview + '</span></td>' +
+										'<td><p class="name">' + nameCell + '</p>' + errorHtml + '</td>' +
+										'<td><span class="size">' + o.formatFileSize(file.size) + '</span></td>' +
+										'<td>' + actionCell + '</td></tr>';
+							}
+
+							var completedCount = $(".files tr.template-download").length + o.files.length;
+							$("#nb_imported_files").val( completedCount );
+							if ( completedCount >= 1 ) {
+								$("#btnLinkValidate").show();
+							} else {
+								$("#btnLinkValidate").hide();
+							}
+
+							return rows;
+						}
 					});
 
 
