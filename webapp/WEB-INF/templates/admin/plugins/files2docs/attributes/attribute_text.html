@@ -1,6 +1,6 @@
 <@formGroup labelFor='${attribute.code}_${identifier}' labelKey='${attribute.name}' mandatory=attribute.required>
     <#assign size><#list parameters.size as size>${size}</#list></#assign>
-    <#assign maxlength><#list parameters.maxlength as maxlength>${maxlength}</#list></#assign>
+    <#assign maxlength = parameters.maxlength?join('')>
     <#assign value><#if (parameters.mapping)?has_content><#list parameters.mapping as mapping>${mapping?if_exists}</#list></#if></#assign>
     <@input type='text' id='${attribute.code}_${identifier}' name='${attribute.code}_${identifier}' size=size maxlength=maxlength?number value=value />
 </@formGroup>

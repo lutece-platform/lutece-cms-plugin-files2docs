@@ -1,6 +1,6 @@
 <@pageContainer>
     <@pageColumn>
-		<#assign title><#if mapping.documentTypeName?has_content>${mapping.documentTypeName}</#if></#assign>
+		<#assign title = mapping.documentTypeName?has_content?then(mapping.documentTypeName, '')>
         <@pageHeader title='#i18n{files2docs.modifyAttribute.contentBoxTitle} ${title!""}' />
 		<@tform action='jsp/admin/plugins/files2docs/DoModifyAttribute.jsp'>
 			<#assign value><#if attribute?exists>${attribute.id}</#if></#assign>
