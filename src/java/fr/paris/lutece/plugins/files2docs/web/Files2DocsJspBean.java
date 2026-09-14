@@ -1459,14 +1459,13 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
             String strDocumentTitle = request.getParameter( PARAMETER_DOCUMENT_TITLE + STRING_UNDERSCORE + ( identifier + 1 ) );
             String strDocumentSummary = request.getParameter( PARAMETER_DOCUMENT_SUMMARY + STRING_UNDERSCORE + ( identifier + 1 ) );
 
-            if ( ( strDocumentTitle == null ) || strDocumentTitle.trim( ).equals( STRING_EMPTY ) || ( strDocumentSummary == null )
-                    || strDocumentSummary.trim( ).equals( STRING_EMPTY ) )
+            if ( ( strDocumentTitle == null ) || strDocumentTitle.trim( ).equals( STRING_EMPTY ) )
             {
                 return AdminMessageService.getMessageUrl( request, Messages.MANDATORY_FIELDS, AdminMessage.TYPE_STOP );
             }
 
             document.setTitle( strDocumentTitle );
-            document.setSummary( strDocumentSummary );
+            document.setSummary( strDocumentSummary != null ? strDocumentSummary : StringUtils.EMPTY );
 
             // Gets and validates the document attributes
             List<DocumentAttribute> listAttributes = (List<DocumentAttribute>) Files2DocsLinkDocument.getInstance( ).getMandatoryAttributes(
