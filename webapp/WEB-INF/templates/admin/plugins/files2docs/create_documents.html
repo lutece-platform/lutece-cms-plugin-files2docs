@@ -22,9 +22,9 @@
 								<#assign value><#if mapping_list[i]?exists && mapping_list[i].title?exists>${mapping_list[i].title}</#if></#assign>
 								<@input type='text' id='document_title_${i+1}' name='document_title_${i+1}' value=value maxlength=255 mandatory=true />
 							</@formGroup>
-							<@formGroup labelKey='#i18n{files2docs.createDocuments.columnSummary}' labelFor='document_summary_${i+1}' rows=2 mandatory=true>
+							<@formGroup labelKey='#i18n{files2docs.createDocuments.columnSummary}' labelFor='document_summary_${i+1}' rows=2>
 								<#assign value><#if mapping_list[i]?exists && mapping_list[i].summary?exists>${mapping_list[i].summary}</#if></#assign>
-								<@input type='textarea' id='document_summary_${i+1}' name='document_summary_${i+1}' rows=2 mandatory=true>${value}</@input>
+								<@input type='textarea' id='document_summary_${i+1}' name='document_summary_${i+1}' rows=2>${value}</@input>
 							</@formGroup>
 							<#if attributes_forms[i]?exists>
 								<@formGroup rows=2>
