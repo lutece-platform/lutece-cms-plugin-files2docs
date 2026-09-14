@@ -14,7 +14,7 @@
 				<#list filename_list as filename>
 					<@columns xs=12 sm=6 md=4 xl=3>
 						<@card headerTitle='test ${filename}' headerClass=''>
-							<@formGroup labelKey='#i18n{files2docs.createDocuments.columnDocumentName}' labelFor='document_title_${i+1}' rows=2>
+							<@formGroup labelKey='#i18n{files2docs.createDocuments.columnDocumentName}' labelFor='document_title_${i+1}' rows=2 mandatory=true>
 								<#assign value><#if mapping_list[i]?exists && mapping_list[i].title?exists>${mapping_list[i].title}</#if></#assign>
 								<@input type='text' id='document_title_${i+1}' name='document_title_${i+1}' value=value maxlength=255 />
 							</@formGroup>
