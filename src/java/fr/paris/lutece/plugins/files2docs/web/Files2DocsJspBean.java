@@ -551,13 +551,13 @@ public class Files2DocsJspBean extends MVCAdminJspBean
             String strDocumentTitle = request.getParameter( PARAMETER_DOCUMENT_TITLE + STRING_UNDERSCORE + ( identifier + 1 ) );
             String strDocumentSummary = request.getParameter( PARAMETER_DOCUMENT_SUMMARY + STRING_UNDERSCORE + ( identifier + 1 ) );
 
-            if ( StringUtils.isBlank( strDocumentTitle ) || StringUtils.isBlank( strDocumentSummary ) )
+            if ( StringUtils.isBlank( strDocumentTitle ) )
             {
                 return redirect( request, AdminMessageService.getMessageUrl( request, Messages.MANDATORY_FIELDS, AdminMessage.TYPE_STOP ) );
             }
 
             document.setTitle( strDocumentTitle );
-            document.setSummary( strDocumentSummary );
+            document.setSummary( StringUtils.defaultString( strDocumentSummary ) );
 
             List<DocumentAttribute> listAttributes = (List<DocumentAttribute>) Files2DocsLinkDocument.getInstance( ).getMandatoryAttributes(
                     strDocumentTypeCode );
