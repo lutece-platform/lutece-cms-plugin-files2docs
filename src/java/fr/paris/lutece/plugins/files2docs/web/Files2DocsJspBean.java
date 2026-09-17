@@ -55,9 +55,10 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
-import org.apache.commons.fileupload.FileItem;
+import fr.paris.lutece.api.user.User;
+import fr.paris.lutece.portal.service.upload.MultipartItem;
 
 import fr.paris.lutece.plugins.document.business.Document;
 import fr.paris.lutece.plugins.document.business.DocumentHome;
@@ -108,14 +109,20 @@ import fr.paris.lutece.util.url.UrlItem;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import org.json.simple.JSONArray;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
-import org.json.simple.JSONObject;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import jakarta.enterprise.inject.spi.CDI;
+import jakarta.enterprise.context.SessionScoped;
+import jakarta.inject.Named;
 
 /**
  * Files2Docs JSP Bean class
  */
+@SessionScoped
+@Named
 public class Files2DocsJspBean extends PluginAdminPageJspBean
 {
 
@@ -669,7 +676,7 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
         // Checks if the Regular Expression Service is enabled
         Map<String, String> mapRegExp = new HashMap<String, String>( );
 
-        if ( RegularExpressionService.getInstance( ).isAvailable( ) )
+        if ( CDI.current( ).select( RegularExpressionService.class ).get( ).isAvailable( ) )
         {
             for ( DocumentType documentType : colDocumentType )
             {
@@ -697,7 +704,7 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
 
                     for ( Integer nExpressionId : colRegularExpression )
                     {
-                        RegularExpression regularExpression = RegularExpressionService.getInstance( ).getRegularExpressionByKey( nExpressionId );
+                        RegularExpression regularExpression = CDI.current( ).select( RegularExpressionService.class ).get( ).getRegularExpressionByKey( nExpressionId );
 
                         // Cuts the current regular expression (".*\.ext" or ".*\.(ext|ext|ext)")
                         Pattern pattern = Pattern.compile( REGEXP_EXTENSION );
@@ -754,7 +761,7 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
         int nCurrentSpaceId = IntegerUtils.convert( strSpaceId );
         DocumentSpace currentSpace = DocumentSpaceHome.findByPrimaryKey( nCurrentSpaceId );
         listSpaceActions = (List<SpaceAction>) RBACService.getAuthorizedActionsCollection( listSpaceActions,
-                currentSpace, getUser(  ) );
+                currentSpace, (User) getUser( ) );
         model.put( MARK_SPACE_ACTIONS_LIST, listSpaceActions );
         model.put( MARK_SPACES_BROWSER, Files2DocsLinkDocument.getInstance( ).getSpacesBrowser( request, getUser( ), getLocale( ) ) );
         model.put( MARK_SUBMIT_BUTTON_DISABLED, bSubmitButtonDisabled );
@@ -825,8 +832,8 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
         }
 
         if ( !RBACService.isAuthorized( DocumentSpace.RESOURCE_TYPE, strParentSpaceId,
-                    SpaceResourceIdService.PERMISSION_CREATE, getUser(  ) ) ||
-                !DocumentSpacesService.getInstance(  )
+                    SpaceResourceIdService.PERMISSION_CREATE, (User) getUser( ) ) ||
+                !CDI.current( ).select( DocumentSpacesService.class ).get( )
                                           .isAuthorizedViewByWorkgroup( IntegerUtils.convert( strParentSpaceId ), getUser(  ) ) )
         {
             return AdminMessageService.getMessageUrl( request, Messages.USER_ACCESS_DENIED, AdminMessage.TYPE_STOP );
@@ -1061,9 +1068,14 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
      */
     public String upload( HttpServletRequest request )
     {
+        if ( !( request instanceof MultipartHttpServletRequest ) )
+        {
+            return RETURN_IO_ERROR;
+        }
+
         // Gets the file
         MultipartHttpServletRequest multiRequest = (MultipartHttpServletRequest) request;
-        FileItem item = multiRequest.getFile( PARAMETER_FILEDATA );
+        MultipartItem item = multiRequest.getFile( PARAMETER_FILEDATA );
 
         // Gets the upload file name
         String strFileName = FileUploadService.getFileNameOnly( item );
@@ -1075,7 +1087,7 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
         }
 
         // Check for regular expression validation (filename)
-        if ( RegularExpressionService.getInstance( ).isAvailable( ) )
+        if ( CDI.current( ).select( RegularExpressionService.class ).get( ).isAvailable( ) )
         {
             // Gets the selected document type code
             String strDocumentTypeCode = request.getParameter( PARAMETER_DOCUMENT_TYPE_CODE );
@@ -1107,9 +1119,9 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
             {
                 for ( Integer nExpressionId : colRegularExpression )
                 {
-                    RegularExpression regularExpression = RegularExpressionService.getInstance( ).getRegularExpressionByKey( nExpressionId );
+                    RegularExpression regularExpression = CDI.current( ).select( RegularExpressionService.class ).get( ).getRegularExpressionByKey( nExpressionId );
 
-                    if ( !RegularExpressionService.getInstance( ).isMatches( strFileName, regularExpression ) )
+                    if ( !CDI.current( ).select( RegularExpressionService.class ).get( ).isMatches( strFileName, regularExpression ) )
                     {
                         return RETURN_INVALID_FILENAME;
                     }
@@ -1173,9 +1185,10 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
     public String getJsonResponse( HttpServletRequest request, String fileName, long fileLength )
     {
 
-        JSONObject jsonResponse = new JSONObject( );
-        JSONArray jsonFilesList = new JSONArray( );
-        JSONObject jsonFile = new JSONObject( );
+        ObjectMapper mapper = new ObjectMapper( );
+        ObjectNode jsonResponse = mapper.createObjectNode( );
+        ArrayNode jsonFilesList = mapper.createArrayNode( );
+        ObjectNode jsonFile = mapper.createObjectNode( );
 
         jsonFile.put( "url", getUploadDirectoryURL( request ) + "/" + fileName );
         jsonFile.put( "thumbnailUrl", AppPathService.getBaseUrl( request ) + "/images/admin/skin/plugins/files2docs/ok.png" );
@@ -1186,7 +1199,7 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
 
         jsonFilesList.add( jsonFile );
 
-        jsonResponse.put( "files", jsonFilesList );
+        jsonResponse.set( "files", jsonFilesList );
 
         return jsonResponse.toString( );
     }
@@ -1204,6 +1217,11 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
 
         // Gets the selected document type code
         String strDocumentTypeCode = request.getParameter( PARAMETER_DOCUMENT_TYPE_CODE );
+
+        if ( strDocumentTypeCode == null )
+        {
+            return AdminMessageService.getMessageUrl( request, Messages.MANDATORY_FIELDS, AdminMessage.TYPE_STOP );
+        }
 
         // Gets the selected space ID
         String strSpaceId = request.getParameter( PARAMETER_BROWSER_SELECTED_SPACE_ID );
@@ -1527,7 +1545,7 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
                     }
 
                     // Checks for regular expression validation
-                    if ( RegularExpressionService.getInstance( ).isAvailable( ) )
+                    if ( CDI.current( ).select( RegularExpressionService.class ).get( ).isAvailable( ) )
                     {
                         // Gets the regular expression list for the current attribute
                         Collection<Integer> colRegularExpression = Files2DocsLinkDocument.getInstance( ).getListRegularExpressionKeyByIdAttribute(
@@ -1537,9 +1555,9 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
                         {
                             for ( Integer nExpressionId : colRegularExpression )
                             {
-                                RegularExpression regularExpression = RegularExpressionService.getInstance( ).getRegularExpressionByKey( nExpressionId );
+                                RegularExpression regularExpression = CDI.current( ).select( RegularExpressionService.class ).get( ).getRegularExpressionByKey( nExpressionId );
 
-                                if ( !RegularExpressionService.getInstance( ).isMatches( strParameterStringValue, regularExpression ) )
+                                if ( !CDI.current( ).select( RegularExpressionService.class ).get( ).isMatches( strParameterStringValue, regularExpression ) )
                                 {
                                     String [ ] listArguments = {
                                             attribute.getName( ), regularExpression.getErrorMessage( ),
@@ -1613,12 +1631,12 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
                 // validate the DOCUMENT
                 try
                 {
-                    DocumentService.getInstance( ).changeDocumentState( document, getUser( ), DocumentState.STATE_WAITING_FOR_APPROVAL );
+                    CDI.current( ).select( DocumentService.class ).get( ).changeDocumentState( document, getUser( ), DocumentState.STATE_WAITING_FOR_APPROVAL );
 
                     // Reload document in case listeners have modified it in the database
                     document = DocumentHome.findByPrimaryKeyWithoutBinaries( document.getId( ) );
 
-                    DocumentService.getInstance( ).validateDocument( document, getUser( ), DocumentState.STATE_VALIDATE );
+                    CDI.current( ).select( DocumentService.class ).get( ).validateDocument( document, getUser( ), DocumentState.STATE_VALIDATE );
                 }
                 catch( DocumentException e )
                 {
@@ -1694,7 +1712,7 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
 
         // Adds the failure files
         String strListFailure = request.getParameter( PARAMETER_FAILURE_LIST );
-        String [ ] strSplitFailureList = strListFailure.trim( ).split( STRING_COMMA );
+        String [ ] strSplitFailureList = ( strListFailure == null ) ? new String [ 0 ] : strListFailure.trim( ).split( STRING_COMMA );
         int nFailureFiles = 0;
 
         if ( strSplitFailureList != null )
@@ -1716,7 +1734,7 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
 
         // Adds the imported files
         String strListImported = request.getParameter( PARAMETER_IMPORTED_LIST );
-        String [ ] strSplitImportedList = strListImported.trim( ).split( STRING_COMMA );
+        String [ ] strSplitImportedList = ( strListImported == null ) ? new String [ 0 ] : strListImported.trim( ).split( STRING_COMMA );
         int nImportedFiles = 0;
 
         if ( strSplitImportedList != null )
@@ -1771,6 +1789,7 @@ public class Files2DocsJspBean extends PluginAdminPageJspBean
         // List of document identifiers
         model.put( MARK_IMPORTED_LIST, strListImported );
         model.put( MARK_FAILURE_LIST, strListFailure );
+        model.put( MARK_BROWSER_SELECTED_SPACE_ID, ( strSpaceId == null ) ? STRING_EMPTY : strSpaceId );
 
         // List of documents (paginator)
         model.put( MARK_PAGINATOR, paginator );

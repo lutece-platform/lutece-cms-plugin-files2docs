@@ -37,6 +37,7 @@ import fr.paris.lutece.portal.service.util.AppLogService;
 import fr.paris.lutece.portal.service.util.AppPropertiesService;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -131,8 +132,8 @@ public final class Files2DocsUtil
         // Replaces '<' and '>' caracters in the format value
         if ( StringUtils.isNotBlank( strToFormat ) )
         {
-            String strFormatted = StringUtils.replace( strToFormat, STRING_LT, STRING_LT_HTML );
-            strFormatted = StringUtils.replace( strToFormat, STRING_GT, STRING_GT_HTML );
+            String strFormatted = Strings.CS.replace( strToFormat, STRING_LT, STRING_LT_HTML );
+            strFormatted = Strings.CS.replace( strToFormat, STRING_GT, STRING_GT_HTML );
 
             return strFormatted;
         }

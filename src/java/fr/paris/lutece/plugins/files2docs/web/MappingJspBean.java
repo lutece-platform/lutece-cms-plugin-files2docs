@@ -39,7 +39,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -60,13 +60,18 @@ import fr.paris.lutece.portal.web.admin.PluginAdminPageJspBean;
 import fr.paris.lutece.portal.web.constants.Messages;
 import fr.paris.lutece.util.html.HtmlTemplate;
 import fr.paris.lutece.util.url.UrlItem;
+import jakarta.enterprise.context.SessionScoped;
+import jakarta.inject.Named;
 
 /**
  * Files2Docs Mapping JSP Bean class
  */
+@SessionScoped
+@Named
 public class MappingJspBean extends PluginAdminPageJspBean
 {
     public static final String MAPPING_MANAGEMENT = "MAPPING_MANAGEMENT";
+    private static final String MESSAGE_MAPPING_NOT_FOUND = "files2docs.message.mappingNotFound";
 
     // Templates
     private static final String TEMPLATE_MANAGE_MAPPING = "admin/plugins/files2docs/manage_mapping.html";
@@ -328,6 +333,11 @@ public class MappingJspBean extends PluginAdminPageJspBean
 
         if ( mapping == null )
         {
+            return AdminMessageService.getMessageUrl( request, MESSAGE_MAPPING_NOT_FOUND, AdminMessage.TYPE_STOP );
+        }
+
+        if ( mapping == null )
+        {
             return AdminMessageService.getMessageUrl( request, MESSAGE_ERROR_FILES2DOCS, AdminMessage.TYPE_STOP );
         }
 
@@ -435,6 +445,11 @@ public class MappingJspBean extends PluginAdminPageJspBean
 
         // Updates the mapping
         Mapping mapping = MappingHome.findByPrimaryKey( nMappingId, getPlugin( ) );
+
+        if ( mapping == null )
+        {
+            return AdminMessageService.getMessageUrl( request, MESSAGE_MAPPING_NOT_FOUND, AdminMessage.TYPE_STOP );
+        }
         mapping.setDescription( strDescription );
 
         MappingHome.update( mapping, getPlugin( ) );
@@ -523,6 +538,11 @@ public class MappingJspBean extends PluginAdminPageJspBean
 
         // Gets the mapping
         Mapping mapping = MappingHome.findByPrimaryKey( nMappingId, getPlugin( ) );
+
+        if ( mapping == null )
+        {
+            return AdminMessageService.getMessageUrl( request, MESSAGE_MAPPING_NOT_FOUND, AdminMessage.TYPE_STOP );
+        }
 
         // Gets the attribute name (title or summary)
         String strAttributeName = request.getParameter( PARAMETER_ATTRIBUTE_NAME );
@@ -616,6 +636,11 @@ public class MappingJspBean extends PluginAdminPageJspBean
             {
                 Mapping mapping = MappingHome.findByPrimaryKey( nMappingId, getPlugin( ) );
 
+                if ( mapping == null )
+                {
+                    return AdminMessageService.getMessageUrl( request, MESSAGE_MAPPING_NOT_FOUND, AdminMessage.TYPE_STOP );
+                }
+
                 // Title
                 if ( strAttributeName.equals( STRING_TITLE ) )
                 {
@@ -660,7 +685,12 @@ public class MappingJspBean extends PluginAdminPageJspBean
 
         if ( mapping == null )
         {
-            AppLogService.error( "The mapping does not exist in the database for id : " + nMappingId );
+            return AdminMessageService.getMessageUrl( request, MESSAGE_MAPPING_NOT_FOUND, AdminMessage.TYPE_STOP );
+        }
+
+        if ( mapping == null )
+        {
+            AppLogService.error( "The mapping does not exist in the database for id : {}", nMappingId );
 
             return AdminMessageService.getMessageUrl( request, MESSAGE_ERROR_FILES2DOCS, AdminMessage.TYPE_STOP );
         }

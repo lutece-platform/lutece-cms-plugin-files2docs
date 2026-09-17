@@ -1,10 +1,12 @@
 <%@ page errorPage="../../ErrorPage.jsp" %>
 <%@ page import="java.util.Date" %>
 <%@ page import="fr.paris.lutece.plugins.files2docs.util.Files2DocsUtil" %>
-<jsp:useBean id="files2docs" scope="session" class="fr.paris.lutece.plugins.files2docs.web.Files2DocsJspBean" />
+<%@page import="fr.paris.lutece.plugins.files2docs.web.Files2DocsJspBean"%>
+<%@page import="jakarta.enterprise.inject.spi.CDI"%>
 
 <%
-	files2docs.init( request, files2docs.FILES2DOCS_MANAGEMENT );
+	Files2DocsJspBean files2docs = CDI.current( ).select( Files2DocsJspBean.class ).get( );
+	files2docs.init( request, Files2DocsJspBean.FILES2DOCS_MANAGEMENT );
 	
 	// Gets the minimum interval (in ms) allowed between two uploads
 	String strMinInterval = request.getParameter( "min_interval" );

@@ -34,6 +34,7 @@
 package fr.paris.lutece.plugins.files2docs.service;
 
 import fr.paris.lutece.portal.service.daemon.Daemon;
+import jakarta.enterprise.inject.spi.CDI;
 
 /**
  * AutoCleaning Daemon
@@ -45,6 +46,6 @@ public class AutoCleaningDaemon extends Daemon
      */
     public void run( )
     {
-        setLastRunLogs( AutoCleaningService.getInstance( ).processAutoCleaning( ) );
+        setLastRunLogs( CDI.current( ).select( AutoCleaningService.class ).get( ).processAutoCleaning( ) );
     }
 }

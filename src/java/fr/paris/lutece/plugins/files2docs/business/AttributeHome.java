@@ -34,7 +34,7 @@
 package fr.paris.lutece.plugins.files2docs.business;
 
 import fr.paris.lutece.portal.service.plugin.Plugin;
-import fr.paris.lutece.portal.service.spring.SpringContextService;
+import jakarta.enterprise.inject.spi.CDI;
 
 import java.util.Collection;
 
@@ -44,7 +44,7 @@ import java.util.Collection;
 public final class AttributeHome
 {
     // Static variable pointed at the DAO instance
-    private static IAttributeDAO _dao = (IAttributeDAO) SpringContextService.getPluginBean( "files2docs", "files2docsAttributeDAO" );
+    private static IAttributeDAO _dao = CDI.current( ).select( IAttributeDAO.class ).get( );
 
     /**
      * Private constructor - this class does not need to be instantiated

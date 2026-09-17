@@ -8,13 +8,13 @@
 				<strong>#i18n{files2docs.importResult.labelImportedFiles} <@tag>${nb_imported_files}</@tag></strong>&nbsp;&nbsp;
 				<strong>#i18n{files2docs.importResult.labelFailureFiles} <@tag>${nb_failure_files}</@tag></strong>&nbsp;
 			</@div>
-			<@aButton href='jsp/admin/plugins/document/ManageDocuments.jsp?id_space_filter=${browser_selected_space_id}' title='#i18n{files2docs.importResult.goToDocumentSpace}' buttonIcon='folder-open' hideTitle=['xs','sm','md']/>
+			<@aButton href='jsp/admin/plugins/document/ManageDocuments.jsp?id_space_filter=${browser_selected_space_id!""}' title='#i18n{files2docs.importResult.goToDocumentSpace}' buttonIcon='folder-open' hideTitle=['xs','sm','md']/>
 		</@alert>
 
 		<@tform action='jsp/admin/plugins/files2docs/DoSelectFiles.jsp' boxed=true>
-			<@input type='hidden' name='mode' value='${mode}' />
+			<@input type='hidden' name='mode' value='${mode!""}' />
 			<@input type='hidden' name='document_type_code' value='${(document_type_code)!}' />
-			<@input type='hidden' name='browser_selected_space_id' value='${browser_selected_space_id}' />
+			<@input type='hidden' name='browser_selected_space_id' value='${browser_selected_space_id!""}' />
 			<@input type='hidden' name='nb_imported_files' value='${(nb_imported_files)!}' />
 			<@input type='hidden' name='extension' value='${(extension_checked_list)!}' />
 			<@table>
@@ -64,7 +64,7 @@
 						</@td>
 						<@td>
 							<#if document.id != -1>
-								<@aButton href='jsp/admin/plugins/document/ModifyDocument.jsp?id_document=${document.id}&id_action=2&id_space_filter=${browser_selected_space_id}' size='sm' title='#i18n{files2docs.manageMapping.actionModify} ${document.title}' hideTitle=['all'] buttonIcon='edit' />
+								<@aButton href='jsp/admin/plugins/document/ModifyDocument.jsp?id_document=${document.id}&id_action=2&id_space_filter=${browser_selected_space_id!""}' size='sm' title='#i18n{files2docs.manageMapping.actionModify} ${document.title}' hideTitle=['all'] buttonIcon='edit' />
 							</#if>
 						</@td>
 					</tr>

@@ -41,36 +41,15 @@ import java.io.File;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import jakarta.enterprise.context.ApplicationScoped;
 
 /**
  * AutoCleaning Service
  */
-public final class AutoCleaningService
+@ApplicationScoped
+public class AutoCleaningService
 {
     private static final String PROPERTY_PARENT_PATH = "files2docs.parentPath";
-    private static AutoCleaningService _singleton;
-
-    /**
-     * Creates a new instance of AutoCleaningService
-     */
-    private AutoCleaningService( )
-    {
-    }
-
-    /**
-     * Gets the unique instance of AutoCleaningService
-     *
-     * @return The unique instance of AutoArchivingService
-     */
-    public static AutoCleaningService getInstance( )
-    {
-        if ( _singleton == null )
-        {
-            _singleton = new AutoCleaningService( );
-        }
-
-        return _singleton;
-    }
 
     /**
      * Executes the AutoCleaning process
