@@ -34,7 +34,7 @@
 package fr.paris.lutece.plugins.files2docs.business;
 
 import fr.paris.lutece.portal.service.plugin.Plugin;
-import fr.paris.lutece.portal.service.spring.SpringContextService;
+import jakarta.enterprise.inject.spi.CDI;
 
 import java.util.Collection;
 
@@ -44,7 +44,7 @@ import java.util.Collection;
 public final class MappingHome
 {
     // Static variable pointed at the DAO instance
-    private static IMappingDAO _dao = (IMappingDAO) SpringContextService.getPluginBean( "files2docs", "files2docsMappingDAO" );
+    private static IMappingDAO _dao = CDI.current( ).select( IMappingDAO.class ).get( );
 
     /**
      * Private constructor - this class does not need to be instantiated

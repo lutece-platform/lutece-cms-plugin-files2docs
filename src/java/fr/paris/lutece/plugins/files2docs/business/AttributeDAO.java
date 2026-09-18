@@ -38,10 +38,12 @@ import fr.paris.lutece.util.sql.DAOUtil;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import jakarta.enterprise.context.ApplicationScoped;
 
 /**
  * This class provides Data Access methods for Attribute objects
  */
+@ApplicationScoped
 public class AttributeDAO implements IAttributeDAO
 {
     // Constants
@@ -62,19 +64,20 @@ public class AttributeDAO implements IAttributeDAO
      */
     private int newPrimaryKey( Plugin plugin )
     {
-        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_NEW_PK, plugin );
-        daoUtil.executeQuery( );
-
         int nKey;
 
-        if ( !daoUtil.next( ) )
+        try ( DAOUtil daoUtil = new DAOUtil( SQL_QUERY_NEW_PK, plugin ) )
         {
-            // If the table is empty
-            nKey = 1;
-        }
+            daoUtil.executeQuery( );
 
-        nKey = daoUtil.getInt( 1 ) + 1;
-        daoUtil.free( );
+            if ( !daoUtil.next( ) )
+            {
+                // If the table is empty
+                nKey = 1;
+            }
+
+            nKey = daoUtil.getInt( 1 ) + 1;
+        }
 
         return nKey;
     }
@@ -89,13 +92,14 @@ public class AttributeDAO implements IAttributeDAO
      */
     public void insert( Attribute attribute, Plugin plugin )
     {
-        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_INSERT_ATTRIBUTE, plugin );
+        try ( DAOUtil daoUtil = new DAOUtil( SQL_QUERY_INSERT_ATTRIBUTE, plugin ) )
+        {
 
-        daoUtil.setInt( 1, newPrimaryKey( plugin ) );
-        daoUtil.setInt( 2, attribute.getMappingId( ) );
-        daoUtil.setInt( 3, attribute.getDocumentAttributeId( ) );
-        daoUtil.executeUpdate( );
-        daoUtil.free( );
+            daoUtil.setInt( 1, newPrimaryKey( plugin ) );
+            daoUtil.setInt( 2, attribute.getMappingId( ) );
+            daoUtil.setInt( 3, attribute.getDocumentAttributeId( ) );
+            daoUtil.executeUpdate( );
+        }
     }
 
     /**
@@ -110,21 +114,21 @@ public class AttributeDAO implements IAttributeDAO
     public Collection<Attribute> selectByMapping( int nMappingId, Plugin plugin )
     {
         Collection<Attribute> colAttribute = new ArrayList<Attribute>( );
-        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SELECT_MAPPING, plugin );
-        daoUtil.setInt( 1, nMappingId );
-        daoUtil.executeQuery( );
-
-        while ( daoUtil.next( ) )
+        try ( DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SELECT_MAPPING, plugin ) )
         {
-            Attribute attribute = new Attribute( );
-            attribute.setId( daoUtil.getInt( 1 ) );
-            attribute.setMappingId( daoUtil.getInt( 2 ) );
-            attribute.setDocumentAttributeId( daoUtil.getInt( 3 ) );
-            attribute.setFormat( daoUtil.getString( 4 ) );
-            colAttribute.add( attribute );
-        }
+            daoUtil.setInt( 1, nMappingId );
+            daoUtil.executeQuery( );
 
-        daoUtil.free( );
+            while ( daoUtil.next( ) )
+            {
+                Attribute attribute = new Attribute( );
+                attribute.setId( daoUtil.getInt( 1 ) );
+                attribute.setMappingId( daoUtil.getInt( 2 ) );
+                attribute.setDocumentAttributeId( daoUtil.getInt( 3 ) );
+                attribute.setFormat( daoUtil.getString( 4 ) );
+                colAttribute.add( attribute );
+            }
+        }
 
         return colAttribute;
     }
@@ -142,20 +146,20 @@ public class AttributeDAO implements IAttributeDAO
     {
         Attribute attribute = null;
 
-        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SELECT_ATTRIBUTE, plugin );
-        daoUtil.setInt( 1, nAttributeId );
-        daoUtil.executeQuery( );
-
-        if ( daoUtil.next( ) )
+        try ( DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SELECT_ATTRIBUTE, plugin ) )
         {
-            attribute = new Attribute( );
-            attribute.setId( daoUtil.getInt( 1 ) );
-            attribute.setMappingId( daoUtil.getInt( 2 ) );
-            attribute.setDocumentAttributeId( daoUtil.getInt( 3 ) );
-            attribute.setFormat( daoUtil.getString( 4 ) );
-        }
+            daoUtil.setInt( 1, nAttributeId );
+            daoUtil.executeQuery( );
 
-        daoUtil.free( );
+            if ( daoUtil.next( ) )
+            {
+                attribute = new Attribute( );
+                attribute.setId( daoUtil.getInt( 1 ) );
+                attribute.setMappingId( daoUtil.getInt( 2 ) );
+                attribute.setDocumentAttributeId( daoUtil.getInt( 3 ) );
+                attribute.setFormat( daoUtil.getString( 4 ) );
+            }
+        }
 
         return attribute;
     }
@@ -170,11 +174,12 @@ public class AttributeDAO implements IAttributeDAO
      */
     public void store( Attribute attribute, Plugin plugin )
     {
-        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_UPDATE_ATTRIBUTE, plugin );
-        daoUtil.setString( 1, attribute.getFormat( ) );
-        daoUtil.setInt( 2, attribute.getId( ) );
-        daoUtil.executeUpdate( );
-        daoUtil.free( );
+        try ( DAOUtil daoUtil = new DAOUtil( SQL_QUERY_UPDATE_ATTRIBUTE, plugin ) )
+        {
+            daoUtil.setString( 1, attribute.getFormat( ) );
+            daoUtil.setInt( 2, attribute.getId( ) );
+            daoUtil.executeUpdate( );
+        }
     }
 
     /**
@@ -187,10 +192,11 @@ public class AttributeDAO implements IAttributeDAO
      */
     public void deleteByMapping( int nMappingId, Plugin plugin )
     {
-        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_REMOVE_MAPPING, plugin );
-        daoUtil.setInt( 1, nMappingId );
-        daoUtil.executeUpdate( );
-        daoUtil.free( );
+        try ( DAOUtil daoUtil = new DAOUtil( SQL_QUERY_REMOVE_MAPPING, plugin ) )
+        {
+            daoUtil.setInt( 1, nMappingId );
+            daoUtil.executeUpdate( );
+        }
     }
 
     /**
@@ -206,20 +212,20 @@ public class AttributeDAO implements IAttributeDAO
     {
         Attribute attribute = null;
 
-        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SELECT_DOCUMENT_ATTRIBUTE, plugin );
-        daoUtil.setInt( 1, nDocumentAttributeId );
-        daoUtil.executeQuery( );
-
-        if ( daoUtil.next( ) )
+        try ( DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SELECT_DOCUMENT_ATTRIBUTE, plugin ) )
         {
-            attribute = new Attribute( );
-            attribute.setId( daoUtil.getInt( 1 ) );
-            attribute.setMappingId( daoUtil.getInt( 2 ) );
-            attribute.setDocumentAttributeId( daoUtil.getInt( 3 ) );
-            attribute.setFormat( daoUtil.getString( 4 ) );
-        }
+            daoUtil.setInt( 1, nDocumentAttributeId );
+            daoUtil.executeQuery( );
 
-        daoUtil.free( );
+            if ( daoUtil.next( ) )
+            {
+                attribute = new Attribute( );
+                attribute.setId( daoUtil.getInt( 1 ) );
+                attribute.setMappingId( daoUtil.getInt( 2 ) );
+                attribute.setDocumentAttributeId( daoUtil.getInt( 3 ) );
+                attribute.setFormat( daoUtil.getString( 4 ) );
+            }
+        }
 
         return attribute;
     }

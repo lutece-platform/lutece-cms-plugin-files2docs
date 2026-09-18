@@ -38,7 +38,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.enterprise.inject.spi.CDI;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -126,7 +127,9 @@ public final class Files2DocsLinkDocument
                 int nNbMandatoryAttributeFiles = 0;
 
                 // Filters document types by fields of type file
-                for ( DocumentAttribute attribute : DocumentTypeHome.findByPrimaryKey( type.getCode( ) ).getAttributes( ) )
+                DocumentType fullType = DocumentTypeHome.findByPrimaryKey( type.getCode( ) );
+
+                for ( DocumentAttribute attribute : ( fullType == null ) ? new ArrayList<DocumentAttribute>( ) : fullType.getAttributes( ) )
                 {
                     for ( String strCode : listAttributeTypeFile )
                     {
@@ -172,7 +175,7 @@ public final class Files2DocsLinkDocument
      */
     public String getSpacesBrowser( HttpServletRequest request, AdminUser user, Locale locale )
     {
-        return DocumentSpacesService.getInstance( ).getSpacesBrowser( request, user, locale, true, true );
+        return CDI.current( ).select( DocumentSpacesService.class ).get( ).getSpacesBrowser( request, user, locale, true, true );
     }
 
     /**
@@ -189,7 +192,7 @@ public final class Files2DocsLinkDocument
      */
     public boolean isAuthorizedAdminDocument( int nIdSpace, String strDocumentTypeId, AdminUser user )
     {
-        return DocumentService.getInstance( ).isAuthorizedAdminDocument( nIdSpace, strDocumentTypeId, DocumentTypeResourceIdService.PERMISSION_CREATE, user );
+        return CDI.current( ).select( DocumentService.class ).get( ).isAuthorizedAdminDocument( nIdSpace, strDocumentTypeId, DocumentTypeResourceIdService.PERMISSION_CREATE, user );
     }
 
     /**
@@ -201,7 +204,14 @@ public final class Files2DocsLinkDocument
      */
     public Collection<DocumentAttribute> getMandatoryAttributes( String strDocumentTypeCode )
     {
-        Collection<DocumentAttribute> colAttributes = DocumentTypeHome.findByPrimaryKey( strDocumentTypeCode ).getAttributes( );
+        DocumentType documentType = DocumentTypeHome.findByPrimaryKey( strDocumentTypeCode );
+
+        if ( documentType == null )
+        {
+            return new ArrayList<>( );
+        }
+
+        Collection<DocumentAttribute> colAttributes = documentType.getAttributes( );
         Collection<DocumentAttribute> colFiltered = new ArrayList<DocumentAttribute>( );
 
         /**
@@ -227,7 +237,14 @@ public final class Files2DocsLinkDocument
      */
     public DocumentAttribute getMandatoryAttributeFileImage( String strDocumentTypeCode )
     {
-        Collection<DocumentAttribute> colAttributes = DocumentTypeHome.findByPrimaryKey( strDocumentTypeCode ).getAttributes( );
+        DocumentType documentType = DocumentTypeHome.findByPrimaryKey( strDocumentTypeCode );
+
+        if ( documentType == null )
+        {
+            return null;
+        }
+
+        Collection<DocumentAttribute> colAttributes = documentType.getAttributes( );
 
         if ( ( colAttributes != null ) && !colAttributes.isEmpty( ) )
         {
@@ -284,7 +301,7 @@ public final class Files2DocsLinkDocument
     {
         try
         {
-            DocumentService.getInstance( ).createDocument( document, user );
+            CDI.current( ).select( DocumentService.class ).get( ).createDocument( document, user );
         }
         catch( DocumentException e )
         {

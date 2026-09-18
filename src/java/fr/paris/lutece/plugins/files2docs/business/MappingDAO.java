@@ -38,10 +38,12 @@ import fr.paris.lutece.util.sql.DAOUtil;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import jakarta.enterprise.context.ApplicationScoped;
 
 /**
  * This class provides Data Access methods for Mapping objects
  */
+@ApplicationScoped
 public class MappingDAO implements IMappingDAO
 {
     // Constants
@@ -62,19 +64,20 @@ public class MappingDAO implements IMappingDAO
      */
     private int newPrimaryKey( Plugin plugin )
     {
-        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_NEW_PK, plugin );
-        daoUtil.executeQuery( );
-
         int nKey;
 
-        if ( !daoUtil.next( ) )
+        try ( DAOUtil daoUtil = new DAOUtil( SQL_QUERY_NEW_PK, plugin ) )
         {
-            // If the table is empty
-            nKey = 1;
-        }
+            daoUtil.executeQuery( );
 
-        nKey = daoUtil.getInt( 1 ) + 1;
-        daoUtil.free( );
+            if ( !daoUtil.next( ) )
+            {
+                // If the table is empty
+                nKey = 1;
+            }
+
+            nKey = daoUtil.getInt( 1 ) + 1;
+        }
 
         return nKey;
     }
@@ -89,21 +92,21 @@ public class MappingDAO implements IMappingDAO
     public Collection<Mapping> selectAll( Plugin plugin )
     {
         Collection<Mapping> colMapping = new ArrayList<Mapping>( );
-        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SELECT_ALL, plugin );
-        daoUtil.executeQuery( );
-
-        while ( daoUtil.next( ) )
+        try ( DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SELECT_ALL, plugin ) )
         {
-            Mapping mapping = new Mapping( );
-            mapping.setId( daoUtil.getInt( 1 ) );
-            mapping.setDocumentTypeCode( daoUtil.getString( 2 ) );
-            mapping.setDescription( daoUtil.getString( 3 ) );
-            mapping.setTitle( daoUtil.getString( 4 ) );
-            mapping.setSummary( daoUtil.getString( 5 ) );
-            colMapping.add( mapping );
-        }
+            daoUtil.executeQuery( );
 
-        daoUtil.free( );
+            while ( daoUtil.next( ) )
+            {
+                Mapping mapping = new Mapping( );
+                mapping.setId( daoUtil.getInt( 1 ) );
+                mapping.setDocumentTypeCode( daoUtil.getString( 2 ) );
+                mapping.setDescription( daoUtil.getString( 3 ) );
+                mapping.setTitle( daoUtil.getString( 4 ) );
+                mapping.setSummary( daoUtil.getString( 5 ) );
+                colMapping.add( mapping );
+            }
+        }
 
         return colMapping;
     }
@@ -118,14 +121,15 @@ public class MappingDAO implements IMappingDAO
      */
     public void insert( Mapping mapping, Plugin plugin )
     {
-        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_INSERT_MAPPING, plugin );
+        try ( DAOUtil daoUtil = new DAOUtil( SQL_QUERY_INSERT_MAPPING, plugin ) )
+        {
 
-        mapping.setId( newPrimaryKey( plugin ) );
-        daoUtil.setInt( 1, mapping.getId( ) );
-        daoUtil.setString( 2, mapping.getDocumentTypeCode( ) );
-        daoUtil.setString( 3, mapping.getDescription( ) );
-        daoUtil.executeUpdate( );
-        daoUtil.free( );
+            mapping.setId( newPrimaryKey( plugin ) );
+            daoUtil.setInt( 1, mapping.getId( ) );
+            daoUtil.setString( 2, mapping.getDocumentTypeCode( ) );
+            daoUtil.setString( 3, mapping.getDescription( ) );
+            daoUtil.executeUpdate( );
+        }
     }
 
     /**
@@ -141,21 +145,21 @@ public class MappingDAO implements IMappingDAO
     {
         Mapping mapping = null;
 
-        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SELECT_MAPPING, plugin );
-        daoUtil.setInt( 1, nMappingId );
-        daoUtil.executeQuery( );
-
-        if ( daoUtil.next( ) )
+        try ( DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SELECT_MAPPING, plugin ) )
         {
-            mapping = new Mapping( );
-            mapping.setId( daoUtil.getInt( 1 ) );
-            mapping.setDocumentTypeCode( daoUtil.getString( 2 ) );
-            mapping.setDescription( daoUtil.getString( 3 ) );
-            mapping.setTitle( daoUtil.getString( 4 ) );
-            mapping.setSummary( daoUtil.getString( 5 ) );
-        }
+            daoUtil.setInt( 1, nMappingId );
+            daoUtil.executeQuery( );
 
-        daoUtil.free( );
+            if ( daoUtil.next( ) )
+            {
+                mapping = new Mapping( );
+                mapping.setId( daoUtil.getInt( 1 ) );
+                mapping.setDocumentTypeCode( daoUtil.getString( 2 ) );
+                mapping.setDescription( daoUtil.getString( 3 ) );
+                mapping.setTitle( daoUtil.getString( 4 ) );
+                mapping.setSummary( daoUtil.getString( 5 ) );
+            }
+        }
 
         return mapping;
     }
@@ -170,13 +174,14 @@ public class MappingDAO implements IMappingDAO
      */
     public void store( Mapping mapping, Plugin plugin )
     {
-        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_UPDATE_MAPPING, plugin );
-        daoUtil.setString( 1, mapping.getDescription( ) );
-        daoUtil.setString( 2, mapping.getTitle( ) );
-        daoUtil.setString( 3, mapping.getSummary( ) );
-        daoUtil.setInt( 4, mapping.getId( ) );
-        daoUtil.executeUpdate( );
-        daoUtil.free( );
+        try ( DAOUtil daoUtil = new DAOUtil( SQL_QUERY_UPDATE_MAPPING, plugin ) )
+        {
+            daoUtil.setString( 1, mapping.getDescription( ) );
+            daoUtil.setString( 2, mapping.getTitle( ) );
+            daoUtil.setString( 3, mapping.getSummary( ) );
+            daoUtil.setInt( 4, mapping.getId( ) );
+            daoUtil.executeUpdate( );
+        }
     }
 
     /**
@@ -189,10 +194,11 @@ public class MappingDAO implements IMappingDAO
      */
     public void delete( int nMappingId, Plugin plugin )
     {
-        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_REMOVE_MAPPING, plugin );
-        daoUtil.setInt( 1, nMappingId );
-        daoUtil.executeUpdate( );
-        daoUtil.free( );
+        try ( DAOUtil daoUtil = new DAOUtil( SQL_QUERY_REMOVE_MAPPING, plugin ) )
+        {
+            daoUtil.setInt( 1, nMappingId );
+            daoUtil.executeUpdate( );
+        }
     }
 
     /**
@@ -208,21 +214,21 @@ public class MappingDAO implements IMappingDAO
     {
         Mapping mapping = null;
 
-        DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SELECT_DOCUMENT_TYPE_CODE, plugin );
-        daoUtil.setString( 1, strDocumentTypeCode );
-        daoUtil.executeQuery( );
-
-        if ( daoUtil.next( ) )
+        try ( DAOUtil daoUtil = new DAOUtil( SQL_QUERY_SELECT_DOCUMENT_TYPE_CODE, plugin ) )
         {
-            mapping = new Mapping( );
-            mapping.setId( daoUtil.getInt( 1 ) );
-            mapping.setDocumentTypeCode( daoUtil.getString( 2 ) );
-            mapping.setDescription( daoUtil.getString( 3 ) );
-            mapping.setTitle( daoUtil.getString( 4 ) );
-            mapping.setSummary( daoUtil.getString( 5 ) );
-        }
+            daoUtil.setString( 1, strDocumentTypeCode );
+            daoUtil.executeQuery( );
 
-        daoUtil.free( );
+            if ( daoUtil.next( ) )
+            {
+                mapping = new Mapping( );
+                mapping.setId( daoUtil.getInt( 1 ) );
+                mapping.setDocumentTypeCode( daoUtil.getString( 2 ) );
+                mapping.setDescription( daoUtil.getString( 3 ) );
+                mapping.setTitle( daoUtil.getString( 4 ) );
+                mapping.setSummary( daoUtil.getString( 5 ) );
+            }
+        }
 
         return mapping;
     }
