@@ -1,21 +1,28 @@
 <@pageContainer>
     <@pageColumn>
         <@pageHeader title='#i18n{files2docs.createMapping.pageTitle}' />
-		<@tform action='jsp/admin/plugins/files2docs/DoCreateMapping.jsp' boxed=true>
+		<#if document_type_list?has_content>
+		<@tform action='jsp/admin/plugins/files2docs/ManageMapping.jsp' boxed=true>
+			<@input type='hidden' name='action' value='createMapping' />
 			<@formGroup labelFor='document_type_code' labelKey='#i18n{files2docs.createMapping.labelDocumentType}' mandatory=true>
-				<@select name='document_type_code'>
+				<@select name='document_type_code' id='document_type_code'>
 					<#list document_type_list?sort_by("name") as type>
-						<option value="${type.code}">${type.name}</option>
+						<@option label=type.name value=type.code />
 					</#list>
 				</@select>
 			</@formGroup>
 			<@formGroup labelFor='description' labelKey='#i18n{files2docs.createMapping.labelDescription}' mandatory=true>
-				<@input type='text' name='description' value='' maxlength=255 />
+				<@input type='text' name='description' id='description' value='' maxlength=255 mandatory=true />
 			</@formGroup>
 			<@formGroup>
 				<@button type='submit' buttonIcon='check' title='#i18n{files2docs.createMapping.buttonSubmit}' />
-				<@aButton href='jsp/admin/plugins/files2docs/ManageMapping.jsp' buttonIcon='times' title='#i18n{files2docs.createMapping.buttonCancel}' color='secondary' />
+				<@aButton href='jsp/admin/plugins/files2docs/ManageMapping.jsp' buttonIcon='x' title='#i18n{portal.util.labelCancel}' color='light' />
 			</@formGroup>
 		</@tform>
+		<#else>
+			<@box>
+				<@empty title='#i18n{portal.util.labelNoItem}' subtitle='#i18n{files2docs.createMapping.emptyHelp}' actionTitle='#i18n{portal.util.labelBack}' actionIcon='arrow-left' actionUrl='jsp/admin/plugins/files2docs/ManageMapping.jsp' />
+			</@box>
+		</#if>
 	</@pageColumn>
 </@pageContainer>

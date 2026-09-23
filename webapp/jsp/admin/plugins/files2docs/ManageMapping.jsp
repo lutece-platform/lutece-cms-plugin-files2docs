@@ -1,9 +1,9 @@
 <%@ page errorPage="../../ErrorPage.jsp" %>
+
+${ pageContext.setAttribute( 'strContent', mappingJspBean.processController( pageContext.request , pageContext.response ) ) }
+
 <jsp:include page="../../AdminHeader.jsp" />
 
-<%@page import="fr.paris.lutece.plugins.files2docs.web.MappingJspBean"%>
-
-${ mappingJspBean.init( pageContext.request, MappingJspBean.MAPPING_MANAGEMENT ) }
-${ mappingJspBean.getManageMapping ( pageContext.request ) }
+${ pageContext.getAttribute( 'strContent' ) }
 
 <%@ include file="../../AdminFooter.jsp" %>

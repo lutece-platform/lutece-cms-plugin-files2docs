@@ -1,16 +1,9 @@
 <%@ page errorPage="../../ErrorPage.jsp" %>
-<% if (request.getParameter("no_header") == null) { %>
-<jsp:include page="../../AdminHeader.jsp" />
-<% } else { %>
-<jsp:include page="../../insert/InsertServiceHeader.jsp" />
-<style>.content-header { display:none ;}</style>
-<% } %>
 
-<%@page import="fr.paris.lutece.plugins.files2docs.web.Files2DocsJspBean"%>
+${ pageContext.setAttribute( 'strContent', files2DocsJspBean.processController( pageContext.request , pageContext.response ) ) }
 
-${ files2DocsJspBean.init( pageContext.request, Files2DocsJspBean.FILES2DOCS_MANAGEMENT ) }
-${ files2DocsJspBean.getSelectFiles( pageContext.request ) }
+<jsp:include page="${ empty param.no_header ? '../../AdminHeader.jsp' : '../../insert/InsertServiceHeader.jsp' }" />
 
-<% if (request.getParameter("no_header") == null) { %>
-<%@ include file="../../AdminFooter.jsp" %>
-<% } %>
+${ pageContext.getAttribute( 'strContent' ) }
+
+<jsp:include page="${ empty param.no_header ? '../../AdminFooter.jsp' : 'InsertServiceFooter.jsp' }" />

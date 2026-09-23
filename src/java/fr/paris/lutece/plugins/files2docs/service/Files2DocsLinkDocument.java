@@ -171,11 +171,13 @@ public final class Files2DocsLinkDocument
      *            The current user
      * @param locale
      *            The current locale
+     * @param strActionUrl
+     *            The URL the browser posts to when it opens a space
      * @return The HTML form
      */
-    public String getSpacesBrowser( HttpServletRequest request, AdminUser user, Locale locale )
+    public String getSpacesBrowser( HttpServletRequest request, AdminUser user, Locale locale, String strActionUrl )
     {
-        return CDI.current( ).select( DocumentSpacesService.class ).get( ).getSpacesBrowser( request, user, locale, true, true );
+        return CDI.current( ).select( DocumentSpacesService.class ).get( ).getSpacesBrowser( request, user, locale, true, true, false, null, strActionUrl );
     }
 
     /**

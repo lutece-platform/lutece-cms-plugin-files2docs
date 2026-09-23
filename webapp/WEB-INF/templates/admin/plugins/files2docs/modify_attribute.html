@@ -2,7 +2,8 @@
     <@pageColumn>
 		<#assign title><#if mapping.documentTypeName?has_content>${mapping.documentTypeName}</#if></#assign>
         <@pageHeader title='#i18n{files2docs.modifyAttribute.contentBoxTitle} ${title!""}' />
-		<@tform action='jsp/admin/plugins/files2docs/DoModifyAttribute.jsp'>
+		<@tform action='jsp/admin/plugins/files2docs/ManageMapping.jsp' boxed=true>
+			<@input type='hidden' name='action' value='modifyAttribute' />
 			<#assign value><#if attribute?exists>${attribute.id}</#if></#assign>
 			<@input type='hidden' name='attribute_id' value=value />
 			<#assign value><#if attribute_name?exists>${attribute_name}</#if></#assign>
@@ -13,11 +14,11 @@
 				<@input type='text' name='attribute_format' id='attribute_format' maxlength=255 value=value />
 			</@formGroup>
 			<@formGroup labelKey='#i18n{files2docs.modifyAttribute.labelExample}'>
-				<@staticText><#list mapping_tag_list as mapping_tag>${mapping_tag}</#list></@staticText>
+				<@staticText><#list mapping_tag_list as mapping_tag>${mapping_tag} </#list></@staticText>
 			</@formGroup>
 			<@formGroup>
 				<@button type='submit' buttonIcon='check' title='#i18n{files2docs.modifyAttribute.buttonSubmit}' />
-				<@aButton href='jsp/admin/plugins/files2docs/ModifyMapping.jsp?mapping_id=${mapping.id}' buttonIcon='times' title='#i18n{files2docs.modifyAttribute.buttonCancel}' color='secondary' />
+				<@aButton href='jsp/admin/plugins/files2docs/ManageMapping.jsp?view=modifyMapping&amp;mapping_id=${mapping.id}' buttonIcon='x' title='#i18n{portal.util.labelCancel}' color='light' />
 			</@formGroup>
 		</@tform>
 	</@pageColumn>

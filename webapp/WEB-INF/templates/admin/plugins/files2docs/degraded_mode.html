@@ -1,4 +1,4 @@
-<#if !document_type_code?exists>
+<#if !document_type_code?has_content>
 	<#list document_type_list?sort_by("name") as type>
 		<#assign document_type_code = type.code>
 		<#break>
@@ -7,33 +7,31 @@
 <@pageContainer>
     <@pageColumn>
         <@pageHeader title='#i18n{files2docs.degradedMode.pageTitle}' />
-		<@tform action='jsp/admin/plugins/files2docs/DoSelectFiles.jsp' enctype='multipart/form-data' boxed=true>
-			<@input type='hidden' name='document_type_code_hidden' value='${document_type_code}'>
-			<#assign value><#if nb_imported_files?exists>${nb_imported_files}<#else>0</#if></#assign>
-			<@input type='hidden' name='nb_imported_files' value=value>
-			<@input type='hidden' name='mode' value='degraded'>
-
-			<@formGroup labelFor='document_type_code' label='#i18n{files2docs.degradedMode.labelType}' mandatory=true>
-				<@select name='document_type_code' disabled=document_type_code_disabled>
+		<@tform id='selectFilesForm' action='jsp/admin/plugins/files2docs/SelectFiles.jsp' enctype='multipart/form-data' boxed=true>
+			<@input type='hidden' name='action' value='selectFiles' />
+			<@input type='hidden' name='document_type_code_hidden' value='${document_type_code!}' />
+			<@input type='hidden' name='nb_imported_files' value='${nb_imported_files!0}' />
+			<@input type='hidden' name='mode' value='degraded' />
+			<#if no_header??>
+			<@input type='hidden' name='no_header' value='${no_header}' />
+			</#if>
+			<@formGroup labelFor='document_type_code' labelKey='#i18n{files2docs.degradedMode.labelType}' mandatory=true>
+				<@select name='document_type_code' id='document_type_code' disabled=document_type_code_disabled>
 					<#list document_type_list?sort_by("name") as type>
-						<#if document_type_code?exists && document_type_code=type.code>
-							<option selected="selected" value="${type.code}">${type.name}</option>
-						<#else>
-							<option value="${type.code}">${type.name}</option>
-						</#if>
+						<@option label=type.name value=type.code selected=( document_type_code?has_content && document_type_code = type.code ) />
 					</#list>
 				</@select>
 			</@formGroup>
-			<@formGroup labelFor='description' labelKey='#i18n{files2docs.degradedMode.labelUpload}' mandatory=true>
-				<@input type='file' name='Filedata' inputSize=50 />
+			<@formGroup labelFor='degraded_file' labelKey='#i18n{files2docs.degradedMode.labelUpload}' mandatory=!(nb_imported_files?? && nb_imported_files gt 0)>
+				<@input type='file' name='files[]' id='degraded_file' />
 			</@formGroup>
 			<#if degraded_error?has_content>
-				<@alert color='danger' icon='ban' message=degraded_error />
+				<@alert color='danger' iconTitle='ban'>${degraded_error?html}</@alert>
 			</#if>
 			<#if nb_imported_files?exists>
 			<@formGroup>
 				<strong>${nb_imported_files}
-				<#if nb_imported_files &lt; 2>
+				<#if nb_imported_files lt 2>
 					#i18n{files2docs.message.swfupload.complete.singular}
 				<#else>
 					#i18n{files2docs.message.swfupload.complete.plural}
@@ -42,19 +40,29 @@
 			</@formGroup>
 			</#if>
 			<@formGroup>
-				<@button type='submit' icon='upload' title='#i18n{files2docs.degradedMode.buttonDegraded}' />
-				<@button type='submit' buttonIcon='trash' title='#i18n{files2docs.degradedMode.buttonDelete}' color='danger' />
+				<@button type='submit' name='degraded_upload' value='degraded_upload' buttonIcon='upload' title='#i18n{files2docs.degradedMode.buttonDegraded}' />
+				<@button type='submit' name='delete' value='delete' params='formnovalidate' buttonIcon='trash' title='#i18n{files2docs.degradedMode.buttonDelete}' color='danger' />
 			</@formGroup>
-			<@formGroup>
-				<@fieldSet legend='#i18n{files2docs.degradedMode.labelSpace}*'>
-					${spaces_browser}
-				</@fieldSet>
-			</@formGroup>
+			<@fieldSet legend='#i18n{files2docs.degradedMode.labelSpace} *'>
+				${spaces_browser}
+				<script>
+						formId = 'selectFilesForm';
+						document.currentScript.parentElement.querySelectorAll( 'button[type="submit"], a[href$="ManageDocuments.jsp"]' ).forEach( function( e ) { e.hidden = true; } );
+						[ 'openSpace', 'goUp', 'modifyChoice' ].forEach( function( name ) {
+							var browse = window[ name ];
+							window[ name ] = function( ) {
+								var action = document.forms[ formId ].elements[ 'action' ];
+								action.name = 'view';
+								action.value = 'selectFiles';
+								browse.apply( this, arguments );
+							};
+						});
+					</script>
+			</@fieldSet>
 			<@formGroup>
 				<@button type='submit' buttonIcon='check' title='#i18n{files2docs.degradedMode.buttonSubmit}' />
-				<@button type='submit' buttonIcon='times' title='#i18n{files2docs.degradedMode.buttonCancel}' color='secondary' />
+				<@button type='submit' name='cancel' value='cancel' params='formnovalidate' buttonIcon='x' title='#i18n{portal.util.labelCancel}' color='light' />
 			</@formGroup>
 		</@tform>
 	</@pageColumn>
 </@pageContainer>
-

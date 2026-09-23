@@ -2,6 +2,5 @@
     <#assign value>
         <#if (parameters.mapping)?has_content><#list parameters.mapping as mapping>${mapping?if_exists}</#list><#else><#if (parameters.currentdate)?has_content><#list parameters.currentdate as currentdate>${currentdate?if_exists}</#list><#else><#if (parameters.defaultvalue)?has_content><#list parameters.defaultvalue as defaultvalue>${defaultvalue?if_exists}</#list></#if></#if></#if>
     </#assign>
-    <@input type='text' id='${attribute.code}_${identifier}' name='${attribute.code}_${identifier'} value=value />
+    <@input type='date' id='${attribute.code}_${identifier}' name='${attribute.code}_${identifier}' value=value?trim language=locale.language format='d/m/Y' />
 </@formGroup>
-</<@getDatePickerBootstrap idField=(attribute.code + "_" + identifier) language=locale.language />

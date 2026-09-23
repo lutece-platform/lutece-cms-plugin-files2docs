@@ -26,16 +26,18 @@
             <feature-title>files2docs.adminFeature.files2docs_management.name</feature-title>
             <feature-description>files2docs.adminFeature.files2docs_management.description</feature-description>
             <feature-level>3</feature-level>
+            <feature-group>CONTENT</feature-group>
             <feature-url>jsp/admin/plugins/files2docs/SelectFiles.jsp</feature-url>
-            <feature-icon-url>images/admin/skin/plugins/files2docs/manage_files2docs.png</feature-icon-url>
+            <icon-url>ti ti-file-import</icon-url>
         </admin-feature>
         <admin-feature>
             <feature-id>MAPPING_MANAGEMENT</feature-id>
             <feature-title>files2docs.adminFeature.mapping_management.name</feature-title>
             <feature-description>files2docs.adminFeature.mapping_management.description</feature-description>
             <feature-level>1</feature-level>
+            <feature-group>CONTENT</feature-group>
             <feature-url>jsp/admin/plugins/files2docs/ManageMapping.jsp</feature-url>
-            <feature-icon-url>images/admin/skin/plugins/files2docs/manage_mapping.png</feature-icon-url>
+            <icon-url>ti ti-arrows-exchange</icon-url>
         </admin-feature>
     </admin-features>
     
