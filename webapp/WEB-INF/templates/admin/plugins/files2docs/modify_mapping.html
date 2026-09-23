@@ -1,93 +1,75 @@
 <@pageContainer>
     <@pageColumn>
         <@pageHeader title='#i18n{files2docs.modifyMapping.contentBoxTitle1} / #i18n{files2docs.modifyMapping.contentBoxTitle2}'>
-			<@tform action='jsp/admin/plugins/files2docs/DoModifyMapping.jsp' type='inline' params='style="align-items:end!important;"'>
-				<@input type='hidden' name='mapping_id' value='${mapping.id}' />
-				<@formGroup labelKey='#i18n{files2docs.modifyMapping.labelDocumentType}' mandatory=true formStyle='inline'>
-					<#assign value><#if mapping.documentTypeName?has_content>${mapping.documentTypeName}</#if></#assign>
-					<@input type='text' name='document_type_name' disabled=true value=value />
-				</@formGroup>
-				<@formGroup labelFor='description' labelKey='#i18n{files2docs.modifyMapping.labelDescription}' mandatory=true formStyle='inline'>
-					<@input type='text' id='description' name='description' value='${mapping.description}' maxlength=255 inputSize=50 />
-				</@formGroup>
-				<@formGroup formStyle='inline'>
-					<@button type='submit' title='#i18n{files2docs.modifyMapping.buttonModify}' buttonIcon='check' hideTitle=['all'] />
-					<@aButton href='jsp/admin/plugins/files2docs/ManageMapping.jsp' buttonIcon='times' title='#i18n{files2docs.modifyMapping.buttonCancel}' color='secondary' hideTitle=['all'] />
-				</@formGroup>		
-			</@tform>
+			<@aButton href='jsp/admin/plugins/files2docs/ManageMapping.jsp' buttonIcon='arrow-left' title='#i18n{portal.util.labelBack}' color='light' />
 		</@pageHeader>
-		<table class="table table-striped table-hover">
-			<tbody>
-				<tr>
-					<th>#i18n{files2docs.modifyMapping.columnAttribute}</th>
-					<th>#i18n{files2docs.modifyMapping.columnValue}</th>
-					<th>#i18n{files2docs.modifyMapping.columnActions}</th>
-				</tr>
-				<tr>
-					<td>#i18n{files2docs.modifyMapping.labelTitle}</td>
-					<td><#if mapping.title?exists>${mapping.title}</#if></td>
-					<td>
-						<@aButton href='jsp/admin/plugins/files2docs/ModifyAttribute.jsp?mapping_id=${mapping.id}&attribute_name=title' title='#i18n{portal.util.labelModify}' buttonIcon='pencil' size='sm' hideTitle=['all'] />
-					</td>
-				</tr>
-				<tr>
-					<td>#i18n{files2docs.modifyMapping.labelSummary}</td>
-					<td><#if mapping.summary?exists>${mapping.summary}</#if></td>
-					<td>
-						<@aButton href='jsp/admin/plugins/files2docs/ModifyAttribute.jsp?mapping_id=${mapping.id}&attribute_name=summary' title='#i18n{portal.util.labelModify}' buttonIcon='pencil' size='sm' hideTitle=['all'] />
-					</td>
-				</tr>
-				<#if attribute_list?exists>
-					<#assign i = 0>
-					<#list attribute_list as attribute>
-					<#if document_attribute_name_list[i]?exists && document_attribute_code_list[i]?exists>
-						<tr>
-							<td>${document_attribute_name_list[i]}</td>
-							<td>
-								<#switch document_attribute_code_list[i]>
-									<#case "file">
-										#i18n{files2docs.modifyMapping.labelFile}
-										<#break>
-									<#case "image">
-										#i18n{files2docs.modifyMapping.labelImage}
-										<#break>
-									<#default>
-										<#if attribute.format?exists>${attribute.format}</#if>
-								</#switch>
-							</td>
-							<td>
-							<#if document_attribute_code_list[i] != "file" && document_attribute_code_list[i] != "image">
-								<!-- <a class="btn btn-primary btn-xs btn-flat" href="jsp/admin/plugins/files2docs/ModifyAttribute.jsp?attribute_id=${attribute.id}" title="#i18n{portal.util.labelModify}" >
-									<i class="fa fa-pencil"></i>
-								</a> -->
-								<@aButton href='jsp/admin/plugins/files2docs/ModifyAttribute.jsp?attribute_id=${attribute.id}' title='#i18n{portal.util.labelModify}' buttonIcon='pencil' size='sm' hideTitle=['all'] />
-							<#elseif attribute.id != -1>
-								<!-- <span class="label label-success">
-									<i class="fa fa-check"></i> #i18n{portal.util.labelEnabled}
-								</span> -->
-								<@tag color='success' tagIcon='check' title='#i18n{portal.util.labelEnabled}' />
-							<#elseif !id_mandatory_doc_attr_file_img??>
-								<#-- No mandatory document attribute type file/image, then display the button to change the assignment for attribute file/image -->
-								<!-- <form class="form-inline" method="post" action="jsp/admin/plugins/files2docs/DoChangeAttributeFileImage.jsp">
-									<input type="hidden" name="mapping_id" value="${mapping.id}">
-									<input type="hidden" name="id_document_attr" value="${attribute.documentAttributeId}">
-									<button class="btn btn-primary btn-xs btn-flat" type="submit">
-										<i class="fa fa-pencil"></i> #i18n{files2docs.modifyMapping.buttonModifyAttributeFileImage} fdhgfhfg
-									</button>
-								</form> -->
-								<@tform type='inline' action='jsp/admin/plugins/files2docs/DoChangeAttributeFileImage.jsp'>
-									<@input type='hidden' name='mapping_id' value='${mapping.id}' />
-									<@input type='hidden' name='id_document_attr' value='${attribute.documentAttributeId}' />
-									<@button type='submit' title='#i18n{files2docs.modifyMapping.buttonModifyAttributeFileImage}' buttonIcon='pencil' size='sm' hideTitle=['all'] />
-								</@tform>
-							</#if>
-							</td>
-						</tr>
-						<#assign i = i + 1>
-					</#if>
-				</#list>
+		<@tform action='jsp/admin/plugins/files2docs/ManageMapping.jsp' boxed=true>
+			<@input type='hidden' name='action' value='modifyMapping' />
+			<@input type='hidden' name='mapping_id' value='${mapping.id}' />
+			<@formGroup labelFor='document_type_name' labelKey='#i18n{files2docs.modifyMapping.labelDocumentType}'>
+				<#assign value><#if mapping.documentTypeName?has_content>${mapping.documentTypeName}</#if></#assign>
+				<@input type='text' name='document_type_name' id='document_type_name' disabled=true value=value />
+			</@formGroup>
+			<@formGroup labelFor='description' labelKey='#i18n{files2docs.modifyMapping.labelDescription}' mandatory=true>
+				<@input type='text' id='description' name='description' value='${mapping.description}' maxlength=255 mandatory=true />
+			</@formGroup>
+			<@formGroup>
+				<@button type='submit' title='#i18n{files2docs.modifyMapping.buttonModify}' buttonIcon='check' />
+				<@aButton href='jsp/admin/plugins/files2docs/ManageMapping.jsp' buttonIcon='x' title='#i18n{portal.util.labelCancel}' color='light' />
+			</@formGroup>
+		</@tform>
+		<@manageFeature>
+			<@manageFeatureItem>
+				<@manageFeatureItemColumn>
+					<@p><strong>#i18n{files2docs.modifyMapping.labelTitle}</strong></@p>
+					<@p class='ms-2'><#if mapping.title?exists>${mapping.title}</#if></@p>
+				</@manageFeatureItemColumn>
+				<@manageFeatureItemColumn align='end'>
+					<@aButton href='jsp/admin/plugins/files2docs/ManageMapping.jsp?view=modifyAttribute&amp;mapping_id=${mapping.id}&amp;attribute_name=title' title='#i18n{portal.util.labelModify}' buttonIcon='pencil' hideTitle=['all'] />
+				</@manageFeatureItemColumn>
+			</@manageFeatureItem>
+			<@manageFeatureItem>
+				<@manageFeatureItemColumn>
+					<@p><strong>#i18n{files2docs.modifyMapping.labelSummary}</strong></@p>
+					<@p class='ms-2'><#if mapping.summary?exists>${mapping.summary}</#if></@p>
+				</@manageFeatureItemColumn>
+				<@manageFeatureItemColumn align='end'>
+					<@aButton href='jsp/admin/plugins/files2docs/ManageMapping.jsp?view=modifyAttribute&amp;mapping_id=${mapping.id}&amp;attribute_name=summary' title='#i18n{portal.util.labelModify}' buttonIcon='pencil' hideTitle=['all'] />
+				</@manageFeatureItemColumn>
+			</@manageFeatureItem>
+			<#list attribute_list![] as attribute>
+			<#assign i = attribute?index>
+			<#if document_attribute_name_list[i]?exists && document_attribute_code_list[i]?exists>
+			<@manageFeatureItem>
+				<@manageFeatureItemColumn>
+					<@p><strong>${document_attribute_name_list[i]}</strong></@p>
+					<@p class='ms-2'>
+						<#switch document_attribute_code_list[i]>
+							<#case "file">
+								#i18n{files2docs.modifyMapping.labelFile}
+								<#break>
+							<#case "image">
+								#i18n{files2docs.modifyMapping.labelImage}
+								<#break>
+							<#default>
+								<#if attribute.format?exists>${attribute.format}</#if>
+						</#switch>
+					</@p>
+				</@manageFeatureItemColumn>
+				<@manageFeatureItemColumn align='end'>
+				<#if document_attribute_code_list[i] != "file" && document_attribute_code_list[i] != "image">
+					<@aButton href='jsp/admin/plugins/files2docs/ManageMapping.jsp?view=modifyAttribute&amp;attribute_id=${attribute.id}' title='#i18n{portal.util.labelModify}' buttonIcon='pencil' hideTitle=['all'] />
+				<#elseif attribute.id != -1>
+					<@tag color='success' tagIcon='check' title='#i18n{portal.util.labelEnabled}' />
+				<#elseif !id_mandatory_doc_attr_file_img??>
+					<@aButton href='jsp/admin/plugins/files2docs/ManageMapping.jsp?view=confirmChangeAttributeFileImage&amp;mapping_id=${mapping.id}&amp;id_document_attr=${attribute.documentAttributeId}' title='#i18n{files2docs.modifyMapping.buttonModifyAttributeFileImage}' buttonIcon='pencil' hideTitle=['all'] />
+				</#if>
+				</@manageFeatureItemColumn>
+			</@manageFeatureItem>
 			</#if>
-			</tbody>
-		</table>
+			<#else>
+			<@empty title='#i18n{portal.util.labelNoItem}' subtitle='#i18n{files2docs.modifyMapping.emptyHelp}' />
+			</#list>
+		</@manageFeature>
 	</@pageColumn>
 </@pageContainer>

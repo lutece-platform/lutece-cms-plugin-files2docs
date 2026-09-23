@@ -48,7 +48,7 @@ public class AttributeDAO implements IAttributeDAO
 {
     // Constants
     private static final String SQL_QUERY_NEW_PK = " SELECT max( id_attribute ) FROM files2docs_mapping_attribute";
-    private static final String SQL_QUERY_INSERT_ATTRIBUTE = "INSERT INTO files2docs_mapping_attribute ( id_attribute, id_mapping, id_document_attribute ) VALUES ( ?, ?, ? )";
+    private static final String SQL_QUERY_INSERT_ATTRIBUTE = "INSERT INTO files2docs_mapping_attribute ( id_attribute, id_mapping, id_document_attribute, format ) VALUES ( ?, ?, ?, ? )";
     private static final String SQL_QUERY_SELECT_MAPPING = "SELECT id_attribute, id_mapping, id_document_attribute, format FROM files2docs_mapping_attribute WHERE id_mapping=?";
     private static final String SQL_QUERY_SELECT_ATTRIBUTE = "SELECT id_attribute, id_mapping, id_document_attribute, format FROM files2docs_mapping_attribute WHERE id_attribute=?";
     private static final String SQL_QUERY_UPDATE_ATTRIBUTE = "UPDATE files2docs_mapping_attribute SET format=? WHERE id_attribute=?";
@@ -98,6 +98,7 @@ public class AttributeDAO implements IAttributeDAO
             daoUtil.setInt( 1, newPrimaryKey( plugin ) );
             daoUtil.setInt( 2, attribute.getMappingId( ) );
             daoUtil.setInt( 3, attribute.getDocumentAttributeId( ) );
+            daoUtil.setString( 4, attribute.getFormat( ) );
             daoUtil.executeUpdate( );
         }
     }

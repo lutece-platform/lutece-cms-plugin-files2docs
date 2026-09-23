@@ -19,14 +19,8 @@
 		</#if>
 	</#if>
 <@select id='${attribute.code}_${identifier}' name='${attribute.code}_${identifier}'>
-		<#if parameters.items?size != 0>
-			<#list parameters.items as item>
-				<#if defaultValue="${item}">
-					<option selected="selected" value="${item}">${item}</option>
-				<#else>
-					<option value="${item}">${item}</option>
-				</#if>
-			</#list>
-		</#if>
+		<#list parameters.items![] as item>
+			<@option label=item value=item selected=( item = defaultValue!'' ) />
+		</#list>
 </@select>
 </@formGroup>

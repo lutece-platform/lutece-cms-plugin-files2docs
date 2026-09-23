@@ -3,10 +3,10 @@
 -- preconditions onFail:MARK_RAN onError:WARN
 -- core_admin_right
 INSERT INTO core_admin_right(id_right,name,level_right,admin_url,description,is_updatable,plugin_name,id_feature_group,icon_url,documentation_url)
-VALUES('FILES2DOCS_MANAGEMENT','files2docs.adminFeature.files2docs_management.name',3,'jsp/admin/plugins/files2docs/SelectFiles.jsp','files2docs.adminFeature.files2docs_management.description',0,'files2docs','CONTENT',NULL,NULL);
+VALUES('FILES2DOCS_MANAGEMENT','files2docs.adminFeature.files2docs_management.name',3,'jsp/admin/plugins/files2docs/SelectFiles.jsp','files2docs.adminFeature.files2docs_management.description',0,'files2docs','CONTENT','ti ti-file-import',NULL);
 
 INSERT INTO core_admin_right(id_right,name,level_right,admin_url,description,is_updatable,plugin_name,id_feature_group,icon_url,documentation_url)
-VALUES('MAPPING_MANAGEMENT','files2docs.adminFeature.mapping_management.name',1,'jsp/admin/plugins/files2docs/ManageMapping.jsp','files2docs.adminFeature.mapping_management.description',0,'files2docs','CONTENT',NULL,NULL);
+VALUES('MAPPING_MANAGEMENT','files2docs.adminFeature.mapping_management.name',1,'jsp/admin/plugins/files2docs/ManageMapping.jsp','files2docs.adminFeature.mapping_management.description',0,'files2docs','CONTENT','ti ti-arrows-exchange',NULL);
 
 -- core_user_right
 INSERT INTO core_user_right(id_right,id_user) VALUES('FILES2DOCS_MANAGEMENT',1);

@@ -3,39 +3,41 @@
         <@pageHeader title='#i18n{files2docs.createDocuments.pageTitle}'>
 			<small>#i18n{files2docs.createDocuments.labelImportedFiles} : ${nb_imported_files}</small>
 		</@pageHeader>
-		<@tform action='jsp/admin/plugins/files2docs/DoCreateDocuments.jsp' boxed=true>
+		<@tform action='jsp/admin/plugins/files2docs/SelectFiles.jsp' boxed=true>
+			<@input type='hidden' name='action' value='createDocuments' />
 			<@input type='hidden' name='document_type_code' value='${document_type_code}' />
 			<@input type='hidden' name='browser_selected_space_id' value='${browser_selected_space_id}' />
 			<@input type='hidden' name='nb_imported_files' value='${nb_imported_files}' />
 			<@input type='hidden' name='extension' value='${extension_checked_list}' />
 			<@input type='hidden' name='mode' value='${mode}' />
+			<#if no_header??>
+			<@input type='hidden' name='no_header' value='${no_header}' />
+			</#if>
 			<@row>
-				<#assign i=0>
 				<#list filename_list as filename>
+					<#assign i = filename?index>
 					<@columns xs=12 sm=6 md=4 xl=3>
-						<@card headerTitle='test ${filename}' headerClass=''>
-							<@formGroup labelKey='#i18n{files2docs.createDocuments.columnDocumentName}' labelFor='document_title_${i+1}' rows=2>
+						<@card headerTitle='${filename}' headerClass=''>
+							<@formGroup labelKey='#i18n{files2docs.createDocuments.columnDocumentName}' labelFor='document_title_${i+1}' rows=2 mandatory=true>
 								<#assign value><#if mapping_list[i]?exists && mapping_list[i].title?exists>${mapping_list[i].title}</#if></#assign>
-								<@input type='text' id='document_title_${i+1}' name='document_title_${i+1}' value=value maxlength=255 />
+								<@input type='text' id='document_title_${i+1}' name='document_title_${i+1}' value=value maxlength=255 mandatory=true />
 							</@formGroup>
-							<@formGroup labelKey='#i18n{files2docs.createDocuments.columnSummary}' labelFor='document_summary_${i+1}' rows=2>
+							<@formGroup labelKey='#i18n{files2docs.createDocuments.columnSummary}' labelFor='document_summary_${i+1}' rows=2 mandatory=true>
 								<#assign value><#if mapping_list[i]?exists && mapping_list[i].summary?exists>${mapping_list[i].summary}</#if></#assign>
-								<@input type='textarea' id='document_summary_${i+1}' name='document_summary_${i+1}' rows=2>${value}</@input>
+								<@input type='textarea' id='document_summary_${i+1}' name='document_summary_${i+1}' rows=2 mandatory=true>${value}</@input>
 							</@formGroup>
 							<#if attributes_forms[i]?exists>
 								<@formGroup rows=2>
 									${attributes_forms[i]}
 								</@formGroup>
 							</#if>
-							<#assign i=i + 1>
 						</@card>
 					</@columns>
 				</#list>
 			</@row>
-
 			<@formGroup>
 				<@button type='submit' title='#i18n{files2docs.createDocuments.buttonSubmit}' buttonIcon='plus' />
-				<@aButton href='jsp/admin/plugins/files2docs/SelectFiles.jsp' buttonIcon='times' title='#i18n{files2docs.createDocuments.buttonCancel}' color='secondary' />
+				<@button type='submit' name='cancel' value='cancel' params='formnovalidate' buttonIcon='x' title='#i18n{portal.util.labelCancel}' color='light' />
 			</@formGroup>
 		</@tform>
 	</@pageColumn>

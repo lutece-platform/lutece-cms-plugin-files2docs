@@ -65,18 +65,18 @@
 					tags dynamiques :
 				</p>
 				<ul>
-					<li>&lt;filename&gt; : nom du fichier importé (sans extension)</li>
-					<li>&lt;mimetype&gt; : type MIME du fichier importé</li>
+					<li>[filename] : nom du fichier importé (sans extension)</li>
+					<li>[mimetype] : type MIME du fichier importé</li>
 					<li>
-						&lt;extension&gt; : extension du fichier importé
+						[extension] : extension du fichier importé
 						(sans le "." devant l'extension)
 					</li>
-					<li>&lt;date&gt; : date de l'import</li>
+					<li>[date] : date de l'import</li>
 				</ul>
 				<p>
 					Il est également possible de combiner du texte en dur et des tags dynamiques.
 					Par exemple :
-					<code>Document "&lt;filename&gt;.&lt;extension&gt;" importé le &lt;date&gt;</code>.
+					<code>Document "[filename].[extension]" importé le [date]</code>.
 				</p>
 			</subsection>
 			<subsection name="Suppression d'un mapping">

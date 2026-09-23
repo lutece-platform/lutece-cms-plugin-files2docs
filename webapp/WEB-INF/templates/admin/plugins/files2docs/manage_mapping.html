@@ -1,34 +1,29 @@
 <@pageContainer>
     <@pageColumn>
         <@pageHeader title='#i18n{files2docs.manageMapping.pageTitle}'>
-			<@tform action='jsp/admin/plugins/files2docs/CreateMapping.jsp'>
-				<@button type='submit' buttonIcon='plus' title='#i18n{files2docs.manageMapping.buttonCreate}' />
-			</@tform>
+			<@aButton href='jsp/admin/plugins/files2docs/ManageMapping.jsp?view=createMapping' buttonIcon='plus' title='#i18n{files2docs.manageMapping.buttonCreate}' color='primary' />
 		</@pageHeader>
-		<@table>
-			<thead>
-			<@tr>
-				<@th>#i18n{files2docs.manageMapping.columnDocumentType}</@th>
-				<@th>#i18n{files2docs.manageMapping.columnDescription}</@th>
-				<@th>#i18n{files2docs.manageMapping.columnActions}</@th>
-			</@tr>
-			</thead>
-			<tbody>
-			<#if mapping_list?exists>
-			<#assign i = 0>
-			<#list mapping_list?sort_by("documentTypeName") as mapping>
-			<@tr>
-				<@td>${mapping.documentTypeName}</@td>
-				<@td>${mapping.description}</@td>
-				<@td>
-					<@aButton href='jsp/admin/plugins/files2docs/ModifyMapping.jsp?mapping_id=${mapping.id}' title='#i18n{portal.util.labelModify}' buttonIcon='pencil' size='sm' hideTitle=['all'] />
-					<@aButton href='jsp/admin/plugins/files2docs/RemoveMapping.jsp?mapping_id=${mapping.id}' title='#i18n{portal.util.labelDelete}' buttonIcon='trash' size='sm' color='danger' hideTitle=['all'] />
-				</@td>
-			</@tr>
-			<#assign i = i + 1>
-			</#list>
-			</#if>
-			</tbody>
-		</@table>
+		<#if mapping_list?has_content>
+			<@manageFeature>
+				<#list mapping_list?sort_by("documentTypeName") as mapping>
+				<@manageFeatureItem>
+					<@manageFeatureItemColumn>
+						<strong>${mapping.documentTypeName!}</strong>
+					</@manageFeatureItemColumn>
+					<@manageFeatureItemColumn>
+						${mapping.description!}
+					</@manageFeatureItemColumn>
+					<@manageFeatureItemColumn align='end'>
+						<@aButton href='jsp/admin/plugins/files2docs/ManageMapping.jsp?view=modifyMapping&amp;mapping_id=${mapping.id}' title='#i18n{portal.util.labelModify}' buttonIcon='pencil' hideTitle=['all'] />
+						<@aButton href='jsp/admin/plugins/files2docs/ManageMapping.jsp?view=confirmRemoveMapping&amp;mapping_id=${mapping.id}' title='#i18n{portal.util.labelDelete}' buttonIcon='trash' color='danger' hideTitle=['all'] />
+					</@manageFeatureItemColumn>
+				</@manageFeatureItem>
+				</#list>
+			</@manageFeature>
+		<#else>
+			<@box>
+				<@empty title='#i18n{portal.util.labelNoItem}' />
+			</@box>
+		</#if>
 	</@pageColumn>
 </@pageContainer>

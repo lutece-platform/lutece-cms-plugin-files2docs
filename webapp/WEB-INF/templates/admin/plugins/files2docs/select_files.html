@@ -1,4 +1,5 @@
-<#if !document_type_code?exists>
+<#include "/admin/plugins/asynchronousupload/upload_commons.html" />
+<#if !document_type_code?has_content>
 	<#list document_type_list?sort_by("name") as type>
 		<#assign document_type_code = type.code>
 		<#break>
@@ -7,449 +8,71 @@
 <#if document_type_code?has_content>
 <@pageContainer>
 	<@pageColumn>
-
-		<!-- space Browser and select file type ---------->
-		<#assign headerTitle>
-			<h2 style="margin-bottom:0;"><@tag color='info'>#i18n{files2docs.selectFiles.step} 1</@tag>&nbsp;#i18n{files2docs.selectFiles.labelSpace} *</h2>
-		</#assign>
-
-		<@card headerTitle=headerTitle headerClass=''>
-
-			<@tform id='selectFilesForm' action='jsp/admin/plugins/files2docs/DoSelectFiles.jsp' enctype='multipart/form-data'>
-				<@input type='hidden' id='update_document_type' name='update_document_type' value='' />
-				<@input type='hidden' id='document_type_code_hidden' name='document_type_code_hidden' value='${document_type_code!}' />
-				<#if no_header?? >
-				<@input type='hidden' id='no_header' name='no_header' value='${no_header!}' />
-				</#if>
-				
+		<@pageHeader title='#i18n{files2docs.selectFiles.pageTitle}' />
+		<@tform id='selectFilesForm' action='jsp/admin/plugins/files2docs/SelectFiles.jsp' enctype='multipart/form-data'>
+			<@input type='hidden' name='action' value='selectFiles' />
+			<@input type='hidden' id='document_type_code_hidden' name='document_type_code_hidden' value='${document_type_code!}' />
+			<#if no_header??>
+			<@input type='hidden' id='no_header' name='no_header' value='${no_header}' />
+			</#if>
+			<@input type='hidden' id='nb_imported_files' name='nb_imported_files' value='0' />
+			<#assign headerTitle><@tag color='info'>#i18n{files2docs.selectFiles.step} 1</@tag>&nbsp;#i18n{files2docs.selectFiles.labelSpace}</#assign>
+			<@card headerTitle=headerTitle headerClass=''>
 				<@fieldSet legend='#i18n{files2docs.selectFiles.labelSpace}' hideLegend=['all']>
 					${spaces_browser}
-					<#--<@formGroup>
-						<@button type='submit' disabled=submit_button_disabled buttonIcon='check' title='#i18n{files2docs.selectFiles.buttonSubmit}' />
-					</@formGroup>-->
+					<script>
+						formId = 'selectFilesForm';
+						document.currentScript.parentElement.querySelectorAll( 'button[type="submit"], a[href$="ManageDocuments.jsp"]' ).forEach( function( e ) { e.hidden = true; } );
+						[ 'openSpace', 'goUp', 'modifyChoice' ].forEach( function( name ) {
+							var browse = window[ name ];
+							window[ name ] = function( ) {
+								var action = document.forms[ formId ].elements[ 'action' ];
+								action.name = 'view';
+								action.value = 'selectFiles';
+								browse.apply( this, arguments );
+							};
+						});
+					</script>
 				</@fieldSet>
-
-				<@fieldSet>
+				<@fieldSet legend='#i18n{files2docs.selectFiles.labelType}' hideLegend=['all']>
 					<@formGroup labelFor='document_type_code' labelKey='#i18n{files2docs.selectFiles.labelType}' mandatory=true>
 						<@select id='document_type_code' name='document_type_code' disabled=document_type_code_disabled>
-							<option selected="selected" value="">#i18n{files2docs.selectFiles.labelType}</option>
 							<#list document_type_list?sort_by("name") as type>
-								<#if document_type_code?exists && document_type_code=type.code>
-									<option selected="selected" value="${type.code}">${type.name}</option>
-								<#else>
-									<option value="${type.code}">${type.name}</option>
-								</#if>
+								<@option label=type.name value=type.code selected=( document_type_code = type.code ) />
 							</#list>
 						</@select>
 					</@formGroup>
-					<#if regexp_map[document_type_code]?exists && regexp_map[document_type_code]?split(",")?size &gt; 1>
-					<p id="divExtension" style="display:none;">
-						<script type="text/javascript">
-							// Displays the file type list with checkbox (JS enabled)
-							document.getElementById("divExtension").style.display = "";
-						</script>
-						#i18n{files2docs.selectFiles.labelExtension}* :
-						<#compress>
-							<#assign i = 0>
-							<#list regexp_map[document_type_code]?trim?split(",") as extension>
-							<input type="checkbox" class="checkbox" name="extension" value="${extension}"
-							<#if extension_checked_list?has_content>
-								<#assign bIsChecked = false>
-								<#list extension_checked_list?trim?split(",") as extension_checked>
-									<#if extension = extension_checked>
-										<#assign bIsChecked = true>
-										<#break>
-									</#if>
-								</#list>
-								</#if>
-								<#if !bIsChecked?exists || bIsChecked>
-									checked="checked"
-								</#if>
-								<#if document_type_code_disabled>
-									disabled="disabled"
-								</#if>
-								onclick="updateFileTypeList(${i});" />${extension}
-								<#assign i = i + 1>
-								</#list>
-						</#compress>
-					</p>
-					
-					<#assign value>
-						<#if extension_checked_list?has_content>${extension_checked_list}</#if>
-					</#assign>
-					<@input type='hidden' id='extension_hidden' name='extension_hidden' value=value />
-					
+					<#if regexp_map[document_type_code]?exists && regexp_map[document_type_code]?split(",")?size gt 1>
+					<@formGroup labelKey='#i18n{files2docs.selectFiles.labelExtension}' mandatory=true>
+						<#list regexp_map[document_type_code]?trim?split(",") as extension>
+							<#assign bIsChecked = !extension_checked_list?has_content || extension_checked_list?trim?split(",")?seq_contains( extension )>
+							<@checkBox orientation='switch' name='extension' id='extension_${extension?index}' value='${extension}' labelKey='${extension}' checked=bIsChecked disabled=document_type_code_disabled />
+						</#list>
+					</@formGroup>
+					<@input type='hidden' id='extension_hidden' name='extension_hidden' value='${extension_checked_list!}' />
 					</#if>
 				</@fieldSet>
-							
-				<@input type='hidden' id='nb_imported_files' name='nb_imported_files' value='0' />
-			</@tform>
-		</@card>
-
-		<#assign headerTitle>
-			<h2 style="margin-bottom: 0;"><@tag color='info'>#i18n{files2docs.selectFiles.step} 2</@tag>&nbsp;#i18n{files2docs.selectFiles.labelUpload} *</h2>
-		</#assign>
-
-		<@card headerTitle=headerTitle headerClass=''>
-
-			
-			<!-- JQUERY upload -->
-			<div id="divJqueryUpload" >
-
-				<!-- blueImp Jquery upload script ----------------------------------------------------------------------- -->
-				<!-- Generic page styles -->
-				<link rel="stylesheet" href="js/plugins/files2docs/jQuery-File-Upload-9.19.0/css/style.css">
-
-				<!-- CSS to style the file input field as button and adjust the Bootstrap progress bars -->
-				<link rel="stylesheet" href="js/plugins/files2docs/jQuery-File-Upload-9.19.0/css/jquery.fileupload.css">
-				<link rel="stylesheet" href="js/plugins/files2docs/jQuery-File-Upload-9.19.0/css/jquery.fileupload-ui.css">
-
-				<!-- The file upload form used as target for the file upload widget -->
-				<@tform id='fileupload' action='${webapp_url}/jsp/admin/plugins/files2docs/Upload.jsp;jsessionid=${jsessionid};document_type_code=${document_type_code}' enctype='multipart/form-data'>
-					<@fieldSet legend='#i18n{files2docs.selectFiles.labelUpload} *' hideLegend=['all']>
-						<!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
-						<@row class='fileupload-buttonbar'>
-							<@columns lg=7>
-								<!-- The fileinput-button span is used to style the file input field as button -->
-								 <@span class='btn btn-success fileinput-button'>
-								 	<@icon style='plus' />
-									<@span>#i18n{files2docs.selectFiles.buttonAdd}</@span>
-									<@input type='file' id='fileSelectBlueImpInput' name='files[]' params='multiple' class='noBootstrapFilestyle' />
-								</@span>
-								<@button type='submit' class='start' buttonIcon='upload' title='#i18n{files2docs.selectFiles.buttonStart}' />
-								<@button type='reset' class='cancel' color='warning' buttonIcon='times' title='#i18n{files2docs.selectFiles.buttonStop}' />
-								<@button type='button' class='delete' color='danger' buttonIcon='trash' title='#i18n{files2docs.selectFiles.buttonDelete}' />
-								<input type="checkbox" class="toggle">
-								<!-- The global file processing state -->
-								<@span class="fileupload-process"></@span>
-							</@columns>
-							<!-- The global progress state -->
-							<@columns lg=5 class='fileupload-progress fade show'>
-								<!-- The global progress bar -->
-								<@progress color='success' />
-								<!-- <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
-									<div class="progress-bar progress-bar-success" style="width:0%;"></div>
-								</div> -->
-								<!-- The extended global progress state -->
-								<@div class='progress-extended'>&nbsp;</@div>
-
-							</@columns>
-						</@row>
-						
-						<@input type='hidden' id='document_type_code' name='document_type_code' value='${document_type_code!}' />
-
-						<!-- The table listing the files available for upload/download -->
-						<table role="presentation" class="table table-striped"><tbody class="files"></tbody></table>
-					</@fieldSet>
-				</@tform>
-				<br>
-
-				<!-- The blueimp Gallery widget -->
-				<div id="blueimp-gallery" class="blueimp-gallery blueimp-gallery-controls" data-filter=":even">
-					<div class="slides"></div>
-					<h3 class="title"></h3>
-					<a class="prev">‹</a>
-					<a class="next">›</a>
-					<a class="close">×</a>
-					<a class="play-pause"></a>
-					<ol class="indicator"></ol>
-				</div>
-				<!-- The template to display files available for upload -->
-				<script id="template-upload" type="text/x-tmpl">
-				{% for (var i=0, file; file=o.files[i]; i++) { %}
-					<tr class="template-upload fade show">
-						<td>
-							<span class="preview"></span>
-						</td>
-						<td>
-							<p class="name">{%=file.name%}</p>
-							<strong class="error text-danger"></strong>
-						</td>
-						<td>
-							<p class="size">Processing...</p>
-							<div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-bar progress-bar-success" style="width:0%;"></div></div>
-						</td>
-						<td>
-							{% if (!i && !o.options.autoUpload) { %}
-								<!-- <button class="btn btn-primary start" disabled>
-									<i class="fa fa-upload"></i>
-									<span>#i18n{files2docs.selectFiles.buttonStart}</span>
-								</button> -->
-								<@button class='start' disabled=true buttonIcon='upload' title='#i18n{files2docs.selectFiles.buttonStart}' hideTitle=['xs','sm','md'] />
-							{% } %}
-							{% if (!i) { %}
-								<@button class='cancel' buttonIcon='times' title='#i18n{files2docs.selectFiles.buttonCancel}' color='danger' hideTitle=['xs','sm','md'] />
-								<!-- <button class="btn btn-warning cancel">
-									<i class="fa fa-times"></i>
-									<span>#i18n{files2docs.selectFiles.buttonCancel}</span>
-								</button> -->
-							{% } %}
-						</td>
-					</tr>
-				{% } %}
-				</script>
-				<!-- The template to display files available for download -->
-				<script id="template-download" type="text/x-tmpl">
-				{% for (var i=0, file; file=o.files[i]; i++) { %}
-					<tr class="template-download fade show">
-						<td>
-							<span class="preview">
-								{% if (file.thumbnailUrl) { %}
-									<a href="{%=file.url%}" title="{%=file.name%}" download="{%=file.name%}" data-gallery><img src="{%=file.thumbnailUrl%}"></a>
-								{% } %}
-							</span>
-						</td>
-						<td>
-							<p class="name">
-								{% if (file.url) { %}
-									<a href="{%=file.url%}" title="{%=file.name%}" download="{%=file.name%}" {%=file.thumbnailUrl?'data-gallery':''%}>{%=file.name%}</a>
-								{% } else { %}
-									<span>{%=file.name%}</span>
-								{% } %}
-							</p>
-							{% if (file.error) { %}
-								<div><span class="label label-danger">Error</span> {%=file.error%}</div>
-							{% } %}
-						</td>
-						<td>
-							<span class="size">{%=o.formatFileSize(file.size)%}</span>
-						</td>
-						<td>
-							{% if (file.deleteUrl) { %}
-								<button class="btn btn-danger btn-sm delete" data-type="{%=file.deleteType%}" data-url="{%=file.deleteUrl%}"{% if (file.deleteWithCredentials) { %} data-xhr-fields='{"withCredentials":true}'{% } %}>
-									<@icon style='trash' />
-									<span class="visually-hidden">#i18n{files2docs.selectFiles.buttonDelete}</span>
-								</button>
-								<input type="checkbox" name="delete" value="1" class="toggle">
-							{% } else { %}
-								<button class="btn btn-warning cancel">
-									<@icon style='ban-circle' />
-									<span>#i18n{files2docs.selectFiles.buttonCancel}</span>
-								</button>
-							{% } %}
-						</td>
-					</tr>
-				{% } 
-				
-					// sets the nb_imported_files
-					$("#nb_imported_files").val( $(".progress-bar").length ) ;
-					if ( $(".progress-bar").length > 1 ) {
-						$("#btnLinkValidate").show();
-					} else {
-						$("#btnLinkValidate").hide();
-					}
-					
-				%}
-				</script>
-
-				<!-- The jQuery UI widget factory, can be omitted if jQuery UI is already included -->
-				<script src="js/plugins/files2docs/jQuery-File-Upload-9.19.0/js/vendor/jquery.ui.widget.js"></script>
-				<!-- The Load Image plugin is included for the preview images and image resizing functionality -->
-				<script src="js/plugins/files2docs/jQuery-File-Upload-9.19.0/js/load-image.all.min.js"></script>
-				<!-- The Canvas to Blob plugin is included for image resizing functionality -->
-				<script src="js/plugins/files2docs/jQuery-File-Upload-9.19.0/js/canvas-to-blob.min.js"></script>
-				<!-- blueimp Gallery script -->
-				<script src="js/plugins/files2docs/jQuery-File-Upload-9.19.0/js/jquery.blueimp-gallery.min.js"></script>
-				<!-- The Iframe Transport is required for browsers without support for XHR file uploads -->
-				<script src="js/plugins/files2docs/jQuery-File-Upload-9.19.0/js/jquery.iframe-transport.js"></script>
-				<!-- The basic File Upload plugin -->
-				<script src="js/plugins/files2docs/jQuery-File-Upload-9.19.0/js/jquery.fileupload.js"></script>
-				<!-- The File Upload processing plugin -->
-				<script src="js/plugins/files2docs/jQuery-File-Upload-9.19.0/js/jquery.fileupload-process.js"></script>
-				<!-- The File Upload image preview & resize plugin -->
-				<script src="js/plugins/files2docs/jQuery-File-Upload-9.19.0/js/jquery.fileupload-image.js"></script>
-				<!-- The File Upload audio preview plugin -->
-				<script src="js/plugins/files2docs/jQuery-File-Upload-9.19.0/js/jquery.fileupload-audio.js"></script>
-				<!-- The File Upload video preview plugin -->
-				<script src="js/plugins/files2docs/jQuery-File-Upload-9.19.0/js/jquery.fileupload-video.js"></script>
-				<!-- The File Upload validation plugin -->
-				<script src="js/plugins/files2docs/jQuery-File-Upload-9.19.0/js/jquery.fileupload-validate.js"></script>
-				<!-- The File Upload user interface plugin -->
-				<script src="js/plugins/files2docs/jQuery-File-Upload-9.19.0/js/jquery.fileupload-ui.js"></script>
-				<!-- The XDomainRequest Transport is included for cross-domain file deletion for IE 8 and IE 9 -->
-				<!--[if (gte IE 8)&(lt IE 10)]>
-				<script src="js/plugins/files2docs/jQuery-File-Upload-9.19.0/js/cors/jquery.xdr-transport.js"></script>
-				<![endif]-->
-
-				<script  type="text/javascript">
-				/*
-				* jQuery File Upload Plugin JS Main script
-				* https://github.com/blueimp/jQuery-File-Upload
-				*
-				* Copyright 2010, Sebastian Tschan
-				* https://blueimp.net
-				*
-				* Licensed under the MIT license:
-				* https://opensource.org/licenses/MIT
-				*/
-
-				/* global $, window */
-
-				function changeQueryParameter( aObjSelector, param, new_value ) {
-					$(aObjSelector).each(function() {
-						var href = $(this).attr( "href" ) ;    
-						var posParamStart = href.indexOf( "&" + param + "=" ) ;
-						if (posParamStart <= 0) posParamStart = href.indexOf( "?" + param + "=" ) ;
-						if (posParamStart <= 0) return;
-
-						var posNextParam = href.indexOf( "&" , posParamStart + param.length + 2 ) ;   
-						var new_href = href.substring( 0, posParamStart + param.length + 2) + new_value ;
-						if (posNextParam > 0) new_href += href.substring( posNextParam ) ;
-						$(this).attr( "href" ,  new_href ) ;    
-					});
-				}
-						
-				$(function () {
-					'use strict';
-
-					// Initialize the jQuery File Upload widget:
-					function escapeHtml(str) {
-						return String(str)
-								.replace(/&/g, '&amp;')
-								.replace(/</g, '&lt;')
-								.replace(/>/g, '&gt;')
-								.replace(/"/g, '&quot;');
-					}
-
-					$('#fileupload').fileupload({
-						url: '${webapp_url}/jsp/admin/plugins/files2docs/Upload.jsp;document_type_code=' + ( $("#document_type_code").val().length > 0 ? $("#document_type_code").val() : "image") ,
-						sequentialUploads: true,
-						uploadTemplate: function (o) {
-							var rows = '';
-							for (var i = 0; i < o.files.length; i++) {
-								var file = o.files[i];
-								rows += '<tr class="template-upload fade show">' +
-										'<td><span class="preview"></span></td>' +
-										'<td><p class="name">' + escapeHtml(file.name) + '</p>' +
-										'<strong class="error text-danger"></strong></td>' +
-										'<td><p class="size">Processing...</p>' +
-										'<div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">' +
-										'<div class="progress-bar progress-bar-success" style="width:0%;"></div></div></td>' +
-										'<td>' +
-										(!i && !o.options.autoUpload ?
-												'<button class="btn btn-primary start" disabled><i class="fa fa-upload"></i></button>' : '') +
-										(!i ?
-												'<button class="btn btn-warning cancel"><i class="fa fa-times"></i></button>' : '') +
-										'</td></tr>';
-							}
-							return rows;
-						},
-						downloadTemplate: function (o) {
-							var rows = '';
-							for (var i = 0; i < o.files.length; i++) {
-								var file = o.files[i];
-								var preview = file.thumbnailUrl ?
-										'<a href="' + escapeHtml(file.url) + '" title="' + escapeHtml(file.name) + '" download="' + escapeHtml(file.name) + '" data-gallery><img src="' + escapeHtml(file.thumbnailUrl) + '"></a>' : '';
-								var nameCell = file.url ?
-										'<a href="' + escapeHtml(file.url) + '" title="' + escapeHtml(file.name) + '" download="' + escapeHtml(file.name) + '"' + (file.thumbnailUrl ? ' data-gallery' : '') + '>' + escapeHtml(file.name) + '</a>' :
-										'<span>' + escapeHtml(file.name) + '</span>';
-								var errorHtml = file.error ?
-										'<div><span class="label label-danger">Error</span> ' + escapeHtml(file.error) + '</div>' : '';
-								var actionCell = file.deleteUrl ?
-										'<button class="btn btn-danger btn-sm delete" data-type="' + escapeHtml(file.deleteType) + '" data-url="' + escapeHtml(file.deleteUrl) + '">' +
-										'<i class="fa fa-trash"></i></button><input type="checkbox" name="delete" value="1" class="toggle">' :
-										'<button class="btn btn-warning cancel"><i class="fa fa-ban-circle"></i></button>';
-								rows += '<tr class="template-download fade show">' +
-										'<td><span class="preview">' + preview + '</span></td>' +
-										'<td><p class="name">' + nameCell + '</p>' + errorHtml + '</td>' +
-										'<td><span class="size">' + o.formatFileSize(file.size) + '</span></td>' +
-										'<td>' + actionCell + '</td></tr>';
-							}
-
-							var completedCount = $(".files tr.template-download").length + o.files.length;
-							$("#nb_imported_files").val( completedCount );
-							if ( completedCount >= 1 ) {
-								$("#btnLinkValidate").show();
-							} else {
-								$("#btnLinkValidate").hide();
-							}
-
-							return rows;
-						}
-					});
-
-
-					// Load existing files:
-					/*$('#fileupload').addClass('fileupload-processing');
-					$.ajax({
-						// Uncomment the following to send cross-domain cookies:
-						//xhrFields: {withCredentials: true},
-						url: $('#fileupload').fileupload('option', 'url'),
-						dataType: 'json',
-						context: $('#fileupload')[0]
-					}).always(function () {
-						$(this).removeClass('fileupload-processing');
-					}).done(function (result) {
-						$(this).fileupload('option', 'done')
-							.call(this, $.Event('done'), {result: result});
-					});*/
-
-
-					// changement dynamique des paramètres du lien vers l'upload en masse de documents
-					$("#document_type_code").change(function(index){
-						changeQueryParameter("a.btn-space-action", "document_type", $(this).val( ) );    
-					});
-					$(".new_space_name").change(function(index){
-						changeQueryParameter("a.btn-space-action", "name", $(this).val( ) );    
-					});
-
-					$(".new_space_name").hide().next("a").hide() ;
-					$("a.btn-show-name").click( function( e ) {
-					e.preventDefault();
-					$(this).next(".new_space_name").toggle().next("a").toggle();    
-					});
-
-
-
-
-
-
-				});
-				</script>
-
-				<!-- --------------------------------------------------------------------------------------- -->			
-
-			</div>
-		</@card>
-
-               
-<!-- Validate step ---------------------------------------------------------------------------- -->
-			<#assign headerTitle>
-				<h2 style="margin-bottom:0;"><@tag color='info'>#i18n{files2docs.selectFiles.step} 3</@tag>&nbsp;#i18n{files2docs.selectFiles.titleSubmit}*</h2>
-			</#assign>
-			<@card headerTitle=headerTitle headerClass=''>
-				<div id="btnLinkValidate" class="btn btn-primary" display="none">
-					<i class="fa fa-check"></i>
-					&nbsp;#i18n{files2docs.selectFiles.buttonSubmit}
-				</div>
 			</@card>
-				
-    </@pageColumn>
-</@pageContainer>			
-
+			<#assign headerTitle><@tag color='info'>#i18n{files2docs.selectFiles.step} 2</@tag>&nbsp;#i18n{files2docs.selectFiles.labelUpload}</#assign>
+			<@card headerTitle=headerTitle headerClass=''>
+				<@formGroup labelFor=upload_field labelKey='#i18n{files2docs.selectFiles.labelUpload}' mandatory=true>
+					<@addFileBOInputAndfilesBox fieldName=upload_field handler=uploadHandler listUploadedFiles=uploaded_files![] multiple=true />
+				</@formGroup>
+			</@card>
+			<#assign headerTitle><@tag color='info'>#i18n{files2docs.selectFiles.step} 3</@tag>&nbsp;#i18n{files2docs.selectFiles.titleSubmit}</#assign>
+			<@card headerTitle=headerTitle headerClass=''>
+				<@button type='submit' id='files2docs_submit' disabled=submit_button_disabled buttonIcon='check' title='#i18n{files2docs.selectFiles.buttonSubmit}' />
+			</@card>
+		</@tform>
+	</@pageColumn>
+</@pageContainer>
+<@addRequiredBOJsFiles />
+<script src="jsp/admin/plugins/asynchronousupload/GetMainUploadJs.jsp?handler=${uploadHandler.handlerName}"></script>
+<script>
+	document.getElementById( '${upload_field}' ).dataset.nof = '${max_files}';
+</script>
 <#else>
 	<@alert color='danger'>
 		#i18n{files2docs.selectFiles.noMapping}
 	</@alert>
 </#if>
-
-<script type="text/javascript">
-	document.querySelectorAll("#selectFilesForm .btn").forEach(function(btn) {
-		if (btn.getAttribute('type') === 'submit') {
-			btn.style.display = 'none';
-		}
-		btn.setAttribute('aria-hidden', 'true');
-	});
-
-	/* document MASS import redirection */
-	document.addEventListener('DOMContentLoaded', function() {
-		document.getElementById('btnLinkValidate').addEventListener('click', function() {
-			document.getElementById('selectFilesForm').submit();
-		});
-
-		/* reinit CSS bootstrap fileStyle default for this input */
-		var fileInput = document.getElementById('fileSelectBlueImpInput');
-		fileInput.classList.remove('filestyle');
-		fileInput.style.display = 'block';
-	});
-</script>

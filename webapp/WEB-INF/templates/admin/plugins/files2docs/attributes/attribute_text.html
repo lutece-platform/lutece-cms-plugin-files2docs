@@ -2,5 +2,5 @@
     <#assign size><#list parameters.size as size>${size}</#list></#assign>
     <#assign maxlength><#list parameters.maxlength as maxlength>${maxlength}</#list></#assign>
     <#assign value><#if (parameters.mapping)?has_content><#list parameters.mapping as mapping>${mapping?if_exists}</#list></#if></#assign>
-    <@input type='text' id='${attribute.code}_${identifier}' name='${attribute.code}_${identifier}' size=size maxlength=maxlength?number value=value />
+    <@input type='text' id='${attribute.code}_${identifier}' name='${attribute.code}_${identifier}' inputSize=(size?has_content)?then(size?number, 0) maxlength=(maxlength?has_content)?then(maxlength?number, 0) value=value />
 </@formGroup>

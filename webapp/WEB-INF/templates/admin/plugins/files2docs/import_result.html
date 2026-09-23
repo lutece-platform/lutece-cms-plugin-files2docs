@@ -1,76 +1,64 @@
 <@pageContainer>
     <@pageColumn>
-        <@pageHeader title='#i18n{files2docs.importResult.pageTitle}' />
-
-		<@alert color='info' class='d-flex justify-content-between align-items-center'>
-			<@div>
-				<@icon style='info-circle' />&nbsp;
-				<strong>#i18n{files2docs.importResult.labelImportedFiles} <@tag>${nb_imported_files}</@tag></strong>&nbsp;&nbsp;
-				<strong>#i18n{files2docs.importResult.labelFailureFiles} <@tag>${nb_failure_files}</@tag></strong>&nbsp;
-			</@div>
-			<@aButton href='jsp/admin/plugins/document/ManageDocuments.jsp?id_space_filter=${browser_selected_space_id!""}' title='#i18n{files2docs.importResult.goToDocumentSpace}' buttonIcon='folder-open' hideTitle=['xs','sm','md']/>
+        <@pageHeader title='#i18n{files2docs.importResult.pageTitle}'>
+			<@aButton href='jsp/admin/plugins/document/ManageDocuments.jsp?id_space_filter=${browser_selected_space_id!""}' title='#i18n{files2docs.importResult.goToDocumentSpace}' buttonIcon='folder-open' color='primary' />
+		</@pageHeader>
+		<@alert color='info'>
+			<strong>#i18n{files2docs.importResult.labelImportedFiles} <@tag>${nb_imported_files}</@tag></strong>&nbsp;&nbsp;
+			<strong>#i18n{files2docs.importResult.labelFailureFiles} <@tag>${nb_failure_files}</@tag></strong>
 		</@alert>
-
-		<@tform action='jsp/admin/plugins/files2docs/DoSelectFiles.jsp' boxed=true>
-			<@input type='hidden' name='mode' value='${mode!""}' />
-			<@input type='hidden' name='document_type_code' value='${(document_type_code)!}' />
-			<@input type='hidden' name='browser_selected_space_id' value='${browser_selected_space_id!""}' />
-			<@input type='hidden' name='nb_imported_files' value='${(nb_imported_files)!}' />
-			<@input type='hidden' name='extension' value='${(extension_checked_list)!}' />
-			<@table>
-				<thead>
-				<tr>
-					<@th></@th>
-					<@th>#i18n{files2docs.importResult.columnFilename}</@th>
-					<@th>#i18n{files2docs.importResult.columnDocumentName}</@th>
-					<@th>#i18n{files2docs.importResult.columnSummary}</@th>
-					<@th>#i18n{files2docs.importResult.columnAttributes}</@th>
-					<@th>#i18n{files2docs.manageMapping.columnActions}</@th>
-				</tr>
-				</thead>
-				<tbody>
+		<#if document_list?has_content>
+			<@manageFeature>
 				<#list document_list as document>
-					<#if document.attributes?exists>
-						<#list document.attributes as attribute>
-							<#if ( attribute.codeAttributeType = "file" || attribute.codeAttributeType = "image" ) && attribute.textValue??>
-								<#assign filename = attribute.textValue>
-							</#if>
-						</#list>
+				<#assign filename = ''>
+				<#list document.attributes![] as attribute>
+					<#if ( attribute.codeAttributeType = "file" || attribute.codeAttributeType = "image" ) && attribute.textValue??>
+						<#assign filename = attribute.textValue>
 					</#if>
-					<tr>
-						<@td>
-							<#if document.id != -1>
-								<@tag color='success' tagIcon='check'>#i18n{portal.util.labelEnabled}</@tag>
-							<#else>
-								<@tag color='danger' tagIcon='times'>#i18n{portal.util.labelDisabled}</@tag>
-							</#if>
-						</@td>
-						<@td><#if document.id != -1>${filename!}<#else>${document.title}</#if></@td>
-						<@td><#if document.id != -1>${document.title}</#if></@td>
-						<@td><#if document.id != -1>${document.summary}</#if></@td>
-						<@td>
-							<#compress>
-							<#if document.attributes?exists>
-								<#list document.attributes as attribute>
+				</#list>
+				<@manageFeatureItem>
+					<@manageFeatureItemColumn auto=true flex=false>
+						<#if document.id != -1>
+							<@tag color='success' tagIcon='check'>#i18n{files2docs.importResult.statusImported}</@tag>
+						<#else>
+							<@tag color='danger' tagIcon='x'>#i18n{files2docs.importResult.statusFailure}</@tag>
+						</#if>
+					</@manageFeatureItemColumn>
+					<@manageFeatureItemColumn>
+						<#if document.id != -1>
+							<strong>${filename}</strong>
+						<#else>
+							<strong>${document.title}</strong>
+						</#if>
+					</@manageFeatureItemColumn>
+					<@manageFeatureItemColumn>
+						<#if document.id != -1>
+							#i18n{files2docs.importResult.columnDocumentName} : ${document.title}
+						</#if>
+					</@manageFeatureItemColumn>
+					<@manageFeatureItemColumn flex=false>
+						<#if document.id != -1>
+							<@p class='mb-1'>#i18n{files2docs.importResult.columnSummary} : ${document.summary!}</@p>
+							<#list document.attributes![] as attribute>
 								<#if attribute.codeAttributeType != "file" && attribute.codeAttributeType != "image">
-									${attribute.name}<#if attribute.required>*</#if>&nbsp;
-									<#if attribute.textValue?has_content>
-									${attribute.textValue}
-									</#if>
+									<@p class='mb-1'>${attribute.name} : ${attribute.textValue!}</@p>
 								</#if>
-								</#list>
-							</#if>
-							</#compress>
-						</@td>
-						<@td>
-							<#if document.id != -1>
-								<@aButton href='jsp/admin/plugins/document/ModifyDocument.jsp?id_document=${document.id}&id_action=2&id_space_filter=${browser_selected_space_id!""}' size='sm' title='#i18n{files2docs.manageMapping.actionModify} ${document.title}' hideTitle=['all'] buttonIcon='edit' />
-							</#if>
-						</@td>
-					</tr>
-					</#list>
-				</tbody>
-			</@table>
-		</@tform>
+							</#list>
+						</#if>
+					</@manageFeatureItemColumn>
+					<@manageFeatureItemColumn align='end'>
+						<#if document.id != -1>
+							<@aButton href='jsp/admin/plugins/document/ModifyDocument.jsp?id_document=${document.id}&amp;id_action=2&amp;id_space_filter=${browser_selected_space_id!""}' title='#i18n{files2docs.manageMapping.actionModify} ${document.title}' hideTitle=['all'] buttonIcon='edit' />
+						</#if>
+					</@manageFeatureItemColumn>
+				</@manageFeatureItem>
+				</#list>
+			</@manageFeature>
+			<@paginationAdmin paginator=paginator combo=1 />
+		<#else>
+			<@box>
+				<@empty title='#i18n{portal.util.labelNoItem}' subtitle='#i18n{files2docs.importResult.emptyHelp}' />
+			</@box>
+		</#if>
 	</@pageColumn>
 </@pageContainer>
