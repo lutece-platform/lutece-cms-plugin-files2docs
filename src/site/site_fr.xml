@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="Lut&egrave;ce - Files2Docs">
+<project name="Lutèce - Files2Docs">
 	<body>
 		<links>
 			<item name="EN" href="../index.html" />
 		</links>
 
-		<menu name="Aper&ccedil;u">
+		<menu name="Aperçu">
 			<item name="Introduction" href="index.html" />
-			<item name="T&eacute;l&eacute;chargement" href="download.html" />
+			<item name="Téléchargement" href="download.html" />
 			<item name="Configuration" href="configuration.html" />
 			<item name="Utilisation" href="/user/admin-features.html" collapse="false">
                 <item name="Mapping upload en masse" href="/user/admin-mapping.html" />
@@ -15,7 +15,7 @@
 			</item>
 		</menu>
 
-		<menu name="T&eacute;l&eacute;chargements" inherit="bottom">
+		<menu name="Téléchargements" inherit="bottom">
 			<item name="Versions stables" href="../../../stable_builds/plugins/plugin-files2docs/"/>
 			<item name="Nightly builds" href="../../../nightly_builds/plugins/plugin-files2docs/" />
 		</menu>
