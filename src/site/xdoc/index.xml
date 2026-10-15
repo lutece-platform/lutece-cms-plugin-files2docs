@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+    <properties>
+        <title>Plugin files2docs</title>
+    </properties>
+    <head>
+        <meta name="keywords" content="cms,document,upload,bulk import,files,mapping"/>
+    </head>
+    <body>
+        <section name="Plugin files2docs">
+            <subsection name="Introduction">
+                <p>The files2docs plugin performs a bulk import of Lutece documents (plugin Document) from files (images, PDF, sounds, videos, ...) uploaded from the user's file system. Each uploaded file becomes a new document of the chosen type, created in the chosen document space.</p>
+                <p>Users no longer need to create each document one by one: the mandatory attributes of the selected document type are filled in automatically from a <strong>mapping</strong> defined per document type. A mapping gives a format for the title, the summary and each attribute of the document. A format can contain tags that are replaced by information on the imported file (name, MIME type, extension, import date).</p>
+                <p>The import is done in several steps:</p>
+                <ul>
+                    <li>choice of the document type (only types with at least one file or image attribute, and at most one mandatory one, are proposed);</li>
+                    <li>choice of the target document space (a new space can be created on the fly);</li>
+                    <li>upload of the files, stored temporarily under the upload directory of the webapp;</li>
+                    <li>check and completion of the generated documents, then creation;</li>
+                    <li>display of the import result.</li>
+                </ul>
+                <p>The plugin requires the Lutece core and the <code>plugin-document</code> plugin.</p>
+            </subsection>
+            <subsection name="Configuration">
+                <p><strong>Properties</strong></p>
+                <p>The settings are in <code>WEB-INF/conf/plugins/files2docs.properties</code>:</p>
+                <table>
+                    <tr>
+                        <th>Property</th>
+                        <th>Default value</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td><code>files2docs.itemsPerPage</code></td>
+                        <td><code>10</code></td>
+                        <td>Default number of rows displayed by the paginator in the admin screens.</td>
+                    </tr>
+                    <tr>
+                        <td><code>files2docs.listAttributeTypeFile</code></td>
+                        <td><code>file,image</code></td>
+                        <td>Codes of the document attribute types holding a file.</td>
+                    </tr>
+                    <tr>
+                        <td><code>files2docs.parentPath</code></td>
+                        <td><code>/plugins/files2docs/upload/</code></td>
+                        <td>Directory (relative to the webapp) where uploaded files are stored temporarily.</td>
+                    </tr>
+                    <tr>
+                        <td><code>files2docs.swfupload.file_upload_limit</code></td>
+                        <td><code>0</code></td>
+                        <td>Maximum number of files to upload (0 = unlimited).</td>
+                    </tr>
+                    <tr>
+                        <td><code>files2docs.swfupload.file_queue_limit</code></td>
+                        <td><code>0</code></td>
+                        <td>Maximum number of files in the upload queue (0 = unlimited).</td>
+                    </tr>
+                    <tr>
+                        <td><code>files2docs.swfupload.requeue_on_error</code></td>
+                        <td><code>false</code></td>
+                        <td>Puts files in error back into the upload queue.</td>
+                    </tr>
+                    <tr>
+                        <td><code>files2docs.swfupload.debug</code></td>
+                        <td><code>false</code></td>
+                        <td>Enables the debug mode of the upload component.</td>
+                    </tr>
+                    <tr>
+                        <td><code>files2docs.requestSizeMax</code></td>
+                        <td><code>2097152</code></td>
+                        <td>Maximum size (in bytes) of a request, i.e. of an uploaded file. Must match the <code>requestSizeMax</code> value of the core upload filter.</td>
+                    </tr>
+                    <tr>
+                        <td><code>files2docs.minInterval</code></td>
+                        <td><code>2000</code></td>
+                        <td>Minimum interval (in milliseconds) between two requests of the same client. Must match the <code>minInterval</code> value of the core filter.</td>
+                    </tr>
+                    <tr>
+                        <td><code>files2docs.mapping.listTags</code></td>
+                        <td><code>filename,mimetype,extension,date</code></td>
+                        <td>List of the tags available in the mapping formats.</td>
+                    </tr>
+                    <tr>
+                        <td><code>files2docs.mapping.tag.filename</code></td>
+                        <td><code>&lt;filename&gt;</code></td>
+                        <td>Tag replaced by the name of the imported file (without extension).</td>
+                    </tr>
+                    <tr>
+                        <td><code>files2docs.mapping.tag.mimetype</code></td>
+                        <td><code>&lt;mimetype&gt;</code></td>
+                        <td>Tag replaced by the MIME type of the imported file.</td>
+                    </tr>
+                    <tr>
+                        <td><code>files2docs.mapping.tag.extension</code></td>
+                        <td><code>&lt;extension&gt;</code></td>
+                        <td>Tag replaced by the extension of the imported file (without the leading dot).</td>
+                    </tr>
+                    <tr>
+                        <td><code>files2docs.mapping.tag.date</code></td>
+                        <td><code>&lt;date&gt;</code></td>
+                        <td>Tag replaced by the import date.</td>
+                    </tr>
+                    <tr>
+                        <td><code>daemon.autoCleaning.interval</code></td>
+                        <td><code>300</code></td>
+                        <td>Interval (in seconds) between two runs of the cleaning daemon.</td>
+                    </tr>
+                    <tr>
+                        <td><code>daemon.autoCleaning.onstartup</code></td>
+                        <td><code>1</code></td>
+                        <td>Starts the cleaning daemon when the webapp starts (1) or not (0).</td>
+                    </tr>
+                </table>
+                <p>The plugin requires a database pool (<code>db-pool-required</code>). A dedicated pool can be declared in <code>db.properties</code> with the <code>files2docs.*</code> keys.</p>
+                <p><strong>Spring Beans</strong></p>
+                <p>Declared in <code>WEB-INF/conf/plugins/files2docs_context.xml</code>:</p>
+                <table>
+                    <tr>
+                        <th>Bean ID</th>
+                        <th>Class</th>
+                    </tr>
+                    <tr>
+                        <td><code>files2docsMappingDAO</code></td>
+                        <td><code>fr.paris.lutece.plugins.files2docs.business.MappingDAO</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>files2docsAttributeDAO</code></td>
+                        <td><code>fr.paris.lutece.plugins.files2docs.business.AttributeDAO</code></td>
+                    </tr>
+                </table>
+                <p><strong>Daemons</strong></p>
+                <table>
+                    <tr>
+                        <th>Daemon ID</th>
+                        <th>Class</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td><code>autoCleaning</code></td>
+                        <td><code>fr.paris.lutece.plugins.files2docs.service.AutoCleaningDaemon</code></td>
+                        <td>Deletes the temporary upload directories (under <code>files2docs.parentPath</code>) last modified more than one day ago. It should be enabled to avoid filling the disk.</td>
+                    </tr>
+                </table>
+            </subsection>
+            <subsection name="Usage">
+                <p><strong>Admin Rights</strong></p>
+                <table>
+                    <tr>
+                        <th>Right</th>
+                        <th>Level</th>
+                        <th>URL</th>
+                        <th>Feature group</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td><code>FILES2DOCS_MANAGEMENT</code></td>
+                        <td>3</td>
+                        <td><code>jsp/admin/plugins/files2docs/SelectFiles.jsp</code></td>
+                        <td><code>CONTENT</code></td>
+                        <td>Multiple documents upload</td>
+                    </tr>
+                    <tr>
+                        <td><code>MAPPING_MANAGEMENT</code></td>
+                        <td>1</td>
+                        <td><code>jsp/admin/plugins/files2docs/ManageMapping.jsp</code></td>
+                        <td><code>CONTENT</code></td>
+                        <td>Management of the mappings between document types and imported files</td>
+                    </tr>
+                </table>
+                <p>Document creation also checks the permissions of the Document plugin: the user must be allowed to create documents of the chosen type in the chosen space.</p>
+                <p><strong>Mappings</strong></p>
+                <p>The <code>MAPPING_MANAGEMENT</code> feature lists, creates, modifies and deletes mappings. A mapping is linked to one document type and defines the format of the title, of the summary and of each mandatory or file attribute of the type. The initialization script provides mappings for the standard types <code>article</code>, <code>banner</code>, <code>sound</code>, <code>actor</code>, <code>flash</code>, <code>image</code>, <code>pdf</code> and <code>video</code>.</p>
+                <p><strong>Services</strong></p>
+                <table>
+                    <tr>
+                        <th>Class</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td><code>Files2DocsLinkDocument</code></td>
+                        <td>Bridge to the Document plugin: document types eligible for import (<code>getListDocumentTypeFile</code>), mandatory attributes (<code>getMandatoryAttributes</code>, <code>getMandatoryAttributeFileImage</code>), mapped attributes (<code>getAllAttributes</code>), creation permission check (<code>isAuthorizedAdminDocument</code>), document creation (<code>createDocument</code>) and spaces browser (<code>getSpacesBrowser</code>).</td>
+                    </tr>
+                    <tr>
+                        <td><code>AutoCleaningService</code></td>
+                        <td>Deletes the outdated temporary upload directories (<code>processAutoCleaning</code>).</td>
+                    </tr>
+                </table>
+            </subsection>
+        </section>
+    </body>
+</document>
