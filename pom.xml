@@ -10,7 +10,7 @@
     <groupId>fr.paris.lutece.plugins</groupId>
     <artifactId>plugin-files2docs</artifactId>
     <packaging>lutece-plugin</packaging>
-    <version>1.1.5-beta-02</version>
+    <version>1.1.5-SNAPSHOT</version>
     <name>Lutece files2docs plugin</name>
 
     <repositories>
