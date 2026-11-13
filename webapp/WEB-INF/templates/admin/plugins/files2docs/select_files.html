@@ -43,12 +43,12 @@
 						</@select>
 					</@formGroup>
 					<#if regexp_map[document_type_code]?exists && regexp_map[document_type_code]?split(",")?size gt 1>
-					<@formGroup labelKey='#i18n{files2docs.selectFiles.labelExtension}' mandatory=true>
+					<@fieldSet legend='#i18n{files2docs.selectFiles.labelExtension} *'>
 						<#list regexp_map[document_type_code]?trim?split(",") as extension>
 							<#assign bIsChecked = !extension_checked_list?has_content || extension_checked_list?trim?split(",")?seq_contains( extension )>
 							<@checkBox orientation='switch' name='extension' id='extension_${extension?index}' value='${extension}' labelKey='${extension}' checked=bIsChecked disabled=document_type_code_disabled />
 						</#list>
-					</@formGroup>
+					</@fieldSet>
 					<@input type='hidden' id='extension_hidden' name='extension_hidden' value='${extension_checked_list!}' />
 					</#if>
 				</@fieldSet>

@@ -13,9 +13,10 @@
 				<#if (attribute.format)??><#assign value = attribute.format><#elseif (attribute_name!'') = 'title'><#assign value = mapping.title!''><#elseif (attribute_name!'') = 'summary'><#assign value = mapping.summary!''><#else><#assign value = ''></#if>
 				<@input type='text' name='attribute_format' id='attribute_format' maxlength=255 value=value />
 			</@formGroup>
-			<@formGroup labelKey='#i18n{files2docs.modifyAttribute.labelExample}'>
-				<@staticText>${mapping_tag_list?join(' ')}</@staticText>
-			</@formGroup>
+			<dl class="mb-3">
+				<dt class="form-label">#i18n{files2docs.modifyAttribute.labelExample}</dt>
+				<dd class="form-control-plaintext">${mapping_tag_list?join(' ')}</dd>
+			</dl>
 			<@formGroup>
 				<@button type='submit' buttonIcon='check' title='#i18n{files2docs.modifyAttribute.buttonSubmit}' />
 				<@aButton href='jsp/admin/plugins/files2docs/ManageMapping.jsp?view=modifyMapping&mapping_id=${mapping.id}' buttonIcon='x' title='#i18n{portal.util.labelCancel}' color='light' />

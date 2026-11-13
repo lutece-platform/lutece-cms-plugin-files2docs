@@ -130,6 +130,8 @@ public class Files2DocsTemplatesRenderTest extends LuteceTestCase
         assertTrue( strHtml, strHtml.contains( TEXT_ESCAPED ) );
         assertFalse( strHtml, strHtml.contains( TEXT_UNESCAPED ) );
         assertTrue( strHtml, strHtml.contains( "formnovalidate" ) );
+        assertTrue( strHtml, strHtml.contains( "id=\"error_degraded_file\"" ) );
+        assertTrue( strHtml, strHtml.contains( "aria-describedby=\"error_degraded_file\"" ) );
 
         model.put( "spaces_browser", FRAGMENT );
         strHtml = render( "admin/plugins/files2docs/degraded_mode.html", model );
