@@ -90,6 +90,7 @@ import fr.paris.lutece.portal.service.message.AdminMessageService;
 import fr.paris.lutece.portal.service.regularexpression.RegularExpressionService;
 import fr.paris.lutece.portal.service.search.IndexationService;
 import fr.paris.lutece.portal.service.template.AppTemplateService;
+import fr.paris.lutece.portal.service.template.HtmlMarkup;
 import fr.paris.lutece.portal.service.upload.MultipartItem;
 import fr.paris.lutece.portal.service.util.AppLogService;
 import fr.paris.lutece.portal.service.util.AppPathService;
@@ -315,8 +316,8 @@ public class Files2DocsJspBean extends MVCAdminJspBean
         model.put( MARK_DOCUMENT_TYPE_CODE, strDocumentTypeCode );
         model.put( MARK_DOCUMENT_TYPE_CODE_DISABLED, nImportedFiles > 0 );
         model.put( MARK_DOCUMENT_TYPE_LIST, colDocumentType );
-        model.put( MARK_SPACES_BROWSER, Files2DocsLinkDocument.getInstance( ).getSpacesBrowser( request, getUser( ), getLocale( ),
-                getViewFullUrl( VIEW_SELECT_FILES ) ) );
+        model.put( MARK_SPACES_BROWSER, HtmlMarkup.of( Files2DocsLinkDocument.getInstance( ).getSpacesBrowser( request, getUser( ), getLocale( ),
+                getViewFullUrl( VIEW_SELECT_FILES ) ) ) );
         model.put( MARK_SUBMIT_BUTTON_DISABLED, StringUtils.isEmpty( strSpaceId ) || strSpaceId.equals( STRING_NULL ) );
         model.put( MARK_BROWSER_SELECTED_SPACE_ID, strSpaceId );
         model.put( MARK_NB_IMPORTED_FILES, nImportedFiles );
@@ -492,7 +493,7 @@ public class Files2DocsJspBean extends MVCAdminJspBean
         model.put( MARK_EXTENSION_CHECKED_LIST, StringUtils.defaultString( getExtensionList( request ) ) );
         model.put( MARK_MAPPING_LIST, colMappings );
         model.put( MARK_FILENAME_LIST, listFilenames );
-        model.put( MARK_ATTRIBUTES_FORMS, getAttributesForms( request, strDocumentTypeCode, listFilenames ) );
+        model.put( MARK_ATTRIBUTES_FORMS, HtmlMarkup.ofAll( getAttributesForms( request, strDocumentTypeCode, listFilenames ) ) );
         model.put( MARK_UPLOAD_MODE, StringUtils.defaultString( request.getParameter( PARAMETER_UPLOAD_MODE ) ) );
 
         if ( request.getParameter( PARAMETER_NO_HEADER ) != null )
@@ -1025,9 +1026,9 @@ public class Files2DocsJspBean extends MVCAdminJspBean
      *            The collection of uploaded filenames
      * @return The HTML form(s)
      */
-    private Collection<String> getAttributesForms( HttpServletRequest request, String strDocumentTypeCode, Collection<String> colFilenames )
+    private List<String> getAttributesForms( HttpServletRequest request, String strDocumentTypeCode, Collection<String> colFilenames )
     {
-        Collection<String> colAttributesForms = new ArrayList<>( );
+        List<String> colAttributesForms = new ArrayList<>( );
 
         int nIdentifier = 1;
 

@@ -36,8 +36,6 @@ package fr.paris.lutece.plugins.files2docs.util;
 import fr.paris.lutece.portal.service.util.AppLogService;
 import fr.paris.lutece.portal.service.util.AppPropertiesService;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Strings;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -55,10 +53,6 @@ public final class Files2DocsUtil
 
     // Strings
     private static final String STRING_COMMA = ",";
-    private static final String STRING_LT = "<";
-    private static final String STRING_GT = ">";
-    private static final String STRING_LT_HTML = "&lt;";
-    private static final String STRING_GT_HTML = "&gt;";
     private static final String REGEXP_INT = "^[\\d]+$";
 
     /**
@@ -114,30 +108,5 @@ public final class Files2DocsUtil
         }
 
         return nValue;
-    }
-
-    /**
-     * Format the given String to HTML :
-     * <ul>
-     * <li><code><</code> is replaced by <code>&amp;lt;</code></li>
-     * <li><code>></code> is replaced by <code>&amp;gt;</code></li>
-     * </ul>
-     * 
-     * @param strToFormat
-     *            the String to format
-     * @return the formatted String
-     */
-    public static String formatToHtml( String strToFormat )
-    {
-        // Replaces '<' and '>' caracters in the format value
-        if ( StringUtils.isNotBlank( strToFormat ) )
-        {
-            String strFormatted = Strings.CS.replace( strToFormat, STRING_LT, STRING_LT_HTML );
-            strFormatted = Strings.CS.replace( strToFormat, STRING_GT, STRING_GT_HTML );
-
-            return strFormatted;
-        }
-
-        return strToFormat;
     }
 }

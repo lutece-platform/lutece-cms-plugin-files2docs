@@ -1,24 +1,24 @@
 <@pageContainer>
     <@pageColumn>
-		<#assign title><#if mapping.documentTypeName?has_content>${mapping.documentTypeName}</#if></#assign>
-        <@pageHeader title='#i18n{files2docs.modifyAttribute.contentBoxTitle} ${title!""}' />
+		<#assign title = mapping.documentTypeName!''>
+        <@pageHeader title='#i18n{files2docs.modifyAttribute.contentBoxTitle} ${title}' />
 		<@tform action='jsp/admin/plugins/files2docs/ManageMapping.jsp' boxed=true>
 			<@input type='hidden' name='action' value='modifyAttribute' />
-			<#assign value><#if attribute?exists>${attribute.id}</#if></#assign>
+			<#assign value = (attribute.id?c)!''>
 			<@input type='hidden' name='attribute_id' value=value />
-			<#assign value><#if attribute_name?exists>${attribute_name}</#if></#assign>
+			<#assign value = attribute_name!''>
 			<@input type='hidden' name='attribute_name' value=value />
 			<@input type='hidden' name='mapping_id' value='${mapping.id}' />
 			<@formGroup labelFor='attribute_format' labelKey='#i18n{files2docs.modifyAttribute.labelFormat}' helpKey='#i18n{files2docs.modifyAttribute.labelDescription}'>
-				<#assign value><#compress><#if attribute?exists && attribute.format?exists>${attribute.format}<#else><#if mapping?exists && attribute_name?exists><#if attribute_name = "title" && mapping.title?exists>${mapping.title}<#else><#if attribute_name = "summary" && mapping.summary?exists>${mapping.summary}</#if></#if></#if></#if></#compress></#assign>
+				<#if (attribute.format)??><#assign value = attribute.format><#elseif (attribute_name!'') = 'title'><#assign value = mapping.title!''><#elseif (attribute_name!'') = 'summary'><#assign value = mapping.summary!''><#else><#assign value = ''></#if>
 				<@input type='text' name='attribute_format' id='attribute_format' maxlength=255 value=value />
 			</@formGroup>
 			<@formGroup labelKey='#i18n{files2docs.modifyAttribute.labelExample}'>
-				<@staticText><#list mapping_tag_list as mapping_tag>${mapping_tag} </#list></@staticText>
+				<@staticText>${mapping_tag_list?join(' ')}</@staticText>
 			</@formGroup>
 			<@formGroup>
 				<@button type='submit' buttonIcon='check' title='#i18n{files2docs.modifyAttribute.buttonSubmit}' />
-				<@aButton href='jsp/admin/plugins/files2docs/ManageMapping.jsp?view=modifyMapping&amp;mapping_id=${mapping.id}' buttonIcon='x' title='#i18n{portal.util.labelCancel}' color='light' />
+				<@aButton href='jsp/admin/plugins/files2docs/ManageMapping.jsp?view=modifyMapping&mapping_id=${mapping.id}' buttonIcon='x' title='#i18n{portal.util.labelCancel}' color='light' />
 			</@formGroup>
 		</@tform>
 	</@pageColumn>

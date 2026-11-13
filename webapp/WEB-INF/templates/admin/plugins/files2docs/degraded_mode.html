@@ -26,7 +26,7 @@
 				<@input type='file' name='files[]' id='degraded_file' />
 			</@formGroup>
 			<#if degraded_error?has_content>
-				<@alert color='danger' iconTitle='ban'>${degraded_error?html}</@alert>
+				<@alert color='danger' iconTitle='ban'>${degraded_error}</@alert>
 			</#if>
 			<#if nb_imported_files?exists>
 			<@formGroup>
@@ -41,7 +41,7 @@
 			</#if>
 			<@formGroup>
 				<@button type='submit' name='degraded_upload' value='degraded_upload' buttonIcon='upload' title='#i18n{files2docs.degradedMode.buttonDegraded}' />
-				<@button type='submit' name='delete' value='delete' params='formnovalidate' buttonIcon='trash' title='#i18n{files2docs.degradedMode.buttonDelete}' color='danger' />
+				<@button type='submit' name='delete' value='delete' params={"formnovalidate": true} buttonIcon='trash' title='#i18n{files2docs.degradedMode.buttonDelete}' color='danger' />
 			</@formGroup>
 			<@fieldSet legend='#i18n{files2docs.degradedMode.labelSpace} *'>
 				${spaces_browser}
@@ -61,7 +61,7 @@
 			</@fieldSet>
 			<@formGroup>
 				<@button type='submit' buttonIcon='check' title='#i18n{files2docs.degradedMode.buttonSubmit}' />
-				<@button type='submit' name='cancel' value='cancel' params='formnovalidate' buttonIcon='x' title='#i18n{portal.util.labelCancel}' color='light' />
+				<@button type='submit' name='cancel' value='cancel' params={"formnovalidate": true} buttonIcon='x' title='#i18n{portal.util.labelCancel}' color='light' />
 			</@formGroup>
 		</@tform>
 	</@pageColumn>

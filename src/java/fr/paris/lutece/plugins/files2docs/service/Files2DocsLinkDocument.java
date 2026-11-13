@@ -363,8 +363,7 @@ public final class Files2DocsLinkDocument
 
     /**
      * Get the collection of all document attributes that are mandatory or type file/image. <br />
-     * This method will also get the attributes even if they are not stored in the db. <br />
-     * The format of the attribute will be formatted in HTML.
+     * This method will also get the attributes even if they are not stored in the db.
      * 
      * @param strDocumentTypeCode
      *            the document type code
@@ -382,17 +381,7 @@ public final class Files2DocsLinkDocument
         {
             Attribute attribute = AttributeHome.findByDocumentAttribute( docAttribute.getId( ), plugin );
 
-            if ( attribute != null )
-            {
-                // Replaces '<' and '>' caracters in the format value
-                String strFormat = attribute.getFormat( );
-
-                if ( StringUtils.isNotBlank( strFormat ) )
-                {
-                    attribute.setFormat( Files2DocsUtil.formatToHtml( strFormat ) );
-                }
-            }
-            else
+            if ( attribute == null )
             {
                 attribute = new Attribute( );
                 attribute.setId( Files2DocsUtil.CONSTANT_ID_NULL );

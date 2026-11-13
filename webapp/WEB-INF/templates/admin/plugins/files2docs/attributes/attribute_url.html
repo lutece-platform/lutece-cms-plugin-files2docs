@@ -1,4 +1,4 @@
 <@formGroup labelFor='${attribute.code}_${identifier}' labelKey='${attribute.name}' mandatory=attribute.required>
-    <#assign value><#if (parameters.mapping)?has_content><#list parameters.mapping as mapping>${mapping?if_exists}</#list><#else>http://</#if></#assign>
+    <#if (parameters.mapping)?has_content><#assign value = ''><#list parameters.mapping![] as m><#assign value = value + ( m!'' )></#list><#else><#assign value = 'http://'></#if>
     <@input type='text' id='${attribute.code}_${identifier}' name='${attribute.code}_${identifier}' value=value />
 </@formGroup>
