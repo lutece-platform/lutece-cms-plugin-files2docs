@@ -67,9 +67,9 @@
 	</@pageColumn>
 </@pageContainer>
 <@addRequiredBOJsFiles />
-<script src="jsp/admin/plugins/asynchronousupload/GetMainUploadJs.jsp?handler=${uploadHandler.handlerName}"></script>
+<script src="jsp/admin/plugins/asynchronousupload/GetMainUploadJs.jsp?handler=${uploadHandler.handlerName?url}"></script>
 <script>
-	document.getElementById( '${upload_field}' ).dataset.nof = '${max_files}';
+	document.getElementById( '${upload_field?js_string?no_esc}' ).dataset.nof = '${max_files?c}';
 </script>
 <#else>
 	<@alert color='danger'>

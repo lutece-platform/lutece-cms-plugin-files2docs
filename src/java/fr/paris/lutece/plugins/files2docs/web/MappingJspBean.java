@@ -255,16 +255,6 @@ public class MappingJspBean extends MVCAdminJspBean
             return redirect( request, AdminMessageService.getMessageUrl( request, MESSAGE_MAPPING_NOT_FOUND, AdminMessage.TYPE_STOP ) );
         }
 
-        if ( StringUtils.isNotBlank( mapping.getTitle( ) ) )
-        {
-            mapping.setTitle( Files2DocsUtil.formatToHtml( mapping.getTitle( ) ) );
-        }
-
-        if ( StringUtils.isNotBlank( mapping.getSummary( ) ) )
-        {
-            mapping.setSummary( Files2DocsUtil.formatToHtml( mapping.getSummary( ) ) );
-        }
-
         setDocumentTypeName( mapping );
 
         List<Attribute> colAttribute = Files2DocsLinkDocument.getInstance( ).getAllAttributes( mapping.getDocumentTypeCode( ), nMappingId, getPlugin( ) );
@@ -405,7 +395,7 @@ public class MappingJspBean extends MVCAdminJspBean
 
         for ( String strPropertyFragment : strListTags.trim( ).split( STRING_COMMA ) )
         {
-            colTag.add( Files2DocsUtil.formatToHtml( AppPropertiesService.getProperty( PROPERTY_MAPPING_TAG_FRAGMENT + strPropertyFragment ) ) );
+            colTag.add( AppPropertiesService.getProperty( PROPERTY_MAPPING_TAG_FRAGMENT + strPropertyFragment ) );
         }
 
         model.put( MARK_ATTRIBUTE, attribute );

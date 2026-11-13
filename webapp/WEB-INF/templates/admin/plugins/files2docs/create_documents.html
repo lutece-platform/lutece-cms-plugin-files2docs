@@ -19,11 +19,11 @@
 					<@columns xs=12 sm=6 md=4 xl=3>
 						<@card headerTitle='${filename}' headerClass=''>
 							<@formGroup labelKey='#i18n{files2docs.createDocuments.columnDocumentName}' labelFor='document_title_${i+1}' rows=2 mandatory=true>
-								<#assign value><#if mapping_list[i]?exists && mapping_list[i].title?exists>${mapping_list[i].title}</#if></#assign>
+								<#assign value = (mapping_list[i].title)!''>
 								<@input type='text' id='document_title_${i+1}' name='document_title_${i+1}' value=value maxlength=255 mandatory=true />
 							</@formGroup>
 							<@formGroup labelKey='#i18n{files2docs.createDocuments.columnSummary}' labelFor='document_summary_${i+1}' rows=2>
-								<#assign value><#if mapping_list[i]?exists && mapping_list[i].summary?exists>${mapping_list[i].summary}</#if></#assign>
+								<#assign value = (mapping_list[i].summary)!''>
 								<@input type='textarea' id='document_summary_${i+1}' name='document_summary_${i+1}' rows=2>${value}</@input>
 							</@formGroup>
 							<#if attributes_forms[i]?exists>
@@ -37,7 +37,7 @@
 			</@row>
 			<@formGroup>
 				<@button type='submit' title='#i18n{files2docs.createDocuments.buttonSubmit}' buttonIcon='plus' />
-				<@button type='submit' name='cancel' value='cancel' params='formnovalidate' buttonIcon='x' title='#i18n{portal.util.labelCancel}' color='light' />
+				<@button type='submit' name='cancel' value='cancel' params={"formnovalidate": true} buttonIcon='x' title='#i18n{portal.util.labelCancel}' color='light' />
 			</@formGroup>
 		</@tform>
 	</@pageColumn>

@@ -1,7 +1,7 @@
 <@pageContainer>
     <@pageColumn>
         <@pageHeader title='#i18n{files2docs.importResult.pageTitle}'>
-			<@aButton href='jsp/admin/plugins/document/ManageDocuments.jsp?id_space_filter=${browser_selected_space_id!""}' title='#i18n{files2docs.importResult.goToDocumentSpace}' buttonIcon='folder-open' color='primary' />
+			<@aButton href='jsp/admin/plugins/document/ManageDocuments.jsp?id_space_filter=${(browser_selected_space_id!"")?url}' title='#i18n{files2docs.importResult.goToDocumentSpace}' buttonIcon='folder-open' color='primary' />
 		</@pageHeader>
 		<@alert color='info'>
 			<strong>#i18n{files2docs.importResult.labelImportedFiles} <@tag>${nb_imported_files}</@tag></strong>&nbsp;&nbsp;
@@ -48,7 +48,7 @@
 					</@manageFeatureItemColumn>
 					<@manageFeatureItemColumn align='end'>
 						<#if document.id != -1>
-							<@aButton href='jsp/admin/plugins/document/ModifyDocument.jsp?id_document=${document.id}&amp;id_action=2&amp;id_space_filter=${browser_selected_space_id!""}' title='#i18n{files2docs.manageMapping.actionModify} ${document.title}' hideTitle=['all'] buttonIcon='edit' />
+							<@aButton href='jsp/admin/plugins/document/ModifyDocument.jsp?id_document=${document.id}&id_action=2&id_space_filter=${(browser_selected_space_id!"")?url}' title='#i18n{files2docs.manageMapping.actionModify} ${document.title}' hideTitle=['all'] buttonIcon='edit' />
 						</#if>
 					</@manageFeatureItemColumn>
 				</@manageFeatureItem>

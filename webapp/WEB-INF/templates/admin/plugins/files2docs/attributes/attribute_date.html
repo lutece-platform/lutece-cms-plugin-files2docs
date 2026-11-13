@@ -1,6 +1,5 @@
 <@formGroup labelFor='${attribute.code}_${identifier}' labelKey='${attribute.name}' mandatory=attribute.required>
-    <#assign value>
-        <#if (parameters.mapping)?has_content><#list parameters.mapping as mapping>${mapping?if_exists}</#list><#else><#if (parameters.currentdate)?has_content><#list parameters.currentdate as currentdate>${currentdate?if_exists}</#list><#else><#if (parameters.defaultvalue)?has_content><#list parameters.defaultvalue as defaultvalue>${defaultvalue?if_exists}</#list></#if></#if></#if>
-    </#assign>
+    <#assign values = (parameters.mapping)?has_content?then(parameters.mapping, (parameters.currentdate)?has_content?then(parameters.currentdate, parameters.defaultvalue![]))>
+    <#assign value = ''><#list values as v><#assign value = value + ( v!'' )></#list>
     <@input type='date' id='${attribute.code}_${identifier}' name='${attribute.code}_${identifier}' value=value?trim language=locale.language format='d/m/Y' />
 </@formGroup>

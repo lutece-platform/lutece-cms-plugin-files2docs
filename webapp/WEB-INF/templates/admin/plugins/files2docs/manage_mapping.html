@@ -14,8 +14,8 @@
 						${mapping.description!}
 					</@manageFeatureItemColumn>
 					<@manageFeatureItemColumn align='end'>
-						<@aButton href='jsp/admin/plugins/files2docs/ManageMapping.jsp?view=modifyMapping&amp;mapping_id=${mapping.id}' title='#i18n{portal.util.labelModify}' buttonIcon='pencil' hideTitle=['all'] />
-						<@aButton href='jsp/admin/plugins/files2docs/ManageMapping.jsp?view=confirmRemoveMapping&amp;mapping_id=${mapping.id}' title='#i18n{portal.util.labelDelete}' buttonIcon='trash' color='danger' hideTitle=['all'] />
+						<@aButton href='jsp/admin/plugins/files2docs/ManageMapping.jsp?view=modifyMapping&mapping_id=${mapping.id}' title='#i18n{portal.util.labelModify}' buttonIcon='pencil' hideTitle=['all'] />
+						<@aButton href='jsp/admin/plugins/files2docs/ManageMapping.jsp?view=confirmRemoveMapping&mapping_id=${mapping.id}' title='#i18n{portal.util.labelDelete}' buttonIcon='trash' color='danger' hideTitle=['all'] />
 					</@manageFeatureItemColumn>
 				</@manageFeatureItem>
 				</#list>
