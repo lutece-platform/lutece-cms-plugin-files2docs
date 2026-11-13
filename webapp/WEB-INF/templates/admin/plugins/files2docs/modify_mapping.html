@@ -25,7 +25,7 @@
 					<@p class='ms-2'><#if mapping.title?exists>${mapping.title}</#if></@p>
 				</@manageFeatureItemColumn>
 				<@manageFeatureItemColumn align='end'>
-					<@aButton href='jsp/admin/plugins/files2docs/ManageMapping.jsp?view=modifyAttribute&mapping_id=${mapping.id}&attribute_name=title' title='#i18n{portal.util.labelModify}' buttonIcon='pencil' hideTitle=['all'] />
+					<@aButton href='jsp/admin/plugins/files2docs/ManageMapping.jsp?view=modifyAttribute&mapping_id=${mapping.id}&attribute_name=title' title='#i18n{portal.util.labelModify} #i18n{files2docs.modifyMapping.labelTitle}' buttonIcon='pencil' hideTitle=['all'] />
 				</@manageFeatureItemColumn>
 			</@manageFeatureItem>
 			<@manageFeatureItem>
@@ -34,7 +34,7 @@
 					<@p class='ms-2'><#if mapping.summary?exists>${mapping.summary}</#if></@p>
 				</@manageFeatureItemColumn>
 				<@manageFeatureItemColumn align='end'>
-					<@aButton href='jsp/admin/plugins/files2docs/ManageMapping.jsp?view=modifyAttribute&mapping_id=${mapping.id}&attribute_name=summary' title='#i18n{portal.util.labelModify}' buttonIcon='pencil' hideTitle=['all'] />
+					<@aButton href='jsp/admin/plugins/files2docs/ManageMapping.jsp?view=modifyAttribute&mapping_id=${mapping.id}&attribute_name=summary' title='#i18n{portal.util.labelModify} #i18n{files2docs.modifyMapping.labelSummary}' buttonIcon='pencil' hideTitle=['all'] />
 				</@manageFeatureItemColumn>
 			</@manageFeatureItem>
 			<#list attribute_list![] as attribute>
@@ -58,11 +58,11 @@
 				</@manageFeatureItemColumn>
 				<@manageFeatureItemColumn align='end'>
 				<#if document_attribute_code_list[i] != "file" && document_attribute_code_list[i] != "image">
-					<@aButton href='jsp/admin/plugins/files2docs/ManageMapping.jsp?view=modifyAttribute&attribute_id=${attribute.id}' title='#i18n{portal.util.labelModify}' buttonIcon='pencil' hideTitle=['all'] />
+					<@aButton href='jsp/admin/plugins/files2docs/ManageMapping.jsp?view=modifyAttribute&attribute_id=${attribute.id}' title='#i18n{portal.util.labelModify} ${document_attribute_name_list[i]}' buttonIcon='pencil' hideTitle=['all'] />
 				<#elseif attribute.id != -1>
-					<@tag color='success' tagIcon='check' title='#i18n{portal.util.labelEnabled}' />
+					<@tag color='success'><@icon style='check' title='#i18n{portal.util.labelEnabled}' /></@tag>
 				<#elseif !id_mandatory_doc_attr_file_img??>
-					<@aButton href='jsp/admin/plugins/files2docs/ManageMapping.jsp?view=confirmChangeAttributeFileImage&mapping_id=${mapping.id}&id_document_attr=${attribute.documentAttributeId}' title='#i18n{files2docs.modifyMapping.buttonModifyAttributeFileImage}' buttonIcon='pencil' hideTitle=['all'] />
+					<@aButton href='jsp/admin/plugins/files2docs/ManageMapping.jsp?view=confirmChangeAttributeFileImage&mapping_id=${mapping.id}&id_document_attr=${attribute.documentAttributeId}' title='#i18n{files2docs.modifyMapping.buttonModifyAttributeFileImage} ${document_attribute_name_list[i]}' buttonIcon='pencil' hideTitle=['all'] />
 				</#if>
 				</@manageFeatureItemColumn>
 			</@manageFeatureItem>

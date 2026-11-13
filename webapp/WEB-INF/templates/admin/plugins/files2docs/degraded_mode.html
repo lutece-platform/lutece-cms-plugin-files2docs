@@ -22,12 +22,9 @@
 					</#list>
 				</@select>
 			</@formGroup>
-			<@formGroup labelFor='degraded_file' labelKey='#i18n{files2docs.degradedMode.labelUpload}' mandatory=!(nb_imported_files?? && nb_imported_files gt 0)>
+			<@formGroup labelFor='degraded_file' labelKey='#i18n{files2docs.degradedMode.labelUpload}' mandatory=!(nb_imported_files?? && nb_imported_files gt 0) errorKey=degraded_error!''>
 				<@input type='file' name='files[]' id='degraded_file' />
 			</@formGroup>
-			<#if degraded_error?has_content>
-				<@alert color='danger' iconTitle='ban'>${degraded_error}</@alert>
-			</#if>
 			<#if nb_imported_files?exists>
 			<@formGroup>
 				<strong>${nb_imported_files}
