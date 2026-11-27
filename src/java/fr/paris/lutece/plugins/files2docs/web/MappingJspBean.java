@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.Map;
 
 import jakarta.enterprise.context.SessionScoped;
+import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -74,6 +75,9 @@ public class MappingJspBean extends MVCAdminJspBean
 {
     public static final String MAPPING_MANAGEMENT = "MAPPING_MANAGEMENT";
     private static final long serialVersionUID = 1L;
+
+    @Inject
+    private Files2DocsLinkDocument _linkDocument;
 
     // Templates
     private static final String TEMPLATE_MANAGE_MAPPING = "admin/plugins/files2docs/manage_mapping.html";
@@ -168,7 +172,7 @@ public class MappingJspBean extends MVCAdminJspBean
     @View( VIEW_CREATE_MAPPING )
     public String getCreateMapping( Models model )
     {
-        Collection<DocumentType> colDocumentTypes = Files2DocsLinkDocument.getInstance( ).getListDocumentTypeFile( Files2DocsUtil.getListAttributeTypeFile( ),
+        Collection<DocumentType> colDocumentTypes = _linkDocument.getListDocumentTypeFile( Files2DocsUtil.getListAttributeTypeFile( ),
                 true );
         Collection<DocumentType> colFilteredDocumentTypes = new ArrayList<>( );
 
@@ -208,7 +212,7 @@ public class MappingJspBean extends MVCAdminJspBean
             return redirect( request, AdminMessageService.getMessageUrl( request, MESSAGE_ERROR_MAPPING_ALREADY_EXISTS, AdminMessage.TYPE_STOP ) );
         }
 
-        if ( Files2DocsLinkDocument.getInstance( ).getDocumentTypeByCode( strDocumentTypeCode ) == null )
+        if ( _linkDocument.getDocumentTypeByCode( strDocumentTypeCode ) == null )
         {
             return redirect( request, AdminMessageService.getMessageUrl( request, MESSAGE_ERROR_FILES2DOCS, AdminMessage.TYPE_STOP ) );
         }
@@ -220,9 +224,9 @@ public class MappingJspBean extends MVCAdminJspBean
         MappingHome.create( mapping, getPlugin( ) );
 
         boolean bIsAttributeFileImgCreated = false;
-        DocumentAttribute docMandatoryAttrFileImg = Files2DocsLinkDocument.getInstance( ).getMandatoryAttributeFileImage( strDocumentTypeCode );
+        DocumentAttribute docMandatoryAttrFileImg = _linkDocument.getMandatoryAttributeFileImage( strDocumentTypeCode );
 
-        for ( DocumentAttribute docAttribute : Files2DocsLinkDocument.getInstance( ).getMandatoryAttributes( strDocumentTypeCode ) )
+        for ( DocumentAttribute docAttribute : _linkDocument.getMandatoryAttributes( strDocumentTypeCode ) )
         {
             if ( isFileOrImage( docAttribute ) )
             {
@@ -262,13 +266,13 @@ public class MappingJspBean extends MVCAdminJspBean
 
         setDocumentTypeName( mapping );
 
-        List<Attribute> colAttribute = Files2DocsLinkDocument.getInstance( ).getAllAttributes( mapping.getDocumentTypeCode( ), nMappingId, getPlugin( ) );
+        List<Attribute> colAttribute = _linkDocument.getAllAttributes( mapping.getDocumentTypeCode( ), nMappingId, getPlugin( ) );
         Collection<String> colDocumentAttributeName = new ArrayList<>( );
         Collection<String> colDocumentAttributeCode = new ArrayList<>( );
 
         for ( Attribute mAttribute : colAttribute )
         {
-            DocumentAttribute docAttribute = Files2DocsLinkDocument.getInstance( ).getDocumentAttributeById( mAttribute.getDocumentAttributeId( ) );
+            DocumentAttribute docAttribute = _linkDocument.getDocumentAttributeById( mAttribute.getDocumentAttributeId( ) );
 
             if ( docAttribute != null )
             {
@@ -277,7 +281,7 @@ public class MappingJspBean extends MVCAdminJspBean
             }
         }
 
-        DocumentAttribute docMandatoryAttrFileImg = Files2DocsLinkDocument.getInstance( ).getMandatoryAttributeFileImage( mapping.getDocumentTypeCode( ) );
+        DocumentAttribute docMandatoryAttrFileImg = _linkDocument.getMandatoryAttributeFileImage( mapping.getDocumentTypeCode( ) );
 
         model.put( MARK_MAPPING, mapping );
         model.put( MARK_ATTRIBUTE_LIST, colAttribute );
@@ -519,7 +523,7 @@ public class MappingJspBean extends MVCAdminJspBean
 
         AttributeHome.removeByMapping( nMappingId, getPlugin( ) );
 
-        for ( DocumentAttribute docAttribute : Files2DocsLinkDocument.getInstance( ).getMandatoryAttributes( mapping.getDocumentTypeCode( ) ) )
+        for ( DocumentAttribute docAttribute : _linkDocument.getMandatoryAttributes( mapping.getDocumentTypeCode( ) ) )
         {
             if ( !isFileOrImage( docAttribute ) || docAttribute.getId( ) == nIdDocumentAttr )
             {
@@ -554,13 +558,13 @@ public class MappingJspBean extends MVCAdminJspBean
             return AdminMessageService.getMessageUrl( request, MESSAGE_MAPPING_NOT_FOUND, AdminMessage.TYPE_STOP );
         }
 
-        if ( Files2DocsLinkDocument.getInstance( ).getMandatoryAttributeFileImage( mapping.getDocumentTypeCode( ) ) != null )
+        if ( _linkDocument.getMandatoryAttributeFileImage( mapping.getDocumentTypeCode( ) ) != null )
         {
             return AdminMessageService.getMessageUrl( request, MESSAGE_ERROR_DOC_TYPE_HAS_MANDATORY_DOC_ATTR_FILE_IMG, AdminMessage.TYPE_STOP );
         }
 
         int nIdDocumentAttr = Files2DocsUtil.convertStringToInt( strIdDocumentAttr );
-        boolean bIsFileAttribute = Files2DocsLinkDocument.getInstance( ).getMandatoryAttributes( mapping.getDocumentTypeCode( ) ).stream( )
+        boolean bIsFileAttribute = _linkDocument.getMandatoryAttributes( mapping.getDocumentTypeCode( ) ).stream( )
                 .anyMatch( a -> a.getId( ) == nIdDocumentAttr && isFileOrImage( a ) );
 
         if ( !bIsFileAttribute )
@@ -580,8 +584,8 @@ public class MappingJspBean extends MVCAdminJspBean
      */
     private boolean isFileOrImage( DocumentAttribute docAttribute )
     {
-        return Files2DocsLinkDocument.getInstance( ).isDocumentAttributeFile( docAttribute )
-                || Files2DocsLinkDocument.getInstance( ).isDocumentAttributeImage( docAttribute );
+        return _linkDocument.isDocumentAttributeFile( docAttribute )
+                || _linkDocument.isDocumentAttributeImage( docAttribute );
     }
 
     /**
@@ -611,7 +615,7 @@ public class MappingJspBean extends MVCAdminJspBean
      */
     private void setDocumentTypeName( Mapping mapping )
     {
-        DocumentType documentType = Files2DocsLinkDocument.getInstance( ).getDocumentTypeByCode( mapping.getDocumentTypeCode( ) );
+        DocumentType documentType = _linkDocument.getDocumentTypeByCode( mapping.getDocumentTypeCode( ) );
         mapping.setDocumentTypeName( ( documentType != null ) ? documentType.getName( ) : mapping.getDocumentTypeCode( ) );
     }
 }

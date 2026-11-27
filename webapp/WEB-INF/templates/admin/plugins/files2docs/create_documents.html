@@ -1,9 +1,10 @@
 <@pageContainer>
     <@pageColumn>
-        <@pageHeader title='#i18n{files2docs.createDocuments.pageTitle}'>
-			<small>#i18n{files2docs.createDocuments.labelImportedFiles} : ${nb_imported_files}</small>
-		</@pageHeader>
-		<@tform action='jsp/admin/plugins/files2docs/SelectFiles.jsp' boxed=true>
+		<#assign pageTitle><span class="avatar avatar-sm bg-azure-lt me-2"><@icon style='file-import' /></span>#i18n{files2docs.createDocuments.pageTitle}</#assign>
+		<#assign pageDescription>#i18n{files2docs.createDocuments.labelImportedFiles} : <span id="files2docs_nb_files">${nb_imported_files}</span></#assign>
+        <@pageHeader title=pageTitle description=pageDescription />
+		<@messages errors=errors![] infos=infos![] warnings=warnings![] />
+		<@tform method='post' name='create_documents' action='jsp/admin/plugins/files2docs/SelectFiles.jsp'>
 			<@input type='hidden' name='action' value='createDocuments' />
 			<@input type='hidden' name='document_type_code' value='${document_type_code}' />
 			<@input type='hidden' name='browser_selected_space_id' value='${browser_selected_space_id}' />
@@ -13,32 +14,75 @@
 			<#if no_header??>
 			<@input type='hidden' name='no_header' value='${no_header}' />
 			</#if>
-			<@row>
+			<#if filename_list?has_content>
+			<@row id='files2docs_documents' class='row-cards row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4'>
 				<#list filename_list as filename>
 					<#assign i = filename?index>
-					<@columns xs=12 sm=6 md=4 xl=3>
-						<@card headerTitle='${filename}' headerClass=''>
-							<@formGroup labelKey='#i18n{files2docs.createDocuments.columnDocumentName}' labelFor='document_title_${i+1}' rows=2 mandatory=true>
-								<#assign value = (mapping_list[i].title)!''>
-								<@input type='text' id='document_title_${i+1}' name='document_title_${i+1}' value=value maxlength=255 mandatory=true />
-							</@formGroup>
-							<@formGroup labelKey='#i18n{files2docs.createDocuments.columnSummary}' labelFor='document_summary_${i+1}' rows=2>
-								<#assign value = (mapping_list[i].summary)!''>
-								<@input type='textarea' id='document_summary_${i+1}' name='document_summary_${i+1}' rows=2>${value}</@input>
-							</@formGroup>
-							<#if attributes_forms[i]?exists>
-								<@formGroup rows=2>
-									${attributes_forms[i]}
-								</@formGroup>
+					<#assign extension = filename?contains('.')?then( filename?keep_after_last('.')?upper_case, '' )>
+					<@columns class='js-files2docs-document'>
+						<@box class='card-sm h-100'>
+							<#if (preview_list[i])!false>
+							<@img url='jsp/admin/plugins/files2docs/SelectFiles.jsp?view=uploadedFile&file=${i+1}' class='card-img-top object-fit-contain files2docs-thumbnail' alt='' />
+							<#else>
+							<div class="card-img-top files2docs-thumbnail d-flex flex-column align-items-center justify-content-center text-secondary" aria-hidden="true">
+								<@icon style='file' class='files2docs-thumbnail-icon' />
+								<#if extension?has_content><span class="small fw-semibold">${extension}</span></#if>
+							</div>
 							</#if>
-						</@card>
+							<@boxBody>
+								<@div class='d-flex align-items-start gap-2 mb-3'>
+									<@div class='flex-fill text-truncate'>
+										<@div class='fw-semibold text-truncate' params={"title": "${filename}"}>${filename}</@div>
+										<@div class='text-secondary small text-truncate'>#${i+1}<#if extension?has_content> &middot; ${extension}</#if></@div>
+									</@div>
+									<@button type='button' size='sm' color='ghost-danger' class='btn-icon js-files2docs-remove' buttonIcon='trash' title='#i18n{files2docs.createDocuments.buttonRemove} ${filename}' hideTitle=['all'] params={"data-document": "${i+1}"} />
+								</@div>
+								<@formGroup labelKey='#i18n{files2docs.createDocuments.columnDocumentName}' labelFor='document_title_${i+1}' rows=2 mandatory=true>
+									<#assign value = (mapping_list[i].title)!''>
+									<@input type='text' id='document_title_${i+1}' name='document_title_${i+1}' value=value maxlength=255 mandatory=true />
+								</@formGroup>
+								<@formGroup labelKey='#i18n{files2docs.createDocuments.columnSummary}' labelFor='document_summary_${i+1}' rows=2>
+									<#assign value = (mapping_list[i].summary)!''>
+									<@input type='textarea' id='document_summary_${i+1}' name='document_summary_${i+1}' rows=2>${value}</@input>
+								</@formGroup>
+								<#if attributes_forms[i]??>
+									${attributes_forms[i]}
+								</#if>
+							</@boxBody>
+						</@box>
 					</@columns>
 				</#list>
 			</@row>
-			<@formGroup>
-				<@button type='submit' title='#i18n{files2docs.createDocuments.buttonSubmit}' buttonIcon='plus' />
+			<#else>
+			<@card>
+				<@empty title='#i18n{portal.util.labelNoItem}' iconName='file-off' subtitle='#i18n{files2docs.importResult.emptyHelp}' />
+			</@card>
+			</#if>
+			<@card class='sticky-bottom shadow mb-0'>
+				<@button type='submit' id='files2docs_create_submit' title='#i18n{files2docs.createDocuments.buttonSubmit}' buttonIcon='plus' color='primary' disabled=!filename_list?has_content />
 				<@button type='submit' name='cancel' value='cancel' params={"formnovalidate": true} buttonIcon='x' title='#i18n{portal.util.labelCancel}' color='light' />
-			</@formGroup>
+			</@card>
 		</@tform>
 	</@pageColumn>
 </@pageContainer>
+<link rel="stylesheet" href="themes/shared/plugins/files2docs/css/admin/files2docs.css" />
+<#if filename_list?has_content>
+<script>
+document.querySelectorAll( '.js-files2docs-remove' ).forEach( ( button ) => {
+	button.addEventListener( 'click', ( ) => {
+		const column = button.closest( '.js-files2docs-document' );
+		const form = button.closest( 'form' );
+		column.querySelectorAll( 'input, textarea, select, button' ).forEach( ( field ) => { field.disabled = true; } );
+		column.hidden = true;
+		const removed = document.createElement( 'input' );
+		removed.type = 'hidden';
+		removed.name = 'document_removed_' + button.dataset.document;
+		removed.value = 'true';
+		form.appendChild( removed );
+		const remaining = document.querySelectorAll( '.js-files2docs-document:not([hidden])' ).length;
+		document.getElementById( 'files2docs_nb_files' ).textContent = remaining;
+		document.getElementById( 'files2docs_create_submit' ).disabled = remaining === 0;
+	} );
+} );
+</script>
+</#if>

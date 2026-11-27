@@ -1,64 +1,88 @@
 <@pageContainer>
     <@pageColumn>
-        <@pageHeader title='#i18n{files2docs.importResult.pageTitle}'>
-			<@aButton href='jsp/admin/plugins/document/ManageDocuments.jsp?id_space_filter=${(browser_selected_space_id!"")?url}' title='#i18n{files2docs.importResult.goToDocumentSpace}' buttonIcon='folder-open' color='primary' />
+		<#assign pageTitle><span class="avatar avatar-sm bg-azure-lt me-2"><@icon style='file-import' /></span>#i18n{files2docs.importResult.pageTitle}</#assign>
+		<@pageHeader title=pageTitle>
+			<@aButton href='jsp/admin/plugins/document/ManageDocuments.jsp?id_space_filter=${(browser_selected_space_id!"")?url("UTF-8")}' title='#i18n{files2docs.importResult.goToDocumentSpace}' buttonIcon='folder-open' hideTitle=['xs','sm'] color='primary' />
 		</@pageHeader>
-		<@alert color='info'>
-			<strong>#i18n{files2docs.importResult.labelImportedFiles} <@tag>${nb_imported_files}</@tag></strong>&nbsp;&nbsp;
-			<strong>#i18n{files2docs.importResult.labelFailureFiles} <@tag>${nb_failure_files}</@tag></strong>
-		</@alert>
+		<@messages errors=errors![] infos=infos![] warnings=warnings![] />
+		<@row>
+			<@columns sm=6>
+				<@card>
+					<div class="d-flex align-items-center gap-3">
+						<span class="avatar bg-green-lt" aria-hidden="true"><@icon style='check' /></span>
+						<div>
+							<div class="h2 mb-0">${nb_imported_files}</div>
+							<div class="text-secondary">#i18n{files2docs.importResult.labelImportedFiles}</div>
+						</div>
+					</div>
+				</@card>
+			</@columns>
+			<@columns sm=6>
+				<@card>
+					<div class="d-flex align-items-center gap-3">
+						<span class="avatar bg-red-lt" aria-hidden="true"><@icon style='x' /></span>
+						<div>
+							<div class="h2 mb-0">${nb_failure_files}</div>
+							<div class="text-secondary">#i18n{files2docs.importResult.labelFailureFiles}</div>
+						</div>
+					</div>
+				</@card>
+			</@columns>
+		</@row>
 		<#if document_list?has_content>
-			<@manageFeature>
-				<#list document_list as document>
+			<@manageFeature layout='list' id='documents-list'>
+			<#list document_list as document>
 				<#assign filename = ''>
 				<#list document.attributes![] as attribute>
 					<#if ( attribute.codeAttributeType = "file" || attribute.codeAttributeType = "image" ) && attribute.textValue??>
 						<#assign filename = attribute.textValue>
 					</#if>
 				</#list>
+				<#assign imported = document.id != -1>
 				<@manageFeatureItem>
-					<@manageFeatureItemColumn auto=true flex=false>
-						<#if document.id != -1>
-							<@tag color='success' tagIcon='check'>#i18n{files2docs.importResult.statusImported}</@tag>
+					<@manageFeatureItemColumn class='d-flex align-items-center gap-2 text-truncate'>
+						<#if imported>
+						<span class="status-dot status-green" title="#i18n{files2docs.importResult.statusImported}"></span><span class="visually-hidden">#i18n{files2docs.importResult.statusImported}</span>
 						<#else>
-							<@tag color='danger' tagIcon='x'>#i18n{files2docs.importResult.statusFailure}</@tag>
+						<span class="status-dot status-red" title="#i18n{files2docs.importResult.statusFailure}"></span><span class="visually-hidden">#i18n{files2docs.importResult.statusFailure}</span>
 						</#if>
-					</@manageFeatureItemColumn>
-					<@manageFeatureItemColumn>
-						<#if document.id != -1>
-							<strong>${filename}</strong>
+						<div class="text-truncate">
+						<#if imported>
+							<a href="jsp/admin/plugins/document/ModifyDocument.jsp?id_document=${document.id?c}&id_action=2&id_space_filter=${(browser_selected_space_id!"")?url("UTF-8")}" class="text-reset fw-semibold" title="#i18n{files2docs.manageMapping.actionModify} ${document.title}">${filename}</a>
+							<div class="text-secondary small text-truncate">#i18n{files2docs.importResult.columnDocumentName} : ${document.title}</div>
 						<#else>
-							<strong>${document.title}</strong>
+							<span class="fw-semibold">${document.title}</span>
+							<div class="text-danger small text-truncate">#i18n{files2docs.importResult.statusFailure}</div>
 						</#if>
+						</div>
 					</@manageFeatureItemColumn>
-					<@manageFeatureItemColumn>
-						<#if document.id != -1>
-							#i18n{files2docs.importResult.columnDocumentName} : ${document.title}
-						</#if>
+					<#if imported>
+					<@manageFeatureItemColumn flex=false class='small text-secondary'>
+						<div class="text-truncate">#i18n{files2docs.importResult.columnSummary} : ${document.summary!}</div>
+						<#list document.attributes![] as attribute>
+							<#if attribute.codeAttributeType != "file" && attribute.codeAttributeType != "image">
+							<div class="text-truncate">${attribute.name} : ${attribute.textValue!}</div>
+							</#if>
+						</#list>
 					</@manageFeatureItemColumn>
-					<@manageFeatureItemColumn flex=false>
-						<#if document.id != -1>
-							<@p class='mb-1'>#i18n{files2docs.importResult.columnSummary} : ${document.summary!}</@p>
-							<#list document.attributes![] as attribute>
-								<#if attribute.codeAttributeType != "file" && attribute.codeAttributeType != "image">
-									<@p class='mb-1'>${attribute.name} : ${attribute.textValue!}</@p>
-								</#if>
-							</#list>
-						</#if>
-					</@manageFeatureItemColumn>
-					<@manageFeatureItemColumn align='end'>
-						<#if document.id != -1>
-							<@aButton href='jsp/admin/plugins/document/ModifyDocument.jsp?id_document=${document.id}&id_action=2&id_space_filter=${(browser_selected_space_id!"")?url}' title='#i18n{files2docs.manageMapping.actionModify} ${document.title}' hideTitle=['all'] buttonIcon='edit' />
+					</#if>
+					<@manageFeatureItemColumn auto=true align='end' class='d-flex align-items-center gap-2'>
+						<#if imported>
+						<div class="btn-actions">
+							<a href="jsp/admin/plugins/document/ModifyDocument.jsp?id_document=${document.id?c}&id_action=2&id_space_filter=${(browser_selected_space_id!"")?url("UTF-8")}" class="btn-action" title="#i18n{files2docs.manageMapping.actionModify} ${document.title}"><@icon style='pencil' /><span class="visually-hidden">#i18n{files2docs.manageMapping.actionModify} ${document.title}</span></a>
+						</div>
 						</#if>
 					</@manageFeatureItemColumn>
 				</@manageFeatureItem>
-				</#list>
+			</#list>
 			</@manageFeature>
-			<@paginationAdmin paginator=paginator combo=1 />
+			<#if paginator.itemsCount gte 10>
+				<@paginationAdmin paginator=paginator combo=1 />
+			</#if>
 		<#else>
-			<@box>
-				<@empty title='#i18n{portal.util.labelNoItem}' subtitle='#i18n{files2docs.importResult.emptyHelp}' />
-			</@box>
+			<@card>
+				<@empty title='#i18n{portal.util.labelNoItem}' iconName='file-off' subtitle='#i18n{files2docs.importResult.emptyHelp}' />
+			</@card>
 		</#if>
 	</@pageColumn>
 </@pageContainer>

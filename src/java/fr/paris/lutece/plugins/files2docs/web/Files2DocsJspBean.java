@@ -55,7 +55,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import jakarta.enterprise.context.SessionScoped;
-import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
@@ -133,6 +132,7 @@ public class Files2DocsJspBean extends MVCAdminJspBean
     private static final String VIEW_SELECT_FILES = "selectFiles";
     private static final String ACTION_SELECT_FILES = "selectFiles";
     private static final String VIEW_CREATE_DOCUMENTS = "createDocuments";
+    private static final String VIEW_UPLOADED_FILE = "uploadedFile";
     private static final String ACTION_CREATE_DOCUMENTS = "createDocuments";
     private static final String VIEW_IMPORT_RESULT = "importResult";
 
@@ -141,6 +141,7 @@ public class Files2DocsJspBean extends MVCAdminJspBean
     private static final String MARK_DOCUMENT_TYPE_CODE_DISABLED = "document_type_code_disabled";
     private static final String MARK_DOCUMENT_TYPE_LIST = "document_type_list";
     private static final String MARK_SPACES_BROWSER = "spaces_browser";
+    private static final String MARK_SPACES_TREE = "spaces_tree";
     private static final String MARK_SUBMIT_BUTTON_DISABLED = "submit_button_disabled";
     private static final String MARK_NB_IMPORTED_FILES = "nb_imported_files";
     private static final String MARK_NB_FAILURE_FILES = "nb_failure_files";
@@ -165,6 +166,7 @@ public class Files2DocsJspBean extends MVCAdminJspBean
     private static final String MARK_MAX_FILES = "max_files";
     private static final String MARK_UPLOADED_FILES = "uploaded_files";
     private static final String MARK_UPLOAD_FIELD = "upload_field";
+    private static final String MARK_PREVIEW_LIST = "preview_list";
     private static final String FIELD_UPLOAD = "files2docs_files";
 
     // Parameters
@@ -178,6 +180,8 @@ public class Files2DocsJspBean extends MVCAdminJspBean
     private static final String PARAMETER_CANCEL = "cancel";
     private static final String PARAMETER_DOCUMENT_TITLE = "document_title";
     private static final String PARAMETER_DOCUMENT_SUMMARY = "document_summary";
+    private static final String PARAMETER_DOCUMENT_REMOVED = "document_removed";
+    private static final String PARAMETER_FILE = "file";
     private static final String PARAMETER_IMPORTED_LIST = "imported_list";
     private static final String PARAMETER_FAILURE_LIST = "failure_list";
     private static final String PARAMETER_MAPPING = "mapping";
@@ -225,10 +229,11 @@ public class Files2DocsJspBean extends MVCAdminJspBean
     private static final String STRING_EMPTY = "";
     private static final String STRING_COMMA = ",";
     private static final String STRING_DOT = ".";
+    private static final Map<String, String> PREVIEW_CONTENT_TYPES = Map.of( "png", "image/png", "jpg", "image/jpeg", "jpeg", "image/jpeg", "gif",
+            "image/gif", "webp", "image/webp" );
     private static final String STRING_UNDERSCORE = "_";
     private static final String STRING_NULL = "null";
     private static final String STRING_DEGRADED = "degraded";
-    private static final String DEFAULT_SPACE_ID = "0";
 
     // Returns (upload)
     private static final String RETURN_IS_NULL = "isNull";
@@ -258,6 +263,15 @@ public class Files2DocsJspBean extends MVCAdminJspBean
 
     @Inject
     private AsynchronousUploadHandler _uploadHandler;
+
+    @Inject
+    private DocumentService _documentService;
+
+    @Inject
+    private Files2DocsLinkDocument _linkDocument;
+
+    @Inject
+    private RegularExpressionService _regularExpressionService;
 
     @Inject
     @Pager( listBookmark = MARK_DOCUMENT_LIST, defaultItemsPerPage = "files2docs.itemsPerPage" )
@@ -303,21 +317,14 @@ public class Files2DocsJspBean extends MVCAdminJspBean
             strSpaceId = request.getParameter( PARAMETER_BROWSER_SPACE_ID );
         }
 
-        if ( strSpaceId == null )
-        {
-            strSpaceId = DEFAULT_SPACE_ID;
-        }
-
         int nImportedFiles = Files2DocsUtil.convertStringToInt( request.getParameter( PARAMETER_NB_IMPORTED_FILES ) );
-        Collection<DocumentType> colDocumentType = Files2DocsLinkDocument.getInstance( ).getListDocumentTypeFile( Files2DocsUtil.getListAttributeTypeFile( ),
+        Collection<DocumentType> colDocumentType = _linkDocument.getListDocumentTypeFile( Files2DocsUtil.getListAttributeTypeFile( ),
                 false );
 
         model.put( MARK_WEBAPP_URL, AppPathService.getBaseUrl( request ) );
         model.put( MARK_DOCUMENT_TYPE_CODE, strDocumentTypeCode );
         model.put( MARK_DOCUMENT_TYPE_CODE_DISABLED, nImportedFiles > 0 );
         model.put( MARK_DOCUMENT_TYPE_LIST, colDocumentType );
-        model.put( MARK_SPACES_BROWSER, HtmlMarkup.of( Files2DocsLinkDocument.getInstance( ).getSpacesBrowser( request, getUser( ), getLocale( ),
-                getViewFullUrl( VIEW_SELECT_FILES ) ) ) );
         model.put( MARK_SUBMIT_BUTTON_DISABLED, StringUtils.isEmpty( strSpaceId ) || strSpaceId.equals( STRING_NULL ) );
         model.put( MARK_BROWSER_SELECTED_SPACE_ID, strSpaceId );
         model.put( MARK_NB_IMPORTED_FILES, nImportedFiles );
@@ -334,7 +341,19 @@ public class Files2DocsJspBean extends MVCAdminJspBean
             model.put( MARK_NO_HEADER, Boolean.TRUE.toString( ) );
         }
 
-        String strTemplate = STRING_DEGRADED.equals( request.getParameter( PARAMETER_UPLOAD_MODE ) ) ? TEMPLATE_DEGRADED_MODE : TEMPLATE_SELECT_FILES;
+        String strTemplate;
+
+        if ( STRING_DEGRADED.equals( request.getParameter( PARAMETER_UPLOAD_MODE ) ) )
+        {
+            strTemplate = TEMPLATE_DEGRADED_MODE;
+            model.put( MARK_SPACES_BROWSER, HtmlMarkup.of( _linkDocument.getSpacesBrowser( request, getUser( ), getLocale( ),
+                    getViewFullUrl( VIEW_SELECT_FILES ) ) ) );
+        }
+        else
+        {
+            strTemplate = TEMPLATE_SELECT_FILES;
+            model.put( MARK_SPACES_TREE, _linkDocument.getSpacesTree( getUser( ) ) );
+        }
 
         return getPage( PROPERTY_SELECT_FILES_PAGE_TITLE, strTemplate, model );
     }
@@ -408,7 +427,7 @@ public class Files2DocsJspBean extends MVCAdminJspBean
             return redirect( request, AdminMessageService.getMessageUrl( request, Messages.MANDATORY_FIELDS, AdminMessage.TYPE_STOP ) );
         }
 
-        if ( !Files2DocsLinkDocument.getInstance( ).isAuthorizedAdminDocument( Files2DocsUtil.convertStringToInt( strSpaceId ), strDocumentTypeCode,
+        if ( !_linkDocument.isAuthorizedAdminDocument( Files2DocsUtil.convertStringToInt( strSpaceId ), strDocumentTypeCode,
                 getUser( ) ) )
         {
             return redirect( request, AdminMessageService.getMessageUrl( request, MESSAGE_DOCUMENT_NOT_AUTHORIZED, AdminMessage.TYPE_STOP ) );
@@ -493,6 +512,7 @@ public class Files2DocsJspBean extends MVCAdminJspBean
         model.put( MARK_EXTENSION_CHECKED_LIST, StringUtils.defaultString( getExtensionList( request ) ) );
         model.put( MARK_MAPPING_LIST, colMappings );
         model.put( MARK_FILENAME_LIST, listFilenames );
+        model.put( MARK_PREVIEW_LIST, listFilenames.stream( ).map( strFilename -> getPreviewContentType( strFilename ) != null ).toList( ) );
         model.put( MARK_ATTRIBUTES_FORMS, HtmlMarkup.ofAll( getAttributesForms( request, strDocumentTypeCode, listFilenames ) ) );
         model.put( MARK_UPLOAD_MODE, StringUtils.defaultString( request.getParameter( PARAMETER_UPLOAD_MODE ) ) );
 
@@ -502,6 +522,50 @@ public class Files2DocsJspBean extends MVCAdminJspBean
         }
 
         return getPage( PROPERTY_CREATE_DOCUMENTS_PAGE_TITLE, TEMPLATE_CREATE_DOCUMENTS, model );
+    }
+
+    /**
+     * Sends an uploaded image of the current import, to preview it on the documents creation page. Only the image types of
+     * PREVIEW_CONTENT_TYPES are sent, with that content type, so that no uploaded file is ever served as active content.
+     *
+     * @param request
+     *            The HTTP request, with the rank of the file (from 1, in the order of the creation page)
+     * @return null, the image being written in the response, or the STOP message when the file is not a previewable image of the import
+     */
+    @View( VIEW_UPLOADED_FILE )
+    public String getUploadedFile( HttpServletRequest request )
+    {
+        List<String> listFilenames = getListFilename( request );
+        int nRank = Files2DocsUtil.convertStringToInt( request.getParameter( PARAMETER_FILE ) );
+
+        if ( nRank < 1 || nRank > listFilenames.size( ) )
+        {
+            return redirect( request, AdminMessageService.getMessageUrl( request, MESSAGE_ZERO_FILE_IMPORTED, AdminMessage.TYPE_STOP ) );
+        }
+
+        String strFilename = listFilenames.get( nRank - 1 );
+        String strContentType = getPreviewContentType( strFilename );
+
+        if ( strContentType == null )
+        {
+            return redirect( request, AdminMessageService.getMessageUrl( request, MESSAGE_ZERO_FILE_IMPORTED, AdminMessage.TYPE_STOP ) );
+        }
+
+        download( readFile( new File( getUploadDirectory( request ), strFilename ) ), strFilename, strContentType );
+
+        return null;
+    }
+
+    /**
+     * Gives the content type under which an uploaded file can be previewed
+     *
+     * @param strFilename
+     *            The file name
+     * @return The image content type, or null when the file is not a previewable image
+     */
+    private static String getPreviewContentType( String strFilename )
+    {
+        return PREVIEW_CONTENT_TYPES.get( StringUtils.lowerCase( StringUtils.substringAfterLast( strFilename, STRING_DOT ) ) );
     }
 
     /**
@@ -533,16 +597,24 @@ public class Files2DocsJspBean extends MVCAdminJspBean
         }
 
         if ( StringUtils.isBlank( strDocumentTypeCode )
-                || !Files2DocsLinkDocument.getInstance( ).isAuthorizedAdminDocument( nSpaceId, strDocumentTypeCode, getUser( ) ) )
+                || !_linkDocument.isAuthorizedAdminDocument( nSpaceId, strDocumentTypeCode, getUser( ) ) )
         {
             return redirect( request, AdminMessageService.getMessageUrl( request, MESSAGE_DOCUMENT_NOT_AUTHORIZED, AdminMessage.TYPE_STOP ) );
         }
 
         List<String> listFilenames = getListFilename( request );
+        List<String> listKeptFilenames = new ArrayList<>( );
         List<Document> listDocuments = new ArrayList<>( );
 
         for ( int identifier = 0; identifier < listFilenames.size( ); identifier++ )
         {
+            if ( request.getParameter( PARAMETER_DOCUMENT_REMOVED + STRING_UNDERSCORE + ( identifier + 1 ) ) != null )
+            {
+                new File( getUploadDirectory( request ), listFilenames.get( identifier ) ).delete( );
+
+                continue;
+            }
+
             Document document = new Document( );
             document.setCodeDocumentType( strDocumentTypeCode );
             document.setSpaceId( nSpaceId );
@@ -560,7 +632,7 @@ public class Files2DocsJspBean extends MVCAdminJspBean
             document.setTitle( strDocumentTitle );
             document.setSummary( StringUtils.defaultString( strDocumentSummary ) );
 
-            List<DocumentAttribute> listAttributes = (List<DocumentAttribute>) Files2DocsLinkDocument.getInstance( ).getMandatoryAttributes(
+            List<DocumentAttribute> listAttributes = (List<DocumentAttribute>) _linkDocument.getMandatoryAttributes(
                     strDocumentTypeCode );
 
             for ( DocumentAttribute attribute : listAttributes )
@@ -595,17 +667,23 @@ public class Files2DocsJspBean extends MVCAdminJspBean
 
             document.setAttributes( listAttributes );
             listDocuments.add( document );
+            listKeptFilenames.add( listFilenames.get( identifier ) );
+        }
+
+        if ( listDocuments.isEmpty( ) )
+        {
+            return redirect( request, AdminMessageService.getMessageUrl( request, MESSAGE_ZERO_FILE_IMPORTED, AdminMessage.TYPE_STOP ) );
         }
 
         List<String> listImported = new ArrayList<>( );
         List<String> listFailure = new ArrayList<>( );
-        Iterator<String> filenameIterator = listFilenames.iterator( );
+        Iterator<String> filenameIterator = listKeptFilenames.iterator( );
 
         for ( Document document : listDocuments )
         {
             String strFilename = filenameIterator.next( );
 
-            if ( Files2DocsLinkDocument.getInstance( ).createDocument( document, getUser( ) ) != null )
+            if ( _linkDocument.createDocument( document, getUser( ) ) != null )
             {
                 listFailure.add( strFilename );
 
@@ -616,9 +694,9 @@ public class Files2DocsJspBean extends MVCAdminJspBean
 
             try
             {
-                CDI.current( ).select( DocumentService.class ).get( ).changeDocumentState( document, getUser( ), DocumentState.STATE_WAITING_FOR_APPROVAL );
+                _documentService.changeDocumentState( document, getUser( ), DocumentState.STATE_WAITING_FOR_APPROVAL );
                 Document documentStored = DocumentHome.findByPrimaryKeyWithoutBinaries( document.getId( ) );
-                CDI.current( ).select( DocumentService.class ).get( ).validateDocument( documentStored, getUser( ), DocumentState.STATE_VALIDATE );
+                _documentService.validateDocument( documentStored, getUser( ), DocumentState.STATE_VALIDATE );
             }
             catch( DocumentException e )
             {
@@ -683,7 +761,7 @@ public class Files2DocsJspBean extends MVCAdminJspBean
 
         for ( String strDocumentId : StringUtils.split( StringUtils.defaultString( strListImported ), STRING_COMMA ) )
         {
-            Document document = Files2DocsLinkDocument.getInstance( ).getDocumentById( Files2DocsUtil.convertStringToInt( strDocumentId ) );
+            Document document = _linkDocument.getDocumentById( Files2DocsUtil.convertStringToInt( strDocumentId ) );
 
             if ( document == null )
             {
@@ -1036,13 +1114,13 @@ public class Files2DocsJspBean extends MVCAdminJspBean
         {
             StringBuilder sbForm = new StringBuilder( );
 
-            for ( DocumentAttribute docAttribute : Files2DocsLinkDocument.getInstance( ).getMandatoryAttributes( strDocumentTypeCode ) )
+            for ( DocumentAttribute docAttribute : _linkDocument.getMandatoryAttributes( strDocumentTypeCode ) )
             {
                 String strCode = docAttribute.getCodeAttributeType( );
 
                 if ( !strCode.equals( ATTRIBUTE_FILE ) && !strCode.equals( ATTRIBUTE_IMAGE ) )
                 {
-                    List<AttributeTypeParameter> listParameters = (List<AttributeTypeParameter>) Files2DocsLinkDocument.getInstance( )
+                    List<AttributeTypeParameter> listParameters = (List<AttributeTypeParameter>) _linkDocument
                             .getAttributeParametersValues( docAttribute.getId( ), getLocale( ) );
 
                     Attribute mappingAttribute = AttributeHome.findByDocumentAttribute( docAttribute.getId( ), getPlugin( ) );
@@ -1083,7 +1161,7 @@ public class Files2DocsJspBean extends MVCAdminJspBean
                         mapParameters.put( param.getName( ), param.getValueList( ) );
                     }
 
-                    for ( AttributeTypeParameter param : Files2DocsLinkDocument.getInstance( ).getAttributeTypeParameterList(
+                    for ( AttributeTypeParameter param : _linkDocument.getAttributeTypeParameterList(
                             docAttribute.getCodeAttributeType( ), getLocale( ) ) )
                     {
                         if ( !mapParameters.containsKey( param.getName( ) ) )
@@ -1194,9 +1272,8 @@ public class Files2DocsJspBean extends MVCAdminJspBean
     private Map<String, String> getRegularExpressionMap( Collection<DocumentType> colDocumentType )
     {
         Map<String, String> mapRegExp = new HashMap<>( );
-        RegularExpressionService regularExpressionService = CDI.current( ).select( RegularExpressionService.class ).get( );
 
-        if ( !regularExpressionService.isAvailable( ) )
+        if ( !_regularExpressionService.isAvailable( ) )
         {
             return mapRegExp;
         }
@@ -1207,10 +1284,10 @@ public class Files2DocsJspBean extends MVCAdminJspBean
         {
             List<String> listExtensions = new ArrayList<>( );
 
-            for ( Integer nExpressionId : Files2DocsLinkDocument.getInstance( ).getListRegularExpressionKeyByIdAttribute(
+            for ( Integer nExpressionId : _linkDocument.getListRegularExpressionKeyByIdAttribute(
                     getFileAttributeId( documentType.getCode( ) ) ) )
             {
-                RegularExpression regularExpression = regularExpressionService.getRegularExpressionByKey( nExpressionId );
+                RegularExpression regularExpression = _regularExpressionService.getRegularExpressionByKey( nExpressionId );
                 Matcher matcher = pattern.matcher( regularExpression.getValue( ).trim( ) );
 
                 if ( matcher.find( ) )
@@ -1240,7 +1317,7 @@ public class Files2DocsJspBean extends MVCAdminJspBean
      */
     private int getFileAttributeId( String strDocumentTypeCode )
     {
-        for ( DocumentAttribute attribute : Files2DocsLinkDocument.getInstance( ).getMandatoryAttributes( strDocumentTypeCode ) )
+        for ( DocumentAttribute attribute : _linkDocument.getMandatoryAttributes( strDocumentTypeCode ) )
         {
             String strCode = attribute.getCodeAttributeType( );
 
@@ -1359,14 +1436,12 @@ public class Files2DocsJspBean extends MVCAdminJspBean
             return RETURN_IS_NULL;
         }
 
-        RegularExpressionService regularExpressionService = CDI.current( ).select( RegularExpressionService.class ).get( );
-
-        if ( regularExpressionService.isAvailable( ) )
+        if ( _regularExpressionService.isAvailable( ) )
         {
-            for ( Integer nExpressionId : Files2DocsLinkDocument.getInstance( ).getListRegularExpressionKeyByIdAttribute(
+            for ( Integer nExpressionId : _linkDocument.getListRegularExpressionKeyByIdAttribute(
                     getFileAttributeId( strDocumentTypeCode ) ) )
             {
-                if ( !regularExpressionService.isMatches( strFileName, regularExpressionService.getRegularExpressionByKey( nExpressionId ) ) )
+                if ( !_regularExpressionService.isMatches( strFileName, _regularExpressionService.getRegularExpressionByKey( nExpressionId ) ) )
                 {
                     return RETURN_INVALID_FILENAME;
                 }
@@ -1444,15 +1519,13 @@ public class Files2DocsJspBean extends MVCAdminJspBean
             return AdminMessageService.getMessageUrl( request, Messages.MANDATORY_FIELDS, AdminMessage.TYPE_STOP );
         }
 
-        RegularExpressionService regularExpressionService = CDI.current( ).select( RegularExpressionService.class ).get( );
-
-        if ( regularExpressionService.isAvailable( ) )
+        if ( _regularExpressionService.isAvailable( ) )
         {
-            for ( Integer nExpressionId : Files2DocsLinkDocument.getInstance( ).getListRegularExpressionKeyByIdAttribute( attribute.getId( ) ) )
+            for ( Integer nExpressionId : _linkDocument.getListRegularExpressionKeyByIdAttribute( attribute.getId( ) ) )
             {
-                RegularExpression regularExpression = regularExpressionService.getRegularExpressionByKey( nExpressionId );
+                RegularExpression regularExpression = _regularExpressionService.getRegularExpressionByKey( nExpressionId );
 
-                if ( !regularExpressionService.isMatches( strValue, regularExpression ) )
+                if ( !_regularExpressionService.isMatches( strValue, regularExpression ) )
                 {
                     return AdminMessageService.getMessageUrl( request, MESSAGE_ATTRIBUTE_VALIDATION_ERROR, new String [ ] {
                             attribute.getName( ), regularExpression.getErrorMessage( )

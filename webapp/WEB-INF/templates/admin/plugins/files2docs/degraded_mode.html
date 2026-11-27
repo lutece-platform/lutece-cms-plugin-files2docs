@@ -6,7 +6,9 @@
 </#if>
 <@pageContainer>
     <@pageColumn>
-        <@pageHeader title='#i18n{files2docs.degradedMode.pageTitle}' />
+		<#assign pageTitle><span class="avatar avatar-sm bg-azure-lt me-2"><@icon style='file-import' /></span>#i18n{files2docs.degradedMode.pageTitle}</#assign>
+		<@pageHeader title=pageTitle />
+		<@messages errors=errors![] infos=infos![] warnings=warnings![] />
 		<@tform id='selectFilesForm' action='jsp/admin/plugins/files2docs/SelectFiles.jsp' enctype='multipart/form-data' boxed=true>
 			<@input type='hidden' name='action' value='selectFiles' />
 			<@input type='hidden' name='document_type_code_hidden' value='${document_type_code!}' />
@@ -15,49 +17,41 @@
 			<#if no_header??>
 			<@input type='hidden' name='no_header' value='${no_header}' />
 			</#if>
-			<@formGroup labelFor='document_type_code' labelKey='#i18n{files2docs.degradedMode.labelType}' mandatory=true>
+			<@formGroup labelFor='document_type_code' labelKey='#i18n{files2docs.degradedMode.labelType}' mandatory=true rows=2>
 				<@select name='document_type_code' id='document_type_code' disabled=document_type_code_disabled>
 					<#list document_type_list?sort_by("name") as type>
 						<@option label=type.name value=type.code selected=( document_type_code?has_content && document_type_code = type.code ) />
 					</#list>
 				</@select>
 			</@formGroup>
-			<@formGroup labelFor='degraded_file' labelKey='#i18n{files2docs.degradedMode.labelUpload}' mandatory=!(nb_imported_files?? && nb_imported_files gt 0) errorKey=degraded_error!''>
+			<@formGroup labelFor='degraded_file' labelKey='#i18n{files2docs.degradedMode.labelUpload}' mandatory=!(nb_imported_files?? && nb_imported_files gt 0) errorKey=degraded_error!'' rows=2>
 				<@input type='file' name='files[]' id='degraded_file' />
 			</@formGroup>
 			<#if nb_imported_files?exists>
-			<@formGroup>
-				<strong>${nb_imported_files}
-				<#if nb_imported_files lt 2>
-					#i18n{files2docs.message.swfupload.complete.singular}
-				<#else>
-					#i18n{files2docs.message.swfupload.complete.plural}
-				</#if>
-				</strong>
+			<@formGroup rows=2>
+				<@staticText>
+					<@tag color='success' tagIcon='check'>${nb_imported_files} <#if nb_imported_files lt 2>#i18n{files2docs.message.swfupload.complete.singular}<#else>#i18n{files2docs.message.swfupload.complete.plural}</#if></@tag>
+				</@staticText>
 			</@formGroup>
 			</#if>
-			<@formGroup>
+			<@formGroup rows=2>
 				<@button type='submit' name='degraded_upload' value='degraded_upload' buttonIcon='upload' title='#i18n{files2docs.degradedMode.buttonDegraded}' />
 				<@button type='submit' name='delete' value='delete' params={"formnovalidate": true} buttonIcon='trash' title='#i18n{files2docs.degradedMode.buttonDelete}' color='danger' />
 			</@formGroup>
-			<@fieldSet legend='#i18n{files2docs.degradedMode.labelSpace} *'>
+			<@fieldSet legend='#i18n{files2docs.degradedMode.labelSpace} *' hideLegend=['all']>
+				<div class="form-label required">#i18n{files2docs.degradedMode.labelSpace}</div>
 				${spaces_browser}
 				<script>
-						formId = 'selectFilesForm';
-						document.currentScript.parentElement.querySelectorAll( 'button[type="submit"], a[href$="ManageDocuments.jsp"]' ).forEach( function( e ) { e.hidden = true; } );
-						[ 'openSpace', 'goUp', 'modifyChoice' ].forEach( function( name ) {
-							var browse = window[ name ];
-							window[ name ] = function( ) {
-								var action = document.forms[ formId ].elements[ 'action' ];
-								action.name = 'view';
-								action.value = 'selectFiles';
-								browse.apply( this, arguments );
-							};
+						document.currentScript.parentElement.querySelectorAll( '.js-spaces-browser-actions' ).forEach( function( e ) { e.style.setProperty( 'display', 'none', 'important' ); } );
+						document.getElementById( 'selectFilesForm' ).addEventListener( 'spacesbrowser:browse', function( ) {
+							var action = document.forms[ 'selectFilesForm' ].elements[ 'action' ];
+							action.name = 'view';
+							action.value = 'selectFiles';
 						});
 					</script>
 			</@fieldSet>
-			<@formGroup>
-				<@button type='submit' buttonIcon='check' title='#i18n{files2docs.degradedMode.buttonSubmit}' />
+			<@formGroup rows=2>
+				<@button type='submit' id='files2docs_degraded_submit' buttonIcon='check' title='#i18n{files2docs.degradedMode.buttonSubmit}' color='primary' />
 				<@button type='submit' name='cancel' value='cancel' params={"formnovalidate": true} buttonIcon='x' title='#i18n{portal.util.labelCancel}' color='light' />
 			</@formGroup>
 		</@tform>

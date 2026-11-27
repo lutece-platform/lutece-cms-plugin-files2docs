@@ -1,4 +1,4 @@
-<@formGroup labelFor='${attribute.code}_${identifier}' labelKey='${attribute.name}' mandatory=attribute.required>
+<@formGroup labelFor='${attribute.code}_${identifier}' labelKey='${attribute.name}' mandatory=attribute.required rows=2>
     <#assign size = ''><#list parameters.size as s><#assign size = size + s></#list>
     <#assign maxlength = ''><#list parameters.maxlength as m><#assign maxlength = maxlength + m></#list>
     <#assign value = ''><#list parameters.mapping![] as m><#assign value = value + ( m!'' )></#list>

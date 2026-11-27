@@ -1,29 +1,65 @@
 <@pageContainer>
     <@pageColumn>
-        <@pageHeader title='#i18n{files2docs.manageMapping.pageTitle}'>
-			<@aButton href='jsp/admin/plugins/files2docs/ManageMapping.jsp?view=createMapping' buttonIcon='plus' title='#i18n{files2docs.manageMapping.buttonCreate}' color='primary' />
+		<#assign pageTitle><span class="avatar avatar-sm bg-azure-lt me-2"><@icon style='arrows-exchange' /></span>#i18n{files2docs.manageMapping.pageTitle}</#assign>
+		<@pageHeader title=pageTitle>
+			<#if mapping_list?has_content>
+			<@tform type='inline'>
+				<@formGroup labelFor='search_mappings' labelKey='#i18n{portal.system.manage_plugins.buttonFilter}' hideLabel=['all'] formStyle='inline'>
+					<@inputGroup>
+						<@input type='text' name='search_mappings' id='search_mappings' placeHolder='#i18n{portal.system.manage_plugins.buttonFilter}' params={"autocomplete": "off"} />
+						<@button color='primary' title='#i18n{portal.system.manage_plugins.buttonFilter}' buttonIcon='filter' hideTitle=['all'] />
+					</@inputGroup>
+				</@formGroup>
+			</@tform>
+			</#if>
+			<@aButton href='jsp/admin/plugins/files2docs/ManageMapping.jsp?view=createMapping' buttonIcon='plus' title='#i18n{files2docs.manageMapping.buttonCreate}' hideTitle=['xs','sm','md'] color='primary' />
 		</@pageHeader>
+		<@messages errors=errors![] infos=infos![] warnings=warnings![] />
 		<#if mapping_list?has_content>
-			<@manageFeature>
-				<#list mapping_list?sort_by("documentTypeName") as mapping>
-				<@manageFeatureItem>
-					<@manageFeatureItemColumn>
-						<strong>${mapping.documentTypeName!}</strong>
+			<@manageFeature layout='list' id='mappings-list'>
+			<#list mapping_list?sort_by("documentTypeName") as mapping>
+				<#assign mappingName = mapping.documentTypeName!''>
+				<@manageFeatureItem id='mapping_${mapping.id?c}'>
+					<@manageFeatureItemColumn class='d-flex align-items-center gap-2 text-truncate'>
+						<span class="avatar avatar-xs bg-azure-lt" aria-hidden="true"><@icon style='file-text' /></span>
+						<div class="text-truncate">
+							<a href="jsp/admin/plugins/files2docs/ManageMapping.jsp?view=modifyMapping&mapping_id=${mapping.id?c}" class="text-reset fw-semibold searchable" title="#i18n{portal.util.labelModify} ${mappingName}">${mappingName}</a>
+							<#if mapping.description?has_content>
+							<div class="text-secondary small text-truncate searchable">${mapping.description}</div>
+							</#if>
+						</div>
 					</@manageFeatureItemColumn>
-					<@manageFeatureItemColumn>
-						${mapping.description!}
-					</@manageFeatureItemColumn>
-					<@manageFeatureItemColumn align='end'>
-						<@aButton href='jsp/admin/plugins/files2docs/ManageMapping.jsp?view=modifyMapping&mapping_id=${mapping.id}' title='#i18n{portal.util.labelModify} ${mapping.documentTypeName!}' buttonIcon='pencil' hideTitle=['all'] />
-						<@aButton href='jsp/admin/plugins/files2docs/ManageMapping.jsp?view=confirmRemoveMapping&mapping_id=${mapping.id}' title='#i18n{portal.util.labelDelete} ${mapping.documentTypeName!}' buttonIcon='trash' color='danger' hideTitle=['all'] />
+					<@manageFeatureItemColumn auto=true align='end' class='d-flex align-items-center gap-2'>
+						<div class="btn-actions">
+							<a href="jsp/admin/plugins/files2docs/ManageMapping.jsp?view=modifyMapping&mapping_id=${mapping.id?c}" class="btn-action" title="#i18n{portal.util.labelModify} ${mappingName}"><@icon style='pencil' /><span class="visually-hidden">#i18n{portal.util.labelModify} ${mappingName}</span></a>
+							<a href="jsp/admin/plugins/files2docs/ManageMapping.jsp?view=confirmRemoveMapping&mapping_id=${mapping.id?c}" class="btn-action text-danger" title="#i18n{portal.util.labelDelete} ${mappingName}"><@icon style='trash' /><span class="visually-hidden">#i18n{portal.util.labelDelete} ${mappingName}</span></a>
+						</div>
 					</@manageFeatureItemColumn>
 				</@manageFeatureItem>
-				</#list>
+			</#list>
 			</@manageFeature>
 		<#else>
-			<@box>
-				<@empty title='#i18n{portal.util.labelNoItem}' />
-			</@box>
+			<@card>
+				<@empty iconName='arrows-exchange' subtitle='#i18n{files2docs.manageMapping.buttonCreate}' actionTitle='#i18n{files2docs.manageMapping.buttonCreate}' actionUrl='jsp/admin/plugins/files2docs/ManageMapping.jsp?view=createMapping' />
+			</@card>
 		</#if>
 	</@pageColumn>
 </@pageContainer>
+<#if mapping_list?has_content>
+<script type="module">
+import LuteceSearchList from './themes/shared/modules/luteceSearchList.js';
+const searchInput = document.querySelector("#search_mappings");
+const searchElementList = document.querySelectorAll("#mappings-list .list-group-item");
+new LuteceSearchList( searchInput, searchElementList, {
+	searchableChild: [".searchable"],
+	highlight: true,
+	persist: true,
+	persistKey: "lutece-admin-files2docs-mappings-search",
+});
+document.querySelectorAll('[id^="mapping_"]').forEach( item => {
+	item.addEventListener('dblclick', function() {
+		window.location.href = 'jsp/admin/plugins/files2docs/ManageMapping.jsp?view=modifyMapping&mapping_id=' + this.id.replace('mapping_', '');
+	});
+});
+</script>
+</#if>

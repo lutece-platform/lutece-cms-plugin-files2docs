@@ -1,4 +1,4 @@
-<@formGroup labelFor='${attribute.code}_${identifier}' labelKey='${attribute.name}' mandatory=attribute.required>
+<@formGroup labelFor='${attribute.code}_${identifier}' labelKey='${attribute.name}' mandatory=attribute.required rows=2>
     <#if (parameters.mapping)?has_content>
     	<#list parameters.mapping as mapping>
 	    	<#if mapping?has_content>

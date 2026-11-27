@@ -1,4 +1,5 @@
 <#include "/admin/plugins/asynchronousupload/upload_commons.html" />
+<#include "/admin/plugins/document/spaces/spaces_tree_select.html" />
 <#if !document_type_code?has_content>
 	<#list document_type_list?sort_by("name") as type>
 		<#assign document_type_code = type.code>
@@ -8,7 +9,11 @@
 <#if document_type_code?has_content>
 <@pageContainer>
 	<@pageColumn>
-		<@pageHeader title='#i18n{files2docs.selectFiles.pageTitle}' />
+		<#assign pageTitle><span class="avatar avatar-sm bg-teal-lt me-2" aria-hidden="true"><@icon style='file-upload' /></span>#i18n{files2docs.selectFiles.pageTitle}</#assign>
+		<@pageHeader title=pageTitle>
+			<@aButton href='jsp/admin/plugins/document/ManageDocuments.jsp' title='#i18n{portal.util.labelBack}' buttonIcon='arrow-left' color='light' hideTitle=['xs','sm','md'] />
+		</@pageHeader>
+		<@messages infos=infos![] errors=errors![] warnings=warnings![] />
 		<@tform id='selectFilesForm' action='jsp/admin/plugins/files2docs/SelectFiles.jsp' enctype='multipart/form-data'>
 			<@input type='hidden' name='action' value='selectFiles' />
 			<@input type='hidden' id='document_type_code_hidden' name='document_type_code_hidden' value='${document_type_code!}' />
@@ -16,63 +21,240 @@
 			<@input type='hidden' id='no_header' name='no_header' value='${no_header}' />
 			</#if>
 			<@input type='hidden' id='nb_imported_files' name='nb_imported_files' value='0' />
-			<#assign headerTitle><@tag color='info'>#i18n{files2docs.selectFiles.step} 1</@tag>&nbsp;#i18n{files2docs.selectFiles.labelSpace}</#assign>
-			<@card headerTitle=headerTitle headerClass=''>
-				<@fieldSet legend='#i18n{files2docs.selectFiles.labelSpace}' hideLegend=['all']>
-					${spaces_browser}
-					<script>
-						formId = 'selectFilesForm';
-						document.currentScript.parentElement.querySelectorAll( 'button[type="submit"], a[href$="ManageDocuments.jsp"]' ).forEach( function( e ) { e.hidden = true; } );
-						[ 'openSpace', 'goUp', 'modifyChoice' ].forEach( function( name ) {
-							var browse = window[ name ];
-							window[ name ] = function( ) {
-								var action = document.forms[ formId ].elements[ 'action' ];
-								action.name = 'view';
-								action.value = 'selectFiles';
-								browse.apply( this, arguments );
-							};
-						});
-					</script>
-				</@fieldSet>
-				<@fieldSet legend='#i18n{files2docs.selectFiles.labelType}' hideLegend=['all']>
-					<@formGroup labelFor='document_type_code' labelKey='#i18n{files2docs.selectFiles.labelType}' mandatory=true>
-						<@select id='document_type_code' name='document_type_code' disabled=document_type_code_disabled>
-							<#list document_type_list?sort_by("name") as type>
-								<@option label=type.name value=type.code selected=( document_type_code = type.code ) />
-							</#list>
-						</@select>
-					</@formGroup>
-					<#if regexp_map[document_type_code]?exists && regexp_map[document_type_code]?split(",")?size gt 1>
-					<@fieldSet legend='#i18n{files2docs.selectFiles.labelExtension} *'>
-						<#list regexp_map[document_type_code]?trim?split(",") as extension>
-							<#assign bIsChecked = !extension_checked_list?has_content || extension_checked_list?trim?split(",")?seq_contains( extension )>
-							<@checkBox orientation='switch' name='extension' id='extension_${extension?index}' value='${extension}' labelKey='${extension}' checked=bIsChecked disabled=document_type_code_disabled />
+			<#-- The current step is set by the script at the end of the page, from what is left to do -->
+			<@ul id='files2docs_stepper' class='steps steps-counter mb-4'>
+				<@li class='step-item'>#i18n{files2docs.selectFiles.labelType}</@li>
+				<@li class='step-item'>#i18n{files2docs.selectFiles.labelSpace}</@li>
+				<@li class='step-item'>#i18n{files2docs.selectFiles.labelUpload}</@li>
+				<@li class='step-item'>#i18n{files2docs.selectFiles.titleSubmit}</@li>
+			</@ul>
+			<@row class='g-3 mb-3'>
+			<@columns xs=12 lg=3 params={"data-files2docs-step": true}>
+			<#assign headerTitle><@tag color='info'>#i18n{files2docs.selectFiles.step} 1</@tag>&nbsp;#i18n{files2docs.selectFiles.labelType}</#assign>
+			<@card class='h-100 files2docs-step-card' headerTitle=headerTitle headerClass=''>
+				<@formGroup labelFor='document_type_code' labelKey='#i18n{files2docs.selectFiles.labelType}' mandatory=true>
+					<@select id='document_type_code' name='document_type_code' disabled=document_type_code_disabled>
+						<#list document_type_list?sort_by("name") as type>
+							<@option label=type.name value=type.code selected=( document_type_code = type.code ) />
 						</#list>
-					</@fieldSet>
-					<@input type='hidden' id='extension_hidden' name='extension_hidden' value='${extension_checked_list!}' />
-					</#if>
+					</@select>
+				</@formGroup>
+				<#-- One group of extensions per document type: only the group of the selected type is shown and enabled, the others are not submitted -->
+				<#list document_type_list?sort_by("name") as type>
+				<#assign extensions = ( regexp_map[type.code]!'' )?trim?split(",")>
+				<#if extensions?size gt 1>
+				<#assign current_type = type.code = document_type_code>
+				<@fieldSet fieldsetId='files2docs_extensions_${type.code}' class=current_type?then( '', 'd-none' ) legend='#i18n{files2docs.selectFiles.labelExtension}' hideLegend=['all'] disabled=!current_type>
+					<@formGroup labelKey='#i18n{files2docs.selectFiles.labelExtension}' mandatory=true>
+						<#list extensions as extension>
+							<#assign bIsChecked = !current_type || !extension_checked_list?has_content || extension_checked_list?trim?split(",")?seq_contains( extension )>
+							<@checkBox orientation='switch' name='extension' id='extension_${type?index}_${extension?index}' value='${extension}' labelKey='${extension}' checked=bIsChecked disabled=document_type_code_disabled />
+						</#list>
+					</@formGroup>
 				</@fieldSet>
+				</#if>
+				</#list>
+				<#if ( regexp_map[document_type_code]!'' )?trim?split(",")?size gt 1>
+				<@input type='hidden' id='extension_hidden' name='extension_hidden' value='${extension_checked_list!}' />
+				</#if>
 			</@card>
-			<#assign headerTitle><@tag color='info'>#i18n{files2docs.selectFiles.step} 2</@tag>&nbsp;#i18n{files2docs.selectFiles.labelUpload}</#assign>
-			<@card headerTitle=headerTitle headerClass=''>
+			</@columns>
+			<@columns xs=12 lg=3 params={"data-files2docs-step": true}>
+			<#assign headerTitle><@tag color='info'>#i18n{files2docs.selectFiles.step} 2</@tag>&nbsp;#i18n{files2docs.selectFiles.labelSpace}</#assign>
+			<@card class='h-100 files2docs-step-card' headerTitle=headerTitle headerClass=''>
+				<#if ( spaces_tree![] )?has_content>
+				<@fieldSet legend='#i18n{files2docs.selectFiles.labelSpace}' hideLegend=['all']>
+					<@spacesTreeSelect id='files2docs_spaces_tree' nodes=spaces_tree selectedId=browser_selected_space_id!'' label='#i18n{files2docs.selectFiles.labelSpace}' />
+				</@fieldSet>
+				<@alert id='files2docs_no_space_for_type' class='d-none' color='warning' title='#i18n{files2docs.selectFiles.noSpaceForType}' />
+				<#else>
+				<@alert color='warning' title='#i18n{files2docs.selectFiles.noSpace}' />
+				</#if>
+			</@card>
+			</@columns>
+			<@columns xs=12 lg=3 params={"data-files2docs-step": true}>
+			<#assign headerTitle><@tag color='info'>#i18n{files2docs.selectFiles.step} 3</@tag>&nbsp;#i18n{files2docs.selectFiles.labelUpload}</#assign>
+			<@card class='h-100 files2docs-step-card' headerTitle=headerTitle headerClass=''>
 				<@formGroup labelFor=upload_field labelKey='#i18n{files2docs.selectFiles.labelUpload}' mandatory=true>
-					<@addFileBOInputAndfilesBox fieldName=upload_field handler=uploadHandler listUploadedFiles=uploaded_files![] multiple=true />
+					<#-- Same input, handler field and progress bar as addFileBOInput, wrapped in a .dropzone: the asynchronousupload main.js binds drag and drop to it -->
+					<#-- The files are sent asynchronously, so the native input stays empty: it must not inherit the required flag of the formGroup -->
+					<#assign propagateMandatory = false>
+					<@div class='dropzone files2docs-dropzone'>
+						<@input type='file' name=upload_field id=upload_field class='${uploadHandler.handlerName} visually-hidden' params={"multiple": "multiple"} />
+						<@formLabel labelFor=upload_field class='dz-message'>
+							<@icon style='cloud-upload' class='files2docs-dropzone-icon' />
+							<@span class='dropzone-msg-title'>#i18n{files2docs.selectFiles.dropzoneTitle}</@span>
+							<@span class='dropzone-msg-desc'>#i18n{files2docs.selectFiles.dropzoneHelp}</@span>
+						</@formLabel>
+						<noscript>
+							<@button type='submit' size='sm' class='mb-3' name='${uploadHandler.uploadSubmitPrefix}${upload_field}' value='${uploadHandler.uploadSubmitPrefix}${upload_field}' title='#i18n{asynchronousupload.action.send.name}' />
+						</noscript>
+					</@div>
+					<@input type='hidden' name='asynchronousupload.handler' value=uploadHandler.handlerName />
+					<@div id='progress_${upload_field}' class='progress mt-2' params={"hidden": true}>
+						<@div id='progress-bar_${upload_field}' class='progress-bar progress-bar-success progress-bar-striped'>&nbsp;</@div>
+					</@div>
+					<@addBOUploadedFilesBox fieldName=upload_field handler=uploadHandler listFiles=uploaded_files![] />
 				</@formGroup>
 			</@card>
-			<#assign headerTitle><@tag color='info'>#i18n{files2docs.selectFiles.step} 3</@tag>&nbsp;#i18n{files2docs.selectFiles.titleSubmit}</#assign>
-			<@card headerTitle=headerTitle headerClass=''>
-				<@button type='submit' id='files2docs_submit' disabled=submit_button_disabled buttonIcon='check' title='#i18n{files2docs.selectFiles.buttonSubmit}' />
+			</@columns>
+			<@columns xs=12 lg=3 params={"data-files2docs-step": true}>
+			<#assign headerTitle><@tag color='info'>#i18n{files2docs.selectFiles.step} 4</@tag>&nbsp;#i18n{files2docs.selectFiles.titleSubmit}</#assign>
+			<@card class='h-100 files2docs-step-card' headerTitle=headerTitle headerClass=''>
+				<#-- Summary of the choices of the previous steps, kept up to date by the script at the end of the page: one row per step, marked done once chosen -->
+				<#macro summaryItem key iconName label>
+				<@div class='files2docs-summary-item' params={"data-summary-item": key}>
+					<span class="avatar avatar-sm files2docs-summary-icon" aria-hidden="true"><@icon style=iconName /></span>
+					<@div class='flex-fill text-break'>
+						<@div class='files2docs-summary-label'>${label}</@div>
+						<@div class='files2docs-summary-value' params={"data-summary": key}></@div>
+					</@div>
+					<@icon style='circle-check' class='files2docs-summary-done' />
+				</@div>
+				</#macro>
+				<@div class='d-flex flex-column h-100'>
+					<@div id='files2docs_summary' class='files2docs-summary mb-3' params={"data-none": "#i18n{files2docs.selectFiles.summaryNone}"}>
+						<@summaryItem key='type' iconName='file-info' label='#i18n{files2docs.selectFiles.summaryType}' />
+						<@summaryItem key='extensions' iconName='file-type-pdf' label='#i18n{files2docs.selectFiles.summaryExtensions}' />
+						<@summaryItem key='space' iconName='folder' label='#i18n{files2docs.selectFiles.summarySpace}' />
+						<@summaryItem key='files' iconName='files' label='#i18n{files2docs.selectFiles.summaryFiles}' />
+					</@div>
+					<@button type='submit' id='files2docs_submit' disabled=submit_button_disabled buttonIcon='check' title='#i18n{files2docs.selectFiles.buttonSubmit}' color='primary' class='w-100 mt-auto' />
+				</@div>
 			</@card>
+			</@columns>
+			</@row>
 		</@tform>
 	</@pageColumn>
 </@pageContainer>
 <@addRequiredBOJsFiles />
-<script src="jsp/admin/plugins/asynchronousupload/GetMainUploadJs.jsp?handler=${uploadHandler.handlerName?url}"></script>
+<link rel="stylesheet" href="themes/shared/plugins/files2docs/css/admin/files2docs.css" />
+<script src="jsp/admin/plugins/asynchronousupload/GetMainUploadJs.jsp?handler=${uploadHandler.handlerName?url('UTF-8')}"></script>
 <script>
 	document.getElementById( '${upload_field?js_string?no_esc}' ).dataset.nof = '${max_files?c}';
+	( ( ) => {
+		const form = document.getElementById( 'selectFilesForm' );
+		const items = document.querySelectorAll( '#files2docs_stepper .step-item' );
+		const columns = document.querySelectorAll( '[data-files2docs-step]' );
+		const typeSelect = document.getElementById( 'document_type_code' );
+		const submit = document.getElementById( 'files2docs_submit' );
+		const radios = form.querySelectorAll( 'input[name="browser_selected_space_id"]' );
+		const extensionGroups = form.querySelectorAll( 'fieldset[id^="files2docs_extensions_"]' );
+		const filesBox = document.getElementById( '_file_deletion_${upload_field?js_string?no_esc}' );
+		const isSpaceSelected = ( ) => form.querySelector( 'input[name="browser_selected_space_id"]:checked:enabled' ) !== null;
+		const isDone = ( step ) => {
+			switch ( step ) {
+				case 1: return typeSelect.value !== '';
+				case 2: return isSpaceSelected( );
+				case 3: return filesBox !== null && filesBox.querySelector( '[id^="_file_uploaded_"]' ) !== null;
+				default: return false;
+			}
+		};
+		const firstPendingStep = ( ) => {
+			for ( let step = 1; step < items.length; step++ ) {
+				if ( !isDone( step ) ) { return step; }
+			}
+			return items.length;
+		};
+		const setCurrentStep = ( current ) => {
+			items.forEach( ( item, index ) => {
+				const active = index + 1 === current;
+				item.classList.toggle( 'active', active );
+				if ( active ) { item.setAttribute( 'aria-current', 'step' ); } else { item.removeAttribute( 'aria-current' ); }
+				columns[ index ].querySelector( '.files2docs-step-card' ).classList.toggle( 'border-primary', active );
+			} );
+		};
+		const summary = document.getElementById( 'files2docs_summary' );
+		const showSummary = ( key, values ) => {
+			const item = summary.querySelector( '[data-summary-item="' + key + '"]' );
+			const value = item.querySelector( '[data-summary]' );
+			value.replaceChildren( );
+			item.classList.toggle( 'is-done', values.length > 0 );
+			if ( values.length === 0 ) {
+				value.textContent = summary.dataset.none;
+			} else if ( values.length === 1 ) {
+				value.textContent = values[ 0 ];
+			} else {
+				const list = document.createElement( 'ul' );
+				list.className = 'files2docs-summary-list';
+				values.forEach( ( text ) => { const li = document.createElement( 'li' ); li.textContent = text; li.title = text; list.append( li ); } );
+				value.append( list );
+			}
+		};
+		const labelOf = ( input ) => form.querySelector( 'label[for="' + input.id + '"]' ).textContent.trim( );
+		// The space with the path of its parents, so that two spaces with the same name can be told apart
+		const spacePath = ( radio ) => {
+			const names = [ ];
+			for ( let item = radio.closest( 'li' ); item; item = item.parentElement.closest( 'li' ) ) {
+				const input = item.querySelector( ':scope > .document-spaces-tree-line > input' );
+				if ( input ) { names.unshift( labelOf( input ) ); }
+			}
+			return names.join( ' / ' );
+		};
+		const updateSummary = ( ) => {
+			const option = typeSelect.selectedOptions[ 0 ];
+			showSummary( 'type', option && option.value !== '' ? [ option.textContent.trim( ) ] : [ ] );
+			summary.querySelector( '[data-summary-item="extensions"]' ).classList.toggle( 'd-none', form.querySelector( 'fieldset[id^="files2docs_extensions_"]:not(:disabled)' ) === null );
+			showSummary( 'extensions', Array.from( form.querySelectorAll( 'fieldset[id^="files2docs_extensions_"]:not(:disabled) input[name="extension"]:checked' ), ( box ) => box.value ) );
+			const space = form.querySelector( 'input[name="browser_selected_space_id"]:checked:enabled' );
+			showSummary( 'space', space ? [ spacePath( space ) ] : [ ] );
+			showSummary( 'files', filesBox === null ? [ ] : Array.from( filesBox.querySelectorAll( '[id^="_file_uploaded_"]' ), ( item ) => {
+				const name = item.querySelector( '.file-item-label' ) || item.querySelector( 'a' );
+				return ( name ? name.textContent : item.textContent ).trim( );
+			} ) );
+		};
+		const refresh = ( ) => {
+			submit.disabled = !isSpaceSelected( );
+			setCurrentStep( firstPendingStep( ) );
+			updateSummary( );
+		};
+		const noSpaceForType = document.getElementById( 'files2docs_no_space_for_type' );
+		// Only the spaces that accept the selected document type, and in which documents can be created, are shown and selectable.
+		// Their parent spaces stay visible, not selectable, to keep the tree readable, and their branches are opened.
+		// The extensions of the selected type only are submitted.
+		const applyType = ( ) => {
+			const type = typeSelect.value;
+			const accepting = new Set( );
+			radios.forEach( ( radio ) => {
+				const types = radio.dataset.documentTypes ? radio.dataset.documentTypes.split( ',' ) : [ ];
+				const disabled = radio.dataset.documentCreationAllowed !== 'true' || !types.includes( type );
+				if ( disabled ) { radio.checked = false; } else { accepting.add( radio.closest( 'li' ) ); }
+				radio.disabled = disabled;
+				form.querySelector( 'label[for="' + radio.id + '"]' ).classList.toggle( 'text-muted', disabled );
+			} );
+			const shown = new Set( );
+			accepting.forEach( ( item ) => {
+				for ( let node = item; node; node = node.parentElement.closest( 'li' ) ) {
+					shown.add( node );
+					if ( node !== item ) { node.classList.add( 'lutece-tree-node-open' ); }
+				}
+			} );
+			radios.forEach( ( radio ) => {
+				const item = radio.closest( 'li' );
+				item.hidden = !shown.has( item );
+			} );
+			if ( noSpaceForType !== null ) { noSpaceForType.classList.toggle( 'd-none', accepting.size > 0 ); }
+			extensionGroups.forEach( ( group ) => {
+				const other = group.id !== 'files2docs_extensions_' + type;
+				group.classList.toggle( 'd-none', other );
+				group.disabled = other;
+			} );
+		};
+		// A step gets the focus as current only once the previous ones are done
+		columns.forEach( ( column, index ) => {
+			column.addEventListener( 'focusin', ( ) => setCurrentStep( Math.min( index + 1, firstPendingStep( ) ) ) );
+		} );
+		form.addEventListener( 'change', ( event ) => {
+			if ( event.target === typeSelect ) { applyType( ); }
+			refresh( );
+		} );
+		if ( filesBox !== null ) {
+			new MutationObserver( refresh ).observe( filesBox, { childList: true } );
+		}
+		applyType( );
+		refresh( );
+	} )( );
 </script>
 <#else>
-	<@alert color='danger'>
-		#i18n{files2docs.selectFiles.noMapping}
-	</@alert>
+	<@alert color='danger' title='#i18n{files2docs.selectFiles.noMapping}' />
 </#if>
