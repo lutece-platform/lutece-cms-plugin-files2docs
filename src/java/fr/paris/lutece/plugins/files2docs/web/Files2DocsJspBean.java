@@ -480,7 +480,8 @@ public class Files2DocsJspBean extends MVCAdminJspBean
             currentMapping.setId( originalMapping.getId( ) );
             currentMapping.setDocumentTypeCode( originalMapping.getDocumentTypeCode( ) );
             currentMapping.setDescription( originalMapping.getDescription( ) );
-            currentMapping.setTitle( getReplacedTags( request, originalMapping.getTitle( ), strFilename ) );
+            currentMapping.setTitle( StringUtils.defaultIfBlank( getReplacedTags( request, originalMapping.getTitle( ), strFilename ),
+                    StringUtils.substringBeforeLast( strFilename, STRING_DOT ) ) );
             currentMapping.setSummary( getReplacedTags( request, originalMapping.getSummary( ), strFilename ) );
             colMappings.add( currentMapping );
         }
